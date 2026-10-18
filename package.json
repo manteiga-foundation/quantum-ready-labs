@@ -1,0 +1,17 @@
+{
+  "name": "quantum-ready-labs",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit -p tsconfig.json",
+    "test": "bun test --timeout 30000 tests",
+    "engine": "bun run engine/server.ts",
+    "scan": "bun run engine/cli.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "typescript": "^5.6.3"
+  }
+}
