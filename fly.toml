@@ -1,0 +1,36 @@
+# Fly Machines configuration for the engine. Deploy from the repository root:
+#   fly deploy --config fly.toml
+# Secrets (set once, never in files):  fly secrets set ENGINE_TOKEN=<random>
+app = "qrl-engine"
+primary_region = "iad"
+
+[build]
+  dockerfile = "engine/Dockerfile"
+
+[env]
+  PORT = "8787"
+  ENGINE_MAX_CONCURRENT = "16"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 32
+    hard_limit = 64
+
+[[http_service.checks]]
+  interval = "30s"
+  timeout = "5s"
+  grace_period = "10s"
+  method = "GET"
+  path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
