@@ -42,20 +42,25 @@ Fourteen probes per scan, run concurrently: 20 to 500 ms per host.
 ## Repository
 
 ```
-engine/      the scanner: target parsing and refusal list, probes, assessment, HTTP server
-worker/      the Cloudflare Worker: validation, rate limits, cache, metrics (in progress)
-web/         the public views and the private metrics view (in progress)
-tests/       bun test, offline against a fixture TLS server
+engine/      the scanner: target parsing and refusal list, probes, assessment, HTTP server (Bun, Fly Machines)
+worker/      the edge: validation, rate limits, 24 h cache, link previews, metrics (Cloudflare Worker + D1)
+web/         the views: entry, live report, private metrics (Vite, React, Arwes)
+tests/       bun test: offline unit and fixture-server tests, plus the views in real Chromium
 spikes/      throwaway experiments with their verdicts
-docs/        status, scoring rubric
+docs/        status, scoring rubric, screenshots
 ```
 
 ```
 bun install
-bun run test            # 47 tests
-bun run scan github.com # scan from the terminal
-bun run engine          # the HTTP engine (ENGINE_TOKEN required)
+bun run test                  # 65 tests (Chromium: bunx playwright install chromium)
+bun run scan github.com       # scan from the terminal
+bun run dev                   # the views on http://127.0.0.1:5180 (?demo=protected replays a recorded scan)
+bun run engine                # the HTTP engine (ENGINE_TOKEN required)
+bun run edge:dev              # the edge locally (wrangler dev; .dev.vars holds ENGINE_TOKEN)
+bun run build                 # check + production bundle
 ```
+
+Scoring: `docs/scoring.md`. Where things stand: `docs/status.md`. How we work: `AGENTS.md`.
 
 ## Guardrails
 
