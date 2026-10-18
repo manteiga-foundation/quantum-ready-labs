@@ -1,0 +1,344 @@
+{
+  "events": [
+    {
+      "type": "start",
+      "target": {
+        "host": "protected.example",
+        "port": 443
+      },
+      "address": "203.0.113.10",
+      "startedAt": "2026-10-18T23:24:48.443Z"
+    },
+    {
+      "type": "probe",
+      "id": "group:X25519MLKEM768",
+      "label": "X25519MLKEM768",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for X25519MLKEM768",
+      "ms": 23,
+      "group": "X25519MLKEM768",
+      "version": "1.3"
+    },
+    {
+      "type": "probe",
+      "id": "group:SecP384r1MLKEM1024",
+      "label": "SecP384r1MLKEM1024",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 32
+    },
+    {
+      "type": "probe",
+      "id": "group:SecP256r1MLKEM768",
+      "label": "SecP256r1MLKEM768",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 41
+    },
+    {
+      "type": "probe",
+      "id": "group:secp521r1",
+      "label": "secp521r1",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for secp521r1",
+      "ms": 51,
+      "group": "secp521r1",
+      "version": "1.3"
+    },
+    {
+      "type": "probe",
+      "id": "tls13",
+      "label": "TLS 1.3",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for X25519MLKEM768",
+      "ms": 51,
+      "group": "X25519MLKEM768",
+      "version": "1.3"
+    },
+    {
+      "type": "probe",
+      "id": "modern",
+      "label": "What current browsers get",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for X25519MLKEM768",
+      "ms": 51,
+      "group": "X25519MLKEM768",
+      "version": "1.3"
+    },
+    {
+      "type": "probe",
+      "id": "group:x25519",
+      "label": "x25519",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for x25519",
+      "ms": 52,
+      "group": "x25519",
+      "version": "1.3"
+    },
+    {
+      "type": "probe",
+      "id": "group:ffdhe2048",
+      "label": "ffdhe2048",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 51
+    },
+    {
+      "type": "probe",
+      "id": "group:X25519Kyber768Draft00",
+      "label": "X25519Kyber768Draft00",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for X25519Kyber768Draft00",
+      "ms": 52,
+      "group": "X25519Kyber768Draft00",
+      "version": "1.3"
+    },
+    {
+      "type": "probe",
+      "id": "group:secp256r1",
+      "label": "secp256r1",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for secp256r1",
+      "ms": 52,
+      "group": "secp256r1",
+      "version": "1.3"
+    },
+    {
+      "type": "probe",
+      "id": "group:ffdhe3072",
+      "label": "ffdhe3072",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 51
+    },
+    {
+      "type": "probe",
+      "id": "rsa-transport",
+      "label": "TLS 1.2 RSA key transport",
+      "answer": "yes",
+      "detail": "ServerHello TLS 1.2, cipher 0x9c",
+      "ms": 60,
+      "version": "1.2"
+    },
+    {
+      "type": "probe",
+      "id": "tls12",
+      "label": "TLS 1.2 with ephemeral keys",
+      "answer": "yes",
+      "detail": "ServerHello TLS 1.2, cipher 0xc02b",
+      "ms": 60,
+      "version": "1.2"
+    },
+    {
+      "type": "connection",
+      "protocol": "TLSv1.3",
+      "cipher": "TLS_AES_128_GCM_SHA256",
+      "alpn": "h2",
+      "chainLength": 4,
+      "trusted": true,
+      "ms": 63
+    },
+    {
+      "type": "probe",
+      "id": "group:secp384r1",
+      "label": "secp384r1",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for secp384r1",
+      "ms": 65,
+      "group": "secp384r1",
+      "version": "1.3"
+    },
+    {
+      "type": "assessment",
+      "assessment": {
+        "stage": "protected",
+        "score": 85,
+        "verdict": "Connections to this host are protected against future quantum decryption.",
+        "nextStep": {
+          "id": "retire-rsa-transport",
+          "title": "Retire RSA key transport cipher suites",
+          "detail": "TLS 1.2 sessions that use RSA key transport have no forward secrecy: one recorded session falls when the RSA key falls, with or without a quantum computer. Keep TLS 1.2 for old clients if you must, but only with ECDHE suites."
+        },
+        "keyExchange": {
+          "status": "hybrid",
+          "hybridGroups": [
+            "X25519MLKEM768"
+          ],
+          "classicalGroups": [
+            "x25519",
+            "secp256r1",
+            "secp384r1",
+            "secp521r1"
+          ],
+          "preferred": "X25519MLKEM768",
+          "rsaKeyTransport": true,
+          "tls13": true,
+          "tls12": true
+        },
+        "certificate": {
+          "status": "not-actionable",
+          "quantumSafe": false,
+          "leafKey": "P-256",
+          "leafSignature": "ecdsa-with-SHA256",
+          "leafDaysValid": 90,
+          "leafDaysRemaining": 47,
+          "chainLength": 4,
+          "trusted": true
+        },
+        "foundations": {
+          "tls13": true,
+          "noRsaKeyTransport": false,
+          "shortLivedCertificate": true,
+          "prefersHybrid": true,
+          "trustedChain": true
+        },
+        "notes": [],
+        "points": {
+          "keyExchange": 60,
+          "noRsaKeyTransport": 0,
+          "shortLivedCertificate": 8,
+          "prefersHybrid": 6,
+          "trustedChain": 6,
+          "certificate": 5
+        }
+      }
+    },
+    {
+      "type": "done",
+      "ms": 105
+    }
+  ],
+  "result": {
+    "target": {
+      "host": "protected.example",
+      "port": 443
+    },
+    "address": "203.0.113.10",
+    "startedAt": "2026-10-18T23:24:48.443Z",
+    "ms": 105,
+    "findings": {
+      "groups": {
+        "X25519MLKEM768": "yes",
+        "SecP256r1MLKEM768": "no",
+        "SecP384r1MLKEM1024": "no",
+        "X25519Kyber768Draft00": "yes",
+        "x25519": "yes",
+        "secp256r1": "yes",
+        "secp384r1": "yes",
+        "secp521r1": "yes",
+        "ffdhe2048": "no",
+        "ffdhe3072": "no"
+      },
+      "tls13": true,
+      "tls12": true,
+      "rsaKeyTransport": true,
+      "preferredModernGroup": 4588,
+      "connection": {
+        "protocol": "TLSv1.3",
+        "cipher": "TLS_AES_128_GCM_SHA256",
+        "alpn": "h2"
+      },
+      "chain": [
+        {
+          "subject": "protected.example",
+          "issuer": "WE1",
+          "keyAlgorithm": "EC",
+          "keyDetail": "P-256",
+          "signatureAlgorithm": "ecdsa-with-SHA256",
+          "notBefore": "2026-09-05T22:29:39.000Z",
+          "notAfter": "2026-12-04T23:29:33.000Z",
+          "isCA": false,
+          "selfSigned": false
+        },
+        {
+          "subject": "WE1",
+          "issuer": "GTS Root R4",
+          "keyAlgorithm": "EC",
+          "keyDetail": "P-256",
+          "signatureAlgorithm": "ecdsa-with-SHA384",
+          "notBefore": "2023-12-13T09:00:00.000Z",
+          "notAfter": "2029-02-20T14:00:00.000Z",
+          "isCA": true,
+          "selfSigned": false
+        },
+        {
+          "subject": "GTS Root R4",
+          "issuer": "GlobalSign Root CA",
+          "keyAlgorithm": "EC",
+          "keyDetail": "P-384",
+          "signatureAlgorithm": "sha256WithRSAEncryption",
+          "notBefore": "2023-11-15T03:43:21.000Z",
+          "notAfter": "2028-01-28T00:00:42.000Z",
+          "isCA": true,
+          "selfSigned": false
+        },
+        {
+          "subject": "GlobalSign Root CA",
+          "issuer": "GlobalSign Root CA",
+          "keyAlgorithm": "RSA",
+          "keyDetail": "RSA-2048",
+          "signatureAlgorithm": "sha1WithRSAEncryption",
+          "notBefore": "1998-09-01T12:00:00.000Z",
+          "notAfter": "2028-01-28T12:00:00.000Z",
+          "isCA": true,
+          "selfSigned": true
+        }
+      ],
+      "trusted": true,
+      "trustError": null,
+      "errors": []
+    },
+    "assessment": {
+      "stage": "protected",
+      "score": 85,
+      "verdict": "Connections to this host are protected against future quantum decryption.",
+      "nextStep": {
+        "id": "retire-rsa-transport",
+        "title": "Retire RSA key transport cipher suites",
+        "detail": "TLS 1.2 sessions that use RSA key transport have no forward secrecy: one recorded session falls when the RSA key falls, with or without a quantum computer. Keep TLS 1.2 for old clients if you must, but only with ECDHE suites."
+      },
+      "keyExchange": {
+        "status": "hybrid",
+        "hybridGroups": [
+          "X25519MLKEM768"
+        ],
+        "classicalGroups": [
+          "x25519",
+          "secp256r1",
+          "secp384r1",
+          "secp521r1"
+        ],
+        "preferred": "X25519MLKEM768",
+        "rsaKeyTransport": true,
+        "tls13": true,
+        "tls12": true
+      },
+      "certificate": {
+        "status": "not-actionable",
+        "quantumSafe": false,
+        "leafKey": "P-256",
+        "leafSignature": "ecdsa-with-SHA256",
+        "leafDaysValid": 90,
+        "leafDaysRemaining": 47,
+        "chainLength": 4,
+        "trusted": true
+      },
+      "foundations": {
+        "tls13": true,
+        "noRsaKeyTransport": false,
+        "shortLivedCertificate": true,
+        "prefersHybrid": true,
+        "trustedChain": true
+      },
+      "notes": [],
+      "points": {
+        "keyExchange": 60,
+        "noRsaKeyTransport": 0,
+        "shortLivedCertificate": 8,
+        "prefersHybrid": 6,
+        "trustedChain": 6,
+        "certificate": 5
+      }
+    }
+  }
+}

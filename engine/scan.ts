@@ -2,33 +2,20 @@
 // parameters and the chain, assess. Findings stream out as events so a report can build live.
 
 import tls from 'node:tls';
-import { assess, emptyFindings, type Assessment, type Findings } from './assess';
+import { assess, emptyFindings, type Findings } from './assess';
 import { chainOf } from './certificate';
 import { buildClientHello12, buildClientHello13, CIPHER, GROUP, GROUP_NAMES, groupName, type GroupName } from './hello';
 import { resolveTarget } from './resolve';
 import { exchange, type Exchange } from './socket';
 import type { Target } from './target';
 
-export type ScanEvent =
-  | { type: 'start'; target: Target; address: string; startedAt: string }
-  | { type: 'probe'; id: string; label: string; answer: 'yes' | 'no' | 'error'; detail: string; ms: number }
-  | { type: 'connection'; protocol: string; cipher: string; alpn: string | null; chainLength: number; trusted: boolean | null; ms: number }
-  | { type: 'assessment'; assessment: Assessment }
-  | { type: 'done'; ms: number };
+export type { ScanEvent, ScanResult } from './events';
+import type { ScanEvent, ScanResult } from './events';
 
 export interface ScanOptions {
   allowPrivate?: boolean;
   timeoutMs?: number;
   onEvent?: (event: ScanEvent) => void;
-}
-
-export interface ScanResult {
-  target: Target;
-  address: string;
-  startedAt: string;
-  ms: number;
-  findings: Findings;
-  assessment: Assessment;
 }
 
 /** The groups current browsers offer, in Chrome's order. The server's pick among them is what a reader's own browser gets. */
@@ -62,7 +49,9 @@ export async function scan(target: Target, options: ScanOptions = {}): Promise<S
   const probe = async (id: string, label: string, hello: Uint8Array, expectHrrGroup?: number): Promise<Exchange> => {
     const x = await exchange(endpoint, hello);
     const { answer, detail } = answerOf(x, expectHrrGroup);
-    onEvent({ type: 'probe', id, label, answer, detail, ms: x.ms });
+    const group = x.kind === 'hrr' ? groupName(x.group) : x.kind === 'serverhello' && x.group !== undefined ? groupName(x.group) : undefined;
+    const version = x.kind === 'hrr' || x.kind === 'serverhello' ? versionName(x.version) : undefined;
+    onEvent({ type: 'probe', id, label, answer, detail, ms: x.ms, group, version });
     if (answer === 'error') findings.errors.push(`${id}: ${detail}`);
     return x;
   };

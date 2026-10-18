@@ -1,0 +1,328 @@
+{
+  "events": [
+    {
+      "type": "start",
+      "target": {
+        "host": "at-risk.example",
+        "port": 443
+      },
+      "address": "203.0.113.10",
+      "startedAt": "2026-10-18T23:24:48.239Z"
+    },
+    {
+      "type": "probe",
+      "id": "group:x25519",
+      "label": "x25519",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for x25519",
+      "ms": 97,
+      "group": "x25519",
+      "version": "1.3"
+    },
+    {
+      "type": "probe",
+      "id": "group:X25519Kyber768Draft00",
+      "label": "X25519Kyber768Draft00",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 106
+    },
+    {
+      "type": "probe",
+      "id": "group:secp256r1",
+      "label": "secp256r1",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for secp256r1",
+      "ms": 112,
+      "group": "secp256r1",
+      "version": "1.3"
+    },
+    {
+      "type": "probe",
+      "id": "group:X25519MLKEM768",
+      "label": "X25519MLKEM768",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 113
+    },
+    {
+      "type": "probe",
+      "id": "group:SecP384r1MLKEM1024",
+      "label": "SecP384r1MLKEM1024",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 113
+    },
+    {
+      "type": "probe",
+      "id": "group:SecP256r1MLKEM768",
+      "label": "SecP256r1MLKEM768",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 113
+    },
+    {
+      "type": "probe",
+      "id": "group:secp521r1",
+      "label": "secp521r1",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 129
+    },
+    {
+      "type": "probe",
+      "id": "rsa-transport",
+      "label": "TLS 1.2 RSA key transport",
+      "answer": "yes",
+      "detail": "ServerHello TLS 1.2, cipher 0x9c",
+      "ms": 130,
+      "version": "1.2"
+    },
+    {
+      "type": "probe",
+      "id": "group:secp384r1",
+      "label": "secp384r1",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 132
+    },
+    {
+      "type": "probe",
+      "id": "modern",
+      "label": "What current browsers get",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for x25519",
+      "ms": 132,
+      "group": "x25519",
+      "version": "1.3"
+    },
+    {
+      "type": "probe",
+      "id": "group:ffdhe2048",
+      "label": "ffdhe2048",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 132
+    },
+    {
+      "type": "probe",
+      "id": "tls12",
+      "label": "TLS 1.2 with ephemeral keys",
+      "answer": "yes",
+      "detail": "ServerHello TLS 1.2, cipher 0xc02b",
+      "ms": 132,
+      "version": "1.2"
+    },
+    {
+      "type": "probe",
+      "id": "tls13",
+      "label": "TLS 1.3",
+      "answer": "yes",
+      "detail": "HelloRetryRequest for x25519",
+      "ms": 132,
+      "group": "x25519",
+      "version": "1.3"
+    },
+    {
+      "type": "connection",
+      "protocol": "TLSv1.3",
+      "cipher": "TLS_AES_128_GCM_SHA256",
+      "alpn": "h2",
+      "chainLength": 4,
+      "trusted": true,
+      "ms": 137
+    },
+    {
+      "type": "probe",
+      "id": "group:ffdhe3072",
+      "label": "ffdhe3072",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 139
+    },
+    {
+      "type": "assessment",
+      "assessment": {
+        "stage": "at-risk",
+        "score": 49,
+        "verdict": "Connections to this host are safe today but can be recorded now and decrypted when a large quantum computer exists.",
+        "nextStep": {
+          "id": "enable-hybrid",
+          "title": "Enable hybrid post-quantum key exchange (X25519MLKEM768)",
+          "detail": "OpenSSL 3.5 or later, nginx 1.27 or later and Caddy 2.9 or later offer it by default; most CDNs have a post-quantum setting. Current Chrome, Firefox, Safari and curl already ask for it on every connection."
+        },
+        "keyExchange": {
+          "status": "classical",
+          "hybridGroups": [],
+          "classicalGroups": [
+            "x25519",
+            "secp256r1"
+          ],
+          "preferred": "x25519",
+          "rsaKeyTransport": true,
+          "tls13": true,
+          "tls12": true
+        },
+        "certificate": {
+          "status": "not-actionable",
+          "quantumSafe": false,
+          "leafKey": "P-256",
+          "leafSignature": "ecdsa-with-SHA256",
+          "leafDaysValid": 90,
+          "leafDaysRemaining": 42,
+          "chainLength": 4,
+          "trusted": true
+        },
+        "foundations": {
+          "tls13": true,
+          "noRsaKeyTransport": false,
+          "shortLivedCertificate": true,
+          "prefersHybrid": false,
+          "trustedChain": true
+        },
+        "notes": [],
+        "points": {
+          "keyExchange": 30,
+          "noRsaKeyTransport": 0,
+          "shortLivedCertificate": 8,
+          "prefersHybrid": 0,
+          "trustedChain": 6,
+          "certificate": 5
+        }
+      }
+    },
+    {
+      "type": "done",
+      "ms": 176
+    }
+  ],
+  "result": {
+    "target": {
+      "host": "at-risk.example",
+      "port": 443
+    },
+    "address": "203.0.113.10",
+    "startedAt": "2026-10-18T23:24:48.239Z",
+    "ms": 176,
+    "findings": {
+      "groups": {
+        "X25519MLKEM768": "no",
+        "SecP256r1MLKEM768": "no",
+        "SecP384r1MLKEM1024": "no",
+        "X25519Kyber768Draft00": "no",
+        "x25519": "yes",
+        "secp256r1": "yes",
+        "secp384r1": "no",
+        "secp521r1": "no",
+        "ffdhe2048": "no",
+        "ffdhe3072": "no"
+      },
+      "tls13": true,
+      "tls12": true,
+      "rsaKeyTransport": true,
+      "preferredModernGroup": 29,
+      "connection": {
+        "protocol": "TLSv1.3",
+        "cipher": "TLS_AES_128_GCM_SHA256",
+        "alpn": "h2"
+      },
+      "chain": [
+        {
+          "subject": "at-risk.example",
+          "issuer": "Sectigo Public Server Authentication CA DV E36",
+          "keyAlgorithm": "EC",
+          "keyDetail": "P-256",
+          "signatureAlgorithm": "ecdsa-with-SHA256",
+          "notBefore": "2026-09-01T00:00:00.000Z",
+          "notAfter": "2026-11-29T23:59:59.000Z",
+          "isCA": false,
+          "selfSigned": false
+        },
+        {
+          "subject": "Sectigo Public Server Authentication CA DV E36",
+          "issuer": "Sectigo Public Server Authentication Root E46",
+          "keyAlgorithm": "EC",
+          "keyDetail": "P-256",
+          "signatureAlgorithm": "ecdsa-with-SHA384",
+          "notBefore": "2021-03-22T00:00:00.000Z",
+          "notAfter": "2036-03-21T23:59:59.000Z",
+          "isCA": true,
+          "selfSigned": false
+        },
+        {
+          "subject": "Sectigo Public Server Authentication Root E46",
+          "issuer": "USERTrust ECC Certification Authority",
+          "keyAlgorithm": "EC",
+          "keyDetail": "P-384",
+          "signatureAlgorithm": "ecdsa-with-SHA384",
+          "notBefore": "2021-03-22T00:00:00.000Z",
+          "notAfter": "2038-01-18T23:59:59.000Z",
+          "isCA": true,
+          "selfSigned": false
+        },
+        {
+          "subject": "USERTrust ECC Certification Authority",
+          "issuer": "USERTrust ECC Certification Authority",
+          "keyAlgorithm": "EC",
+          "keyDetail": "P-384",
+          "signatureAlgorithm": "ecdsa-with-SHA384",
+          "notBefore": "2010-02-01T00:00:00.000Z",
+          "notAfter": "2038-01-18T23:59:59.000Z",
+          "isCA": true,
+          "selfSigned": true
+        }
+      ],
+      "trusted": true,
+      "trustError": null,
+      "errors": []
+    },
+    "assessment": {
+      "stage": "at-risk",
+      "score": 49,
+      "verdict": "Connections to this host are safe today but can be recorded now and decrypted when a large quantum computer exists.",
+      "nextStep": {
+        "id": "enable-hybrid",
+        "title": "Enable hybrid post-quantum key exchange (X25519MLKEM768)",
+        "detail": "OpenSSL 3.5 or later, nginx 1.27 or later and Caddy 2.9 or later offer it by default; most CDNs have a post-quantum setting. Current Chrome, Firefox, Safari and curl already ask for it on every connection."
+      },
+      "keyExchange": {
+        "status": "classical",
+        "hybridGroups": [],
+        "classicalGroups": [
+          "x25519",
+          "secp256r1"
+        ],
+        "preferred": "x25519",
+        "rsaKeyTransport": true,
+        "tls13": true,
+        "tls12": true
+      },
+      "certificate": {
+        "status": "not-actionable",
+        "quantumSafe": false,
+        "leafKey": "P-256",
+        "leafSignature": "ecdsa-with-SHA256",
+        "leafDaysValid": 90,
+        "leafDaysRemaining": 42,
+        "chainLength": 4,
+        "trusted": true
+      },
+      "foundations": {
+        "tls13": true,
+        "noRsaKeyTransport": false,
+        "shortLivedCertificate": true,
+        "prefersHybrid": false,
+        "trustedChain": true
+      },
+      "notes": [],
+      "points": {
+        "keyExchange": 30,
+        "noRsaKeyTransport": 0,
+        "shortLivedCertificate": 8,
+        "prefersHybrid": 0,
+        "trustedChain": 6,
+        "certificate": 5
+      }
+    }
+  }
+}

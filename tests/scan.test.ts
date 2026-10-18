@@ -17,6 +17,7 @@ describe('scan against the fixture', () => {
     expect(events[0]).toMatchObject({ type: 'start', target: { host: 'localhost', port: fixture.port }, address: '127.0.0.1' });
     const probes = events.filter((e) => e.type === 'probe');
     expect(probes.length).toBeGreaterThanOrEqual(12);
+    expect(probes.find((p) => p.type === 'probe' && p.id === 'modern')).toMatchObject({ group: 'X25519MLKEM768', version: '1.3' });
     expect(events.filter((e) => e.type === 'connection')).toHaveLength(1);
     expect(events.at(-1)).toMatchObject({ type: 'done' });
 

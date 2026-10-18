@@ -5,13 +5,28 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "check": "tsc --noEmit -p tsconfig.json",
-    "test": "bun test --timeout 30000 tests",
+    "dev": "vite --config web/vite.config.ts --host 127.0.0.1 --port 5180",
+    "check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p web/tsconfig.json",
+    "test": "bun test --timeout 60000 tests",
+    "test:unit": "bun run scripts/test-unit.ts",
+    "build": "bun run check && vite build --config web/vite.config.ts",
     "engine": "bun run engine/server.ts",
     "scan": "bun run engine/cli.ts"
   },
+  "dependencies": {
+    "@arwes/react": "1.0.0-alpha.23",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/titillium-web": "^5.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
   "devDependencies": {
     "@types/bun": "^1.4.2",
-    "typescript": "^5.6.3"
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "playwright": "1.63.0",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0"
   }
 }

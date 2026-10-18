@@ -1,0 +1,314 @@
+{
+  "events": [
+    {
+      "type": "start",
+      "target": {
+        "host": "exposed.example",
+        "port": 1012
+      },
+      "address": "203.0.113.10",
+      "startedAt": "2026-10-18T23:24:47.906Z"
+    },
+    {
+      "type": "probe",
+      "id": "group:X25519MLKEM768",
+      "label": "X25519MLKEM768",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 118
+    },
+    {
+      "type": "probe",
+      "id": "group:x25519",
+      "label": "x25519",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 126
+    },
+    {
+      "type": "probe",
+      "id": "group:SecP384r1MLKEM1024",
+      "label": "SecP384r1MLKEM1024",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 127
+    },
+    {
+      "type": "probe",
+      "id": "tls13",
+      "label": "TLS 1.3",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 137
+    },
+    {
+      "type": "probe",
+      "id": "group:ffdhe2048",
+      "label": "ffdhe2048",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 140
+    },
+    {
+      "type": "probe",
+      "id": "group:secp256r1",
+      "label": "secp256r1",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 141
+    },
+    {
+      "type": "probe",
+      "id": "modern",
+      "label": "What current browsers get",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 141
+    },
+    {
+      "type": "probe",
+      "id": "group:secp384r1",
+      "label": "secp384r1",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 145
+    },
+    {
+      "type": "probe",
+      "id": "rsa-transport",
+      "label": "TLS 1.2 RSA key transport",
+      "answer": "yes",
+      "detail": "ServerHello TLS 1.2, cipher 0x9d",
+      "ms": 151,
+      "version": "1.2"
+    },
+    {
+      "type": "probe",
+      "id": "group:ffdhe3072",
+      "label": "ffdhe3072",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 154
+    },
+    {
+      "type": "probe",
+      "id": "tls12",
+      "label": "TLS 1.2 with ephemeral keys",
+      "answer": "yes",
+      "detail": "ServerHello TLS 1.2, cipher 0xc030",
+      "ms": 154,
+      "version": "1.2"
+    },
+    {
+      "type": "probe",
+      "id": "group:X25519Kyber768Draft00",
+      "label": "X25519Kyber768Draft00",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 155
+    },
+    {
+      "type": "probe",
+      "id": "group:secp521r1",
+      "label": "secp521r1",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 154
+    },
+    {
+      "type": "probe",
+      "id": "group:SecP256r1MLKEM768",
+      "label": "SecP256r1MLKEM768",
+      "answer": "no",
+      "detail": "alert 40",
+      "ms": 158
+    },
+    {
+      "type": "connection",
+      "protocol": "TLSv1.2",
+      "cipher": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+      "alpn": "http/1.1",
+      "chainLength": 4,
+      "trusted": true,
+      "ms": 239
+    },
+    {
+      "type": "assessment",
+      "assessment": {
+        "stage": "exposed",
+        "score": 27,
+        "verdict": "Connections to this host can be recorded today and decrypted later. TLS 1.3 is not available.",
+        "nextStep": {
+          "id": "enable-tls13",
+          "title": "Enable TLS 1.3",
+          "detail": "Hybrid post-quantum key exchange is a TLS 1.3 feature. Every current server stack has TLS 1.3; enabling it is the first step and costs nothing else."
+        },
+        "keyExchange": {
+          "status": "legacy",
+          "hybridGroups": [],
+          "classicalGroups": [],
+          "preferred": null,
+          "rsaKeyTransport": true,
+          "tls13": false,
+          "tls12": true
+        },
+        "certificate": {
+          "status": "not-actionable",
+          "quantumSafe": false,
+          "leafKey": "RSA-2048",
+          "leafSignature": "sha256WithRSAEncryption",
+          "leafDaysValid": 90,
+          "leafDaysRemaining": 71,
+          "chainLength": 4,
+          "trusted": true
+        },
+        "foundations": {
+          "tls13": false,
+          "noRsaKeyTransport": false,
+          "shortLivedCertificate": true,
+          "prefersHybrid": null,
+          "trustedChain": true
+        },
+        "notes": [],
+        "points": {
+          "keyExchange": 10,
+          "noRsaKeyTransport": 0,
+          "shortLivedCertificate": 8,
+          "prefersHybrid": 0,
+          "trustedChain": 6,
+          "certificate": 3
+        }
+      }
+    },
+    {
+      "type": "done",
+      "ms": 298
+    }
+  ],
+  "result": {
+    "target": {
+      "host": "exposed.example",
+      "port": 1012
+    },
+    "address": "203.0.113.10",
+    "startedAt": "2026-10-18T23:24:47.906Z",
+    "ms": 298,
+    "findings": {
+      "groups": {
+        "X25519MLKEM768": "no",
+        "SecP256r1MLKEM768": "no",
+        "SecP384r1MLKEM1024": "no",
+        "X25519Kyber768Draft00": "no",
+        "x25519": "no",
+        "secp256r1": "no",
+        "secp384r1": "no",
+        "secp521r1": "no",
+        "ffdhe2048": "no",
+        "ffdhe3072": "no"
+      },
+      "tls13": false,
+      "tls12": true,
+      "rsaKeyTransport": true,
+      "preferredModernGroup": null,
+      "connection": {
+        "protocol": "TLSv1.2",
+        "cipher": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+        "alpn": "http/1.1"
+      },
+      "chain": [
+        {
+          "subject": "*.exposed.example",
+          "issuer": "YR1",
+          "keyAlgorithm": "RSA",
+          "keyDetail": "RSA-2048",
+          "signatureAlgorithm": "sha256WithRSAEncryption",
+          "notBefore": "2026-09-29T20:02:56.000Z",
+          "notAfter": "2026-12-28T20:02:55.000Z",
+          "isCA": false,
+          "selfSigned": false
+        },
+        {
+          "subject": "YR1",
+          "issuer": "Root YR",
+          "keyAlgorithm": "RSA",
+          "keyDetail": "RSA-2048",
+          "signatureAlgorithm": "sha256WithRSAEncryption",
+          "notBefore": "2025-09-03T00:00:00.000Z",
+          "notAfter": "2028-09-02T23:59:59.000Z",
+          "isCA": true,
+          "selfSigned": false
+        },
+        {
+          "subject": "Root YR",
+          "issuer": "ISRG Root X1",
+          "keyAlgorithm": "RSA",
+          "keyDetail": "RSA-4096",
+          "signatureAlgorithm": "sha256WithRSAEncryption",
+          "notBefore": "2026-05-13T00:00:00.000Z",
+          "notAfter": "2032-09-02T23:59:59.000Z",
+          "isCA": true,
+          "selfSigned": false
+        },
+        {
+          "subject": "ISRG Root X1",
+          "issuer": "ISRG Root X1",
+          "keyAlgorithm": "RSA",
+          "keyDetail": "RSA-4096",
+          "signatureAlgorithm": "sha256WithRSAEncryption",
+          "notBefore": "2015-06-04T11:04:38.000Z",
+          "notAfter": "2035-06-04T11:04:38.000Z",
+          "isCA": true,
+          "selfSigned": true
+        }
+      ],
+      "trusted": true,
+      "trustError": null,
+      "errors": []
+    },
+    "assessment": {
+      "stage": "exposed",
+      "score": 27,
+      "verdict": "Connections to this host can be recorded today and decrypted later. TLS 1.3 is not available.",
+      "nextStep": {
+        "id": "enable-tls13",
+        "title": "Enable TLS 1.3",
+        "detail": "Hybrid post-quantum key exchange is a TLS 1.3 feature. Every current server stack has TLS 1.3; enabling it is the first step and costs nothing else."
+      },
+      "keyExchange": {
+        "status": "legacy",
+        "hybridGroups": [],
+        "classicalGroups": [],
+        "preferred": null,
+        "rsaKeyTransport": true,
+        "tls13": false,
+        "tls12": true
+      },
+      "certificate": {
+        "status": "not-actionable",
+        "quantumSafe": false,
+        "leafKey": "RSA-2048",
+        "leafSignature": "sha256WithRSAEncryption",
+        "leafDaysValid": 90,
+        "leafDaysRemaining": 71,
+        "chainLength": 4,
+        "trusted": true
+      },
+      "foundations": {
+        "tls13": false,
+        "noRsaKeyTransport": false,
+        "shortLivedCertificate": true,
+        "prefersHybrid": null,
+        "trustedChain": true
+      },
+      "notes": [],
+      "points": {
+        "keyExchange": 10,
+        "noRsaKeyTransport": 0,
+        "shortLivedCertificate": 8,
+        "prefersHybrid": 0,
+        "trustedChain": 6,
+        "certificate": 3
+      }
+    }
+  }
+}
