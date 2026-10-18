@@ -1,0 +1,76 @@
+# Quantum Ready Labs
+
+Is this host ready for the quantum era?
+
+Quantum Ready Labs is an open-source tool that tests a public host's TLS configuration for one
+thing: where it stands on the post-quantum transition, and what the next step is. Type a host
+name or an IP address; the service opens a handful of TLS connections to it, exactly as a browser
+would, and reports in plain language.
+
+It is not a general TLS checker and does not compete with the excellent tools that are. The
+readiness score measures quantum readiness only, as a stage name:
+
+| Stage | Meaning |
+|---|---|
+| Exposed | TLS 1.3 is not available. Sessions can be recorded today and decrypted later. |
+| Classical | TLS 1.3 with forward secrecy, no post-quantum key exchange. Safe today, harvestable. |
+| Hybrid | Hybrid post-quantum key exchange (X25519MLKEM768 or equivalent) is accepted. |
+| Agile | Hybrid, no legacy key transport, short-lived automated certificates: ready for what comes next. |
+
+## Why key exchange, and not the certificate
+
+A quantum computer able to break RSA and elliptic curves does not exist. The threat today is
+"harvest now, decrypt later": encrypted traffic recorded now falls when such a machine exists.
+That is a confidentiality problem, and it is solved in the key exchange, which is why browsers,
+OpenSSL and the large CDNs already negotiate hybrid post-quantum key exchange on every
+connection that supports it.
+
+Certificates (authentication) are a different matter. A signature cannot be forged retroactively,
+so there is no harvest-now risk, and the public Web PKI has no post-quantum roots yet. The report
+says so plainly and does not alarm about something nobody can act on today.
+
+## How it works
+
+The engine builds TLS ClientHello messages by hand and reads the server's first reply in clear:
+offer one key-exchange group with no key share and a supporting server answers HelloRetryRequest
+naming it, while a non-supporting server sends an alert. No post-quantum cryptography is
+implemented, no handshake completes, and the result is identical on every platform. One ordinary
+connection reads the negotiated parameters and the certificate chain.
+
+Fourteen probes per scan, run concurrently: 20 to 500 ms per host.
+
+## Repository
+
+```
+engine/      the scanner: target parsing and refusal list, probes, assessment, HTTP server
+worker/      the Cloudflare Worker: validation, rate limits, cache, metrics (in progress)
+web/         the public views and the private metrics view (in progress)
+tests/       bun test, offline against a fixture TLS server
+spikes/      throwaway experiments with their verdicts
+docs/        status, scoring rubric
+```
+
+```
+bun install
+bun run test            # 47 tests
+bun run scan github.com # scan from the terminal
+bun run engine          # the HTTP engine (ENGINE_TOKEN required)
+```
+
+## Guardrails
+
+The public service connects only to public Internet addresses: the host is resolved first and
+every address is judged against the IANA special-purpose registries (private, loopback,
+link-local, CGNAT, multicast, documentation, and the IPv6 embeddings of those). A scan is a
+handful of TLS handshakes, the same traffic a browser visit causes; still, only test hosts you
+are allowed to connect to.
+
+## Standards referenced
+
+NIST FIPS 203 (ML-KEM), FIPS 204 (ML-DSA), FIPS 205 (SLH-DSA); NIST IR 8547 (transition
+timeline: quantum-vulnerable algorithms deprecated after 2030, disallowed after 2035); NSA CNSA
+2.0; IETF draft-ietf-tls-ecdhe-mlkem (the hybrid groups).
+
+## Licence
+
+MIT. A Manteiga Foundation project.
