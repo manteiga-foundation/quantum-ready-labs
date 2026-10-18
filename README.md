@@ -13,9 +13,9 @@ readiness score measures quantum readiness only, as a stage name:
 | Stage | Meaning |
 |---|---|
 | Exposed | TLS 1.3 is not available. Sessions can be recorded today and decrypted later. |
-| Classical | TLS 1.3 with forward secrecy, no post-quantum key exchange. Safe today, harvestable. |
-| Hybrid | Hybrid post-quantum key exchange (X25519MLKEM768 or equivalent) is accepted. |
-| Agile | Hybrid, no legacy key transport, short-lived automated certificates: ready for what comes next. |
+| At risk | TLS 1.3 with forward secrecy, no post-quantum key exchange. Safe today, harvestable. |
+| Protected | Hybrid post-quantum key exchange (X25519MLKEM768 or equivalent) is accepted. |
+| Ready | Protected, no legacy key transport, short-lived automated certificates: ready for what comes next. |
 
 ## Why key exchange, and not the certificate
 

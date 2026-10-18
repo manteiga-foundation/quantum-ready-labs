@@ -35,7 +35,7 @@ describe('scan against the fixture', () => {
       selfSigned: true,
     });
     expect(result.findings.trusted).toBe(false);
-    expect(result.assessment.stage).toBe('hybrid');
+    expect(result.assessment.stage).toBe('protected');
     expect(result.ms).toBeLessThan(10000);
   });
 

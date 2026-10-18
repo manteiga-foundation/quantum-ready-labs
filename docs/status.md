@@ -13,7 +13,7 @@ slice that changes it; `AGENTS.md` stays the contract.
 - `engine/hello.ts`, `engine/socket.ts`: hello builders (TLS 1.3 one-group probes, TLS 1.2 cipher
   probes), reply parser, one-record exchange with timeouts.
 - `engine/resolve.ts`: resolve once, judge every address, connect to the chosen one.
-- `engine/assess.ts`: the ladder (unreachable, inconclusive, exposed, classical, hybrid, agile),
+- `engine/assess.ts`: the ladder (unreachable, inconclusive, exposed, at-risk, protected, ready),
   points (key exchange 60, foundations 30, certificate 10), one next step per situation, notes.
 - `engine/certificate.ts`: chain links with key and signature algorithms (ML-DSA and SLH-DSA
   OIDs known), validity, CA flag.
@@ -24,8 +24,8 @@ slice that changes it; `AGENTS.md` stays the contract.
 - Tests: 47 (bun test), all offline against a fixture TLS server (Bun.serve, BoringSSL, which
   already speaks X25519MLKEM768).
 
-Measured on real hosts (2026-10-18): cloudflare.com, google.com, manteiga.org HYBRID 85;
-github.com CLASSICAL 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan.
+Measured on real hosts (2026-10-18): cloudflare.com, google.com, manteiga.org PROTECTED 85;
+github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan.
 
 ## Emulated / not yet
 
@@ -50,7 +50,7 @@ github.com CLASSICAL 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan
 
 ## Open questions
 
-- Agile threshold: leaf certificates of 100 days or less count as automated. Right line?
-- Should RSA key transport reachable keep a host out of Agile (today: yes)? Cloudflare and
+- Ready threshold: leaf certificates of 100 days or less count as automated. Right line?
+- Should RSA key transport reachable keep a host out of Ready (today: yes)? Cloudflare and
   Google both still accept it for old clients.
 - Which ports the public tool allows beyond 443 (8443? 993/465 for mail?).

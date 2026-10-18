@@ -49,7 +49,7 @@ describe('engine HTTP server', () => {
     expect(lines.filter((l) => l.type === 'probe').length).toBeGreaterThanOrEqual(12);
     const last = lines.at(-1)!;
     expect(last.type).toBe('result');
-    expect((last.result as { assessment: { stage: string } }).assessment.stage).toBe('hybrid');
+    expect((last.result as { assessment: { stage: string } }).assessment.stage).toBe('protected');
   });
 
   test('an invalid target is a 400 with the reason, not a stream', async () => {

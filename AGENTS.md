@@ -25,7 +25,9 @@ from the first commit: nothing under `engine/` imports the DOM, a web framework 
   (HelloRetryRequest or alert) and never finish the handshake.
 - **Scan** - the set of probes for one target plus one real connection for the negotiated
   parameters and the certificate chain. Streams its findings as it goes; the report builds live.
-- **Stage** - the readiness ladder: Exposed, Classical, Hybrid, Agile. The score sits under it.
+- **Stage** - the readiness ladder, in the reader's words: Exposed, At risk, Protected, Ready
+  (technically: no TLS 1.3; classical TLS 1.3; hybrid PQ key exchange; hybrid plus agile
+  foundations). The score sits under it.
 - **Report** - the public result: verdict, the one next step, three cards (Key exchange,
   Certificate, Foundations), what real clients get, details folded, share/print/JSON.
 - **Edge** - the Cloudflare Worker: validation, refusal list, rate limits, result cache, metrics.

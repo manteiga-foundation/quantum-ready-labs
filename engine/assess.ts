@@ -62,7 +62,27 @@ export function emptyFindings(): Findings {
   };
 }
 
-export type Stage = 'unreachable' | 'inconclusive' | 'exposed' | 'classical' | 'hybrid' | 'agile';
+export type Stage = 'unreachable' | 'inconclusive' | 'exposed' | 'at-risk' | 'protected' | 'ready';
+
+/** The word the reader sees. Direct, for an executive audience; the technical names live in the details. */
+export const STAGE_LABEL: Record<Stage, string> = {
+  unreachable: 'UNREACHABLE',
+  inconclusive: 'INCONCLUSIVE',
+  exposed: 'EXPOSED',
+  'at-risk': 'AT RISK',
+  protected: 'PROTECTED',
+  ready: 'READY',
+};
+
+/** What each stage means in one line, for legends and the rubric. */
+export const STAGE_MEANING: Record<Stage, string> = {
+  unreachable: 'No TLS server answered.',
+  inconclusive: 'The server answered in a way the probes could not read with confidence.',
+  exposed: 'TLS 1.3 is not available: sessions can be recorded today and decrypted later.',
+  'at-risk': 'TLS 1.3 with forward secrecy, no post-quantum key exchange: safe today, harvestable.',
+  protected: 'Hybrid post-quantum key exchange is accepted: confidentiality protected.',
+  ready: 'Protected, with no legacy key transport and short-lived automated certificates.',
+};
 
 export interface Note {
   id: string;
@@ -191,11 +211,11 @@ export function assess(f: Findings): Assessment {
   if (!anyAnswer) stage = 'unreachable';
   else if (f.tls13 === true && allGroupsNo) stage = 'inconclusive';
   else if (f.tls13 === false || (f.tls13 === null && hybridGroups.length === 0 && classicalGroups.length === 0)) stage = 'exposed';
-  else if (hybridGroups.length === 0) stage = 'classical';
+  else if (hybridGroups.length === 0) stage = 'at-risk';
   else {
     const foundationsInPlace =
       f.rsaKeyTransport === false && leafDaysValid !== null && leafDaysValid <= SHORT_LIVED_DAYS && f.trusted !== false;
-    stage = foundationsInPlace ? 'agile' : 'hybrid';
+    stage = foundationsInPlace ? 'ready' : 'protected';
   }
 
   // Points. Key exchange 60, foundations 30, certificate 10.
@@ -212,7 +232,7 @@ export function assess(f: Findings): Assessment {
   if (stage === 'unreachable') nextStep = STEPS.unreachable;
   else if (stage === 'inconclusive') nextStep = STEPS.inconclusive;
   else if (stage === 'exposed') nextStep = STEPS['enable-tls13'];
-  else if (stage === 'classical') nextStep = STEPS['enable-hybrid'];
+  else if (stage === 'at-risk') nextStep = STEPS['enable-hybrid'];
   else if (f.rsaKeyTransport !== false) nextStep = STEPS['retire-rsa-transport'];
   else if (leafDaysValid === null || leafDaysValid > SHORT_LIVED_DAYS) nextStep = STEPS['shorten-certificates'];
   else nextStep = STEPS['watch-pq-certificates'];
@@ -221,9 +241,9 @@ export function assess(f: Findings): Assessment {
     unreachable: 'No TLS server answered at this address.',
     inconclusive: 'The server answered in a way the probes could not read with confidence.',
     exposed: 'Connections to this host can be recorded today and decrypted later. TLS 1.3 is not available.',
-    classical: 'Connections to this host are safe today but can be recorded now and decrypted when a large quantum computer exists.',
-    hybrid: 'Connections to this host are protected against future quantum decryption.',
-    agile: 'Connections to this host are protected against future quantum decryption, and the foundations for the next step are in place.',
+    'at-risk': 'Connections to this host are safe today but can be recorded now and decrypted when a large quantum computer exists.',
+    protected: 'Connections to this host are protected against future quantum decryption.',
+    ready: 'Connections to this host are protected against future quantum decryption, and the foundations for the next step are in place.',
   }[stage];
 
   return {
