@@ -1,0 +1,26 @@
+# The edge. Deploy from the repository root after `bun run build`:
+#   bunx wrangler deploy
+# Secrets (never in files):  bunx wrangler secret put ENGINE_TOKEN
+name = "quantum-ready-labs"
+main = "worker/src/index.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "dist/web"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*", "/r/*", "/metrics"]
+
+[vars]
+ENGINE_URL = "https://qrl-engine.fly.dev"
+PUBLIC_ORIGIN = "https://quantumreadylabs.com"
+ALLOWED_PORTS = "443"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "qrl"
+database_id = "REPLACE_AFTER_CREATE"
+
+[observability]
+enabled = true
