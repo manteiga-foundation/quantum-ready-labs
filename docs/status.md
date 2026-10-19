@@ -103,9 +103,11 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
 
 ## Next, in order
 
-1. Deploy the study page (`bun run deploy:edge`) once the maintainer has read it; then the
-   press release (docx, led by the Florida figure, the foundation as issuer), Show HN and
-   LinkedIn pointing at the note.
+1. The study page is deployed and the press release (docs/press/2026-10-20-florida-release,
+   led by the Florida figure, Manteiga Foundation as issuer) is paid and scheduled on PR Newswire
+   via eReleases for Tuesday 20 October 2026, 8:00 ET. After it is live: the wire URL and the
+   pickups into n30.ai's Press section; Show HN and LinkedIn pointing at the note; watch the
+   engine (one shared-cpu-1x machine) for the first hours.
 2. Mail the 27 letters (postal addresses still to be gathered; the letter can now cite the note).
 3. Cloudflare Access on `/metrics`; per-day p50/p95 and the real signals in metrics.
 4. Engine capacity for a launch week: measure refusals under load, then `ENGINE_MAX_CONCURRENT`
