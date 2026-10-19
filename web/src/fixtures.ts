@@ -43,6 +43,17 @@ export interface MetricsData {
   referrers: { source: string; count: number }[];
   countries: { country: string; count: number }[];
   signals: { label: string; detail: string }[];
+  hosts: HostRow[];
+}
+
+export interface HostRow {
+  host: string;
+  port: number;
+  stage: string;
+  score: number;
+  scans: number;
+  lastId: string;
+  lastAt: string;
 }
 
 export function demoMetrics(now = new Date('2026-10-18T12:00:00Z')): MetricsData {
@@ -98,6 +109,14 @@ export function demoMetrics(now = new Date('2026-10-18T12:00:00Z')): MetricsData
       { country: 'United Kingdom', count: Math.round(totals.scans * 0.11) },
       { country: 'Brazil', count: Math.round(totals.scans * 0.09) },
       { country: 'Other', count: Math.round(totals.scans * 0.29) },
+    ],
+    hosts: [
+      { host: 'ready.example', port: 443, stage: 'ready', score: 95, scans: 3, lastId: 'demo-ready', lastAt: days[29].date + 'T11:40:00Z' },
+      { host: 'protected.example', port: 443, stage: 'protected', score: 85, scans: 12, lastId: 'demo-protected', lastAt: days[29].date + 'T10:12:00Z' },
+      { host: 'at-risk.example', port: 443, stage: 'at-risk', score: 49, scans: 7, lastId: 'demo-at-risk', lastAt: days[28].date + 'T22:05:00Z' },
+      { host: 'exposed.example', port: 1012, stage: 'exposed', score: 27, scans: 2, lastId: 'demo-exposed', lastAt: days[28].date + 'T09:30:00Z' },
+      { host: 'shop.example', port: 443, stage: 'protected', score: 79, scans: 4, lastId: 'demo-protected', lastAt: days[27].date + 'T15:02:00Z' },
+      { host: 'intranet-portal.example', port: 443, stage: 'at-risk', score: 43, scans: 1, lastId: 'demo-at-risk', lastAt: days[26].date + 'T08:44:00Z' },
     ],
     signals: [
       { label: 'Probe disagreement', detail: '3 hosts answered the hybrid probe but a real connection negotiated x25519 (server preference). Worth a note in the report.' },

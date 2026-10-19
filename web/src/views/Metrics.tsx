@@ -84,6 +84,51 @@ export function Metrics() {
       </section>
 
       <section className="section">
+        <h2>Hosts tested</h2>
+        <p className="notice">Latest fresh result per host, most recent first. The link opens the public result page.</p>
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Host</th>
+                <th>Stage</th>
+                <th>Score</th>
+                <th>Scans</th>
+                <th>Last tested</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.hosts.map((h) => (
+                <tr key={`${h.host}:${h.port}`} data-testid="host-row">
+                  <td className="mono">
+                    <a href={`/r/${h.lastId}`}>
+                      {h.host}
+                      {h.port !== 443 ? `:${h.port}` : ''}
+                    </a>
+                  </td>
+                  <td data-testid="host-stage" style={{ color: `var(--stage-${h.stage})`, fontWeight: 600 }}>
+                    {STAGE_LABEL[h.stage as keyof typeof STAGE_LABEL] ?? h.stage}
+                  </td>
+                  <td className="mono" data-testid="host-score">
+                    {h.score}
+                  </td>
+                  <td className="mono dim">{h.scans}</td>
+                  <td className="dim">{new Date(h.lastAt).toISOString().slice(0, 16).replace('T', ' ')}</td>
+                </tr>
+              ))}
+              {data.hosts.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="dim">
+                    No hosts tested in the last 30 days.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="section">
         <h2>Health</h2>
         <div className="counts">
           <Count label="Probe time p50, today" value={`${last.p50} ms`} />

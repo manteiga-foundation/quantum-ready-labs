@@ -264,6 +264,17 @@ async function metricsRoute(request: Request, env: Env): Promise<Response> {
   const opens = await env.DB.prepare('SELECT COUNT(*) AS n FROM opens WHERE created_at >= ?').bind(since).first<{ n: number }>();
   const ports = await env.DB.prepare("SELECT detail, COUNT(*) AS n FROM failures WHERE reason = 'Port not allowed' AND created_at >= ? GROUP BY detail ORDER BY n DESC LIMIT 5").bind(since).all<{ detail: string; n: number }>();
 
+  const hosts = await env.DB.prepare(
+    `SELECT s.host, s.port, s.stage, s.score, s.id AS lastId, s.created_at AS lastAt,
+            (SELECT COUNT(*) FROM scans c WHERE c.host = s.host AND c.port = s.port AND c.created_at >= ?) AS scans
+     FROM scans s
+     WHERE s.cache_hit = 0 AND s.created_at >= ?
+       AND s.created_at = (SELECT MAX(created_at) FROM scans m WHERE m.host = s.host AND m.port = s.port AND m.cache_hit = 0)
+     ORDER BY s.created_at DESC LIMIT 300`,
+  )
+    .bind(since, since)
+    .all<{ host: string; port: number; stage: string; score: number; lastId: string; lastAt: number; scans: number }>();
+
   const failMap = new Map(failuresByDay.results.map((r) => [r.day, r.n]));
   const sorted = timings.results.map((t) => t.ms);
   const pct = (p: number) => (sorted.length ? sorted[Math.min(sorted.length - 1, Math.floor((p / 100) * sorted.length))] : 0);
@@ -283,6 +294,7 @@ async function metricsRoute(request: Request, env: Env): Promise<Response> {
       p95: 0,
     })),
     failures: failures.results,
+    hosts: hosts.results.map((h) => ({ ...h, lastAt: new Date(h.lastAt).toISOString() })),
     referrers: referrers.results,
     countries: countries.results,
     signals: [

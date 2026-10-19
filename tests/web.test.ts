@@ -137,6 +137,13 @@ describe('view 3: the private metrics view', () => {
     await see(page.getByRole('heading', { name: 'Readiness over time' }));
     await see(page.getByRole('heading', { name: 'Failures' }));
     expect(await page.getByTestId('trend-day').count()).toBeGreaterThan(7);
+    await see(page.getByRole('heading', { name: 'Hosts tested' }));
+    const rows = page.getByTestId('host-row');
+    expect(await rows.count()).toBeGreaterThan(3);
+    const first = rows.first();
+    await see(first.getByTestId('host-stage'), /EXPOSED|AT RISK|PROTECTED|READY/);
+    await see(first.getByTestId('host-score'), /^\s*\d+\s*$/);
+    expect(await first.getByRole('link').getAttribute('href')).toMatch(/^\/r\/[A-Za-z0-9_-]+$/);
     expect(errors).toEqual([]);
     await page.context().close();
   });
