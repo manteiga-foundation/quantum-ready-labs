@@ -12,7 +12,7 @@
     "build": "bun run check && vite build --config web/vite.config.ts",
     "engine": "bun run engine/server.ts",
     "scan": "bun run engine/cli.ts",
-    "deploy:engine": "fly deploy --config fly.toml --remote-only --ha=false",
+    "deploy:engine": "fly deploy --config fly.toml --remote-only",
     "deploy:edge": "bun run build && wrangler deploy",
     "edge:dev": "wrangler dev",
     "render": "bun run render/server.ts",

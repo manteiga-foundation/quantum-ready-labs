@@ -9,20 +9,23 @@ primary_region = "iad"
 
 [env]
   PORT = "8787"
-  ENGINE_MAX_CONCURRENT = "16"
+  # Scans in flight per machine before the engine answers 429. Sized with the proxy limits below:
+  # the proxy spreads to the other machine (and wakes it) past soft_limit, well before this.
+  ENGINE_MAX_CONCURRENT = "32"
 
 [http_service]
   internal_port = 8787
   force_https = true
   auto_stop_machines = "stop"
   auto_start_machines = true
-  min_machines_running = 0
+  # One machine stays warm (no cold start for the first reader); the second wakes under load.
+  min_machines_running = 1
   processes = ["app"]
 
   [http_service.concurrency]
     type = "requests"
-    soft_limit = 32
-    hard_limit = 64
+    soft_limit = 20
+    hard_limit = 30
 
 [[http_service.checks]]
   interval = "30s"
@@ -32,5 +35,5 @@ primary_region = "iad"
   path = "/health"
 
 [[vm]]
-  size = "shared-cpu-1x"
-  memory = "256mb"
+  size = "shared-cpu-2x"
+  memory = "512mb"

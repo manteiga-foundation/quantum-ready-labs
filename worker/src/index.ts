@@ -167,8 +167,10 @@ async function scanRoute(request: Request, env: Env, ctx: ExecutionContext): Pro
   });
   if (!upstream.ok || !upstream.body) {
     const detail = (await upstream.json().catch(() => ({}))) as { error?: string };
-    ctx.waitUntil(recordFailure(env, upstream.status === 429 ? 'Engine busy' : 'Engine refused', detail.error ?? String(upstream.status), target.port));
-    return json({ error: detail.error ?? 'The scanner is busy. Please try again in a moment.' }, upstream.status === 429 ? 429 : 502);
+    const busy = upstream.status === 429;
+    ctx.waitUntil(recordFailure(env, busy ? 'Engine busy' : 'Engine refused', detail.error ?? String(upstream.status), target.port));
+    // The engine says "busy" in one word; the reader gets the sentence and a 429 with Retry-After.
+    return json({ error: busy ? 'The scanner is busy. Please try again in a moment.' : detail.error ?? 'The scanner could not run. Please try again in a moment.' }, busy ? 429 : 502, busy ? { 'retry-after': '3' } : {});
   }
 
   // Pass the stream through, keep the result, append the share id when it arrives.
@@ -245,7 +247,7 @@ async function studyScanRoute(request: Request, env: Env, ctx: ExecutionContext)
     headers: { authorization: `Bearer ${env.ENGINE_TOKEN}`, 'content-type': 'application/json' },
     body: JSON.stringify({ host: target.host, port: target.port }),
   });
-  if (!upstream.ok) return json({ error: `engine answered ${upstream.status}` }, 502);
+  if (!upstream.ok) return json({ error: upstream.status === 429 ? 'The scanner is busy. Please try again in a moment.' : `engine answered ${upstream.status}` }, upstream.status === 429 ? 429 : 502, upstream.status === 429 ? { 'retry-after': '3' } : {});
   const lines = (await upstream.text()).split('\n').filter((l) => l.trim());
   const last = lines.length ? (JSON.parse(lines.at(-1)!) as { type: string; result?: ScanResult; error?: string }) : null;
   if (!last || last.type !== 'result' || !last.result) return json({ error: last?.error ?? 'the engine did not finish the scan' }, 502);

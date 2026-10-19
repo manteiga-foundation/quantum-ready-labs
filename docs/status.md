@@ -11,8 +11,9 @@ slice that changes it; `AGENTS.md` stays the contract.
   exchange with timeouts; resolution; the ladder (`assess.ts`, rubric in `docs/scoring.md`);
   chain details with signature algorithms read from the DER; the scan (14 probes concurrently
   plus one real connection, events streamed); the HTTP face (`server.ts`: NDJSON, bearer token,
-  concurrency cap). Deployed as `qrl-engine` on Fly Machines (iad, shared-cpu-1x, stops when
-  idle). Token in `~/.config/quantum-ready-labs/engine-token` on the maintainer's machine and in
+  concurrency cap). Deployed as `qrl-engine` on Fly Machines (iad, two shared-cpu-2x 512 MB machines,
+  one always warm, the second wakes under load; `ENGINE_MAX_CONCURRENT=32` per machine, proxy
+  soft 20 / hard 30). Token in `~/.config/quantum-ready-labs/engine-token` on the maintainer's machine and in
   Fly secrets.
 - Edge (`worker/`): validation with the engine's parser, DNS-over-HTTPS resolution and the
   refusal list again, rate limits per caller and per host (D1 counters), a 24 h result cache,
@@ -107,11 +108,14 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
    led by the Florida figure, Manteiga Foundation as issuer) is paid and scheduled on PR Newswire
    via eReleases for Tuesday 20 October 2026, 8:00 ET. After it is live: the wire URL and the
    pickups into n30.ai's Press section; Show HN and LinkedIn pointing at the note; watch the
-   engine (one shared-cpu-1x machine) for the first hours.
+   engine for the first hours (`fly status -a qrl-engine`, the failures table on /metrics).
 2. Mail the 27 letters (postal addresses still to be gathered; the letter can now cite the note).
 3. Cloudflare Access on `/metrics`; per-day p50/p95 and the real signals in metrics.
-4. Engine capacity for a launch week: measure refusals under load, then `ENGINE_MAX_CONCURRENT`
-   or a second machine.
+4. Engine capacity, done for the launch: `scripts/load-test.ts` (tagged rows through the study
+   path, deleted afterwards) measured one shared-cpu-1x at 24 simultaneous scans: 6 refused with
+   429 on the warm round. After scaling to two shared-cpu-2x machines: 48 simultaneous, three
+   rounds, all answered, p95 under 1 s; 96 simultaneous, all answered, p95 0.8 s. Edge now turns
+   the engine's one-word "busy" into the sentence and a 429 with Retry-After on both scan paths.
 5. CLI (`qready`): same engine, terminal renderer, `bun build --compile` for three OSes, Homebrew.
 6. Quarterly re-scan of the Florida population (`florida-financial-2027q1`), the first trend.
 
