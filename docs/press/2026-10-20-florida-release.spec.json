@@ -57,7 +57,7 @@
       "style": "Body",
       "runs": [
         {
-          "text": "[CITY], Fla., Oct. 21, 2026 /PRNewswire/ -- ",
+          "text": "[CITY], Fla., Oct. 20, 2026 /PRNewswire/ -- ",
           "bold": true
         },
         {
@@ -83,7 +83,7 @@
     {
       "type": "paragraph",
       "style": "Body",
-      "text": "\"Nothing is broken today, and that is exactly why this is the moment to act,\" said [FULL NAME], [TITLE] of Manteiga Foundation. \"Confidentiality is the urgent part of the quantum transition, the fix is small, and most of these institutions are one setting away. We built the scanner so that anyone can see where a host stands in a second and what to do next.\""
+      "text": "\"Nothing is broken today, and that is exactly why this is the moment to act,\" said Jaime Manteiga, Co-Founder of Manteiga Foundation. \"Confidentiality is the urgent part of the quantum transition, the fix is small, and most of these institutions are one setting away. We built the scanner so that anyone can see where a host stands in a second and what to do next.\""
     },
     {
       "type": "paragraph",
@@ -143,7 +143,7 @@
     {
       "type": "paragraph",
       "style": "Boiler",
-      "text": "[FULL NAME], [TITLE], Manteiga Foundation\n[EMAIL]  |  [PHONE]\nquantumreadylabs.com/studies/florida-financial-2026q4  |  github.com/manteiga-foundation/quantum-ready-labs"
+      "text": "Jaime Manteiga, Co-Founder, Manteiga Foundation\njaime@manteiga.org  |  305-709-2909\nquantumreadylabs.com/studies/florida-financial-2026q4  |  github.com/manteiga-foundation/quantum-ready-labs"
     },
     {
       "type": "paragraph",
@@ -161,7 +161,7 @@
     {
       "type": "paragraph",
       "style": "Note",
-      "text": "Placeholders to fill before submission: [CITY] in the dateline, [FULL NAME], [TITLE], [EMAIL], [PHONE]. The quote is a draft in your voice; change any word of it."
+      "text": "Placeholder left to fill before submission: [CITY] in the dateline. Name, title and contact are in."
     },
     {
       "type": "paragraph",
@@ -181,7 +181,7 @@
     {
       "type": "paragraph",
       "style": "Note",
-      "text": "Timing: Tuesday, October 21, 2026, 8:00 a.m. ET. Post the Show HN and the LinkedIn post the same morning, both linking to the note, not the landing page. The page is live now at the URL above; the OG preview (title, figure image) is in place for LinkedIn unfurls."
+      "text": "Timing: Tuesday, October 20, 2026, 8:00 a.m. ET. Post the Show HN and the LinkedIn post the same morning, both linking to the note, not the landing page. The page is live now at the URL above; the OG preview (title, figure image) is in place for LinkedIn unfurls."
     },
     {
       "type": "paragraph",
