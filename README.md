@@ -75,6 +75,8 @@ bun install
 bun run scan github.com
 ```
 
+![bun run scan github.com in a terminal: the QREADY banner, then AT RISK 49 / 100, the verdict, the one next step, the key exchange, certificate and foundations cards, and the probe grid](docs/readme/cli.png)
+
 That is a complete scan: the stage, the score, the verdict, the one next step, the three cards and
 every probe. Useful flags: `--verbose` (chain and score breakdown), `--share` (also records the scan
 at quantumreadylabs.com and prints the share and PDF links), `--json` (one result per line, for

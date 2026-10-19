@@ -54,6 +54,8 @@ slice that changes it; `AGENTS.md` stays the contract.
   `--share` for the public links, `--json` for machines, a worst-first summary for several hosts.
   Truecolor, 256 or none by NO_COLOR, FORCE_COLOR, COLORTERM and the TTY; every line fits the
   terminal's width (tested at 80).
+- README: install and run in four steps (verified locally end to end); `docs/readme/cli.png` from
+  `scripts/readme-cli.ts` (a real scan, truecolor ANSI to HTML in a terminal frame, Chromium at 2x).
 - README: executive summary first, then a hero still and a GIF of a scan (`docs/readme/`, made by
   `scripts/readme-media.ts`), pinned by `tests/readme.test.ts`.
 - Tests: 103 (`bun run test`): 90 offline (unit, fixture TLS server, engine HTTP, edge policy,
