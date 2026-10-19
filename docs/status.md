@@ -61,6 +61,11 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
   has two computed lines, not the richer emulated set. Cloudflare Access on `/metrics` is a
   dashboard step; until then the header check keeps it closed.
 - Quarterly reports: addresses are stored; nothing is sent, and the dialog says so.
+- PDF cold start: the render machine stops when idle; a cold request took 13 to 20 s. Now a view
+  of any result page or a scan wakes it (and Chromium starts with the process), so the first PDF
+  after a wake measures about 2 s; the dialog prepares the PDF while open, with a progress bar
+  and a note after 2.5 s, and downloads a blob so the tab never navigates to a blank page (the
+  mobile symptom). Truly cold with no page view first is still about 20 s.
 - Letters: postal addresses are not in the list yet (`addressLines` exists in the template); the
   signer defaults to the maintainer and is an argument.
 - PDF: the cover has room for a client name (`preparedFor`); no UI asks for it yet. The first

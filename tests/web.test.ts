@@ -86,10 +86,22 @@ describe('view 2: the live report', () => {
     expect(await page.getByTestId('probe-row').count()).toBe(14);
     expect(await page.getByTestId('chain-link').count()).toBe(4);
     await see(page.getByRole('button', { name: 'Download report' }));
+    // The PDF is prepared while the dialog is open, with a visible progress state (the renderer can
+    // take seconds when cold); the download itself is a blob, so the tab never navigates away.
+    await page.route('**/api/report/*.pdf', async (route) => {
+      await new Promise((r) => setTimeout(r, 1200));
+      await route.fulfill({ status: 200, contentType: 'application/pdf', headers: { 'content-disposition': 'attachment; filename="quantum-readiness-protected.example.pdf"' }, body: '%PDF-1.4 fake' });
+    });
     await page.getByRole('button', { name: 'Download report' }).click();
     await see(page.getByRole('dialog'), /five-page PDF/);
-    await see(page.getByTestId('download-only'), exact('Download PDF'));
-    await page.getByRole('button', { name: 'Cancel' }).click();
+    await see(page.getByTestId('pdf-progress'), /Preparing/);
+    expect(await page.getByTestId('download-only').isDisabled()).toBe(true);
+    await see(page.getByTestId('download-only'), exact('Download PDF'), 15000);
+    expect(await page.getByTestId('download-only').isDisabled()).toBe(false);
+    await see(page.getByTestId('pdf-progress'), /ready/i);
+    const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('download-only').click()]);
+    expect(download.suggestedFilename()).toBe('quantum-readiness-protected.example.pdf');
+    expect(page.url()).toContain('/scan?host=protected.example'); // the tab stayed on the report
     expect(errors).toEqual([]);
     await page.context().close();
   });

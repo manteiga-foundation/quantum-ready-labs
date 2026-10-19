@@ -1,5 +1,5 @@
 import { Animator, Animated } from '@arwes/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { STAGE_LABEL, STAGE_MEANING, type Assessment, type Findings } from '../../../engine/assess';
 import { GROUP_NAMES, type GroupName } from '../../../engine/hello';
 import { subscribe } from '../api';
@@ -325,20 +325,22 @@ function Rubric({ a }: { a: Assessment }) {
 function DownloadDialog({ host, pdfUrl, onClose }: { host: string; pdfUrl: string | null; onClose: () => void }) {
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
+  const pdf = usePreparedPdf(pdfUrl);
   const download = () => {
-    onClose();
     if (pdfUrl) {
+      if (pdf.status !== 'ready') return;
       const a = document.createElement('a');
-      a.href = pdfUrl;
-      a.download = '';
+      a.href = pdf.objectUrl;
+      a.download = pdf.filename;
       document.body.appendChild(a);
       a.click();
       a.remove();
+      onClose();
     } else {
+      onClose();
       setTimeout(() => window.print(), 50);
     }
   };
-  const print = download;
   const withEmail = async () => {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return;
     setBusy(true);
@@ -346,6 +348,7 @@ function DownloadDialog({ host, pdfUrl, onClose }: { host: string; pdfUrl: strin
     setBusy(false);
     download();
   };
+  const notReady = pdfUrl !== null && pdf.status !== 'ready';
   return (
     <div className="dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="dl-title">
       <div className="dialog">
@@ -353,16 +356,28 @@ function DownloadDialog({ host, pdfUrl, onClose }: { host: string; pdfUrl: strin
         <p>
           {pdfUrl ? 'A five-page PDF, print-ready: cover, executive summary, where the host stands, technical details, method and standards.' : 'The report prints to PDF from your browser.'} If you would like a quarterly readiness report for {host}, leave an address; this is optional, and nothing is sent until the quarterly reports begin.
         </p>
+        {pdfUrl && (
+          <div className={`pdf-progress pdf-${pdf.status}`} data-testid="pdf-progress" role="status" aria-live="polite">
+            <div className="pdf-bar" aria-hidden="true">
+              <span />
+            </div>
+            <span className="pdf-text">
+              {pdf.status === 'preparing' && (pdf.slow ? 'Preparing the PDF. The first one after a quiet spell takes up to twenty seconds while the renderer starts.' : 'Preparing the PDF.')}
+              {pdf.status === 'ready' && `PDF ready, ${Math.max(1, Math.round(pdf.bytes / 1024))} KB.`}
+              {pdf.status === 'error' && 'The PDF could not be prepared right now. Reload the page to try again, or print from your browser.'}
+            </span>
+          </div>
+        )}
         <label htmlFor="email" className="sr-only">
           Email
         </label>
         <input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
         <div className="actions">
-          <button type="button" className="button" onClick={withEmail} disabled={busy || !email}>
+          <button type="button" className="button" onClick={withEmail} disabled={busy || !email || notReady}>
             Download and subscribe
           </button>
-          <button type="button" className="button ghost" onClick={print} data-testid="download-only">
-            {pdfUrl ? 'Download PDF' : 'Print'}
+          <button type="button" className="button ghost" onClick={download} data-testid="download-only" disabled={notReady}>
+            {pdfUrl ? (pdf.status === 'preparing' ? 'Preparing' : 'Download PDF') : 'Print'}
           </button>
           <button type="button" className="button ghost" onClick={onClose}>
             Cancel
@@ -371,4 +386,36 @@ function DownloadDialog({ host, pdfUrl, onClose }: { host: string; pdfUrl: strin
       </div>
     </div>
   );
+}
+
+type PreparedPdf = { status: 'preparing'; slow: boolean } | { status: 'ready'; objectUrl: string; filename: string; bytes: number } | { status: 'error' };
+
+/** Fetches the PDF as soon as the dialog opens, so the wait overlaps the reader's decision. */
+function usePreparedPdf(pdfUrl: string | null): PreparedPdf {
+  const [state, setState] = useState<PreparedPdf>({ status: 'preparing', slow: false });
+  useEffect(() => {
+    if (!pdfUrl) return;
+    let cancelled = false;
+    let objectUrl: string | null = null;
+    const slowTimer = setTimeout(() => !cancelled && setState((s) => (s.status === 'preparing' ? { status: 'preparing', slow: true } : s)), 2500);
+    (async () => {
+      try {
+        const res = await fetch(pdfUrl);
+        if (!res.ok) throw new Error(String(res.status));
+        const blob = await res.blob();
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        const filename = res.headers.get('content-disposition')?.match(/filename="([^"]+)"/)?.[1] ?? 'quantum-readiness.pdf';
+        setState({ status: 'ready', objectUrl, filename, bytes: blob.size });
+      } catch {
+        if (!cancelled) setState({ status: 'error' });
+      }
+    })();
+    return () => {
+      cancelled = true;
+      clearTimeout(slowTimer);
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [pdfUrl]);
+  return state;
 }

@@ -49,6 +49,9 @@ export async function createRenderServer(options: RenderServerOptions): Promise<
   };
   let rendering = 0;
   const fontUrls = await loadFonts();
+  // Chromium starts with the process, not with the first PDF: a wake-up ping on /health is enough
+  // to make the first render warm.
+  const warm = getBrowser().catch((e) => console.error('chromium failed to start', e));
 
   const server = Bun.serve({
     hostname,
@@ -56,7 +59,10 @@ export async function createRenderServer(options: RenderServerOptions): Promise<
     idleTimeout: 60,
     async fetch(req) {
       const url = new URL(req.url);
-      if (url.pathname === '/health') return json({ ok: true, rendering });
+      if (url.pathname === '/health') {
+        await warm;
+        return json({ ok: true, rendering, browser: !!browser?.isConnected() });
+      }
       if (url.pathname.startsWith('/fonts/')) {
         const name = url.pathname.slice('/fonts/'.length);
         if (!/^[a-z0-9-]+\.woff2$/.test(name)) return new Response('not found', { status: 404 });

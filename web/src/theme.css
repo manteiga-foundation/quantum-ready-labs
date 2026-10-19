@@ -624,6 +624,70 @@ details.tech summary {
   margin-bottom: 14px;
 }
 
+/* The PDF being prepared inside the dialog */
+.pdf-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.pdf-bar {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  background: var(--line-dim);
+  border-radius: 2px;
+}
+
+.pdf-bar span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  background: var(--accent);
+  border-radius: 2px;
+  animation: pdf-sweep 1.4s ease-in-out infinite;
+}
+
+.pdf-ready .pdf-bar span {
+  width: 100%;
+  background: var(--stage-protected);
+  animation: none;
+}
+
+.pdf-ready .pdf-text {
+  color: var(--stage-protected);
+}
+
+.pdf-error .pdf-bar span {
+  width: 100%;
+  background: var(--stage-exposed);
+  animation: none;
+}
+
+.pdf-error .pdf-text {
+  color: var(--stage-exposed);
+}
+
+@keyframes pdf-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdf-bar span {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+}
+
 /* Metrics */
 .metrics {
   display: flex;

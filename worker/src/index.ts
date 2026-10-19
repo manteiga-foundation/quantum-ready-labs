@@ -32,7 +32,10 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
 
-    if (pathname === '/api/scan' && request.method === 'POST') return scanRoute(request, env, ctx);
+    if (pathname === '/api/scan' && request.method === 'POST') {
+      warmRenderer(env, ctx);
+      return scanRoute(request, env, ctx);
+    }
     if (pathname === '/api/study/scan' && request.method === 'POST') return studyScanRoute(request, env, ctx);
     if (pathname.startsWith('/api/result/') && request.method === 'GET') return resultRoute(pathname.slice('/api/result/'.length), env, ctx);
     const pdf = pathname.match(/^\/api\/report\/([A-Za-z0-9_-]+)\.pdf$/);
@@ -43,7 +46,10 @@ export default {
     if (pathname.startsWith('/api/')) return json({ error: 'not found' }, 404);
 
     const shared = pathname.match(/^\/r\/([A-Za-z0-9_-]{12})$/);
-    if (shared && request.method === 'GET') return sharedPage(shared[1], request, env);
+    if (shared && request.method === 'GET') {
+      warmRenderer(env, ctx);
+      return sharedPage(shared[1], request, env);
+    }
 
     if (pathname === '/metrics') {
       // Cloudflare Access fronts this path; this is the belt to its braces.
@@ -266,6 +272,12 @@ async function resultRoute(id: string, env: Env, ctx: ExecutionContext): Promise
   if (!row) return json({ error: 'not found' }, 404);
   ctx.waitUntil(env.DB.prepare('INSERT INTO opens (scan_id, created_at) VALUES (?, ?)').bind(id, Date.now()).run());
   return new Response(row.result, { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300' } });
+}
+
+/** Wakes the render machine (it stops when idle) so the first PDF after a quiet spell is not a cold start. */
+function warmRenderer(env: Env, ctx: ExecutionContext): void {
+  if (!env.RENDER_URL) return;
+  ctx.waitUntil(fetch(`${env.RENDER_URL}/health`, { signal: AbortSignal.timeout(20000) }).catch(() => undefined));
 }
 
 /** The PDF: the stored result rendered by the render service, cached per id (results never change). */
