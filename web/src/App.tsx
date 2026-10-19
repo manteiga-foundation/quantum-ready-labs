@@ -136,7 +136,7 @@ export function App() {
       <footer className="footer">
         <p>Quantum Ready Labs tests the key exchange, protocol versions and certificate chain a host negotiates, and explains where it stands on the post-quantum transition. It is not a general TLS audit.</p>
         <p>
-          Open source under the MIT licence. A <a href="https://manteiga.org" rel="noopener">Manteiga Foundation</a> project. <a href="/api">API</a> for scripts, services and agents. Abuse or questions: hello@manteiga.org
+          Open source under the MIT license. A <a href="https://manteiga.org" rel="noopener">Manteiga Foundation</a> project. <a href="/api">API</a> for scripts, services and agents. Abuse or questions: hello@manteiga.org
         </p>
       </footer>
     </div>

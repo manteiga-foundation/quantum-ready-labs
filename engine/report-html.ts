@@ -18,7 +18,7 @@ export interface ReportOptions {
   /** Where the bundled fonts come from: a URL prefix (`/fonts` by default) or, for a self-contained document, a map of file name to data URL. */
   fontBase?: string;
   fontUrls?: Partial<Record<FontFile, string>>;
-  /** Optional client or organisation name for the cover. Escaped like everything else. */
+  /** Optional client or organization name for the cover. Escaped like everything else. */
   preparedFor?: string | null;
 }
 

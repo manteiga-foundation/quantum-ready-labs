@@ -88,7 +88,7 @@
     {
       "type": "paragraph",
       "style": "Body",
-      "text": "Quantum Ready Labs is free and open source under the MIT licence. Typing a host name at quantumreadylabs.com opens a handful of connections to it, as a browser visit would, and returns the stage, a score for quantum readiness alone, the one next step and the standards cited (NIST IR 8547, FIPS 203, CNSA 2.0), shareable by link or as a five-page PDF; an open API runs the same test for services."
+      "text": "Quantum Ready Labs is free and open source under the MIT license. Typing a host name at quantumreadylabs.com opens a handful of connections to it, as a browser visit would, and returns the stage, a score for quantum readiness alone, the one next step and the standards cited (NIST IR 8547, FIPS 203, CNSA 2.0), shareable by link or as a five-page PDF; an open API runs the same test for services."
     },
     {
       "type": "paragraph",

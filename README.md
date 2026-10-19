@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/manteiga-foundation/quantum-ready-labs/actions/workflows/ci.yml/badge.svg)](https://github.com/manteiga-foundation/quantum-ready-labs/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/manteiga-foundation/quantum-ready-labs?label=release&color=1034a6)](https://github.com/manteiga-foundation/quantum-ready-labs/releases)
-[![Licence: MIT](https://img.shields.io/badge/licence-MIT-e0b85c)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-e0b85c)](LICENSE)
 [![Test your host](https://img.shields.io/badge/test%20your%20host-quantumreadylabs.com-43b48a)](https://quantumreadylabs.com)
 [![API](https://img.shields.io/badge/API-open%2C%20no%20key-1034a6)](https://quantumreadylabs.com/api)
 
@@ -192,7 +192,7 @@ NIST FIPS 203 (ML-KEM), FIPS 204 (ML-DSA), FIPS 205 (SLH-DSA); NIST IR 8547 (tra
 timeline: quantum-vulnerable algorithms deprecated after 2030, disallowed after 2035); NSA CNSA
 2.0; IETF draft-ietf-tls-ecdhe-mlkem (the hybrid groups).
 
-## Licence
+## License
 
 MIT. A Manteiga Foundation project. Fonts Titillium Web and JetBrains Mono (SIL Open Font
-Licence); frames by Arwes (MIT).
+License); frames by Arwes (MIT).
