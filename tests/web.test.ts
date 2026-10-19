@@ -205,6 +205,14 @@ describe('view 5: a study, the state-of-readiness note', () => {
     await see(page.getByTestId('study-lead'), /81/);
     await see(page.getByTestId('study-lead'), /54/);
     await see(page.getByTestId('study-calm'), /nothing is broken today/i);
+    await see(page.getByTestId('study-calm'), /The risk is time/);
+    await see(page.getByTestId('study-calm'), /The fix is small/);
+    // Stage words in the prose carry the stage colour, the same as the count under them.
+    const inline = page.locator('[data-testid=study-lead] [data-stage=exposed]').first();
+    await see(inline, exact('Exposed'));
+    const inlineColour = await inline.evaluate('el => getComputedStyle(el).color');
+    const countColour = await page.getByTestId('count-exposed').evaluate('el => getComputedStyle(el).color');
+    expect(inlineColour).toBe(countColour);
     // Four counts, one per stage, and a distribution bar with four segments.
     await see(page.getByTestId('count-exposed'), exact('10'));
     await see(page.getByTestId('count-at-risk'), exact('17'));

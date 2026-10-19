@@ -16,6 +16,16 @@ export function longDate(iso: string): string {
   return `${d} ${MONTHS[m - 1]} ${y}`;
 }
 
+/** A stage word inside prose, in the stage's colour: Exposed, At risk, Protected, Ready. */
+function Word({ stage }: { stage: StudyStage }) {
+  const label = STAGE_LABEL[stage];
+  return (
+    <span className="stage-inline" data-stage={stage} style={{ color: `var(--stage-${stage})` }}>
+      {label.charAt(0) + label.slice(1).toLowerCase()}
+    </span>
+  );
+}
+
 export function StudyIndex({ go }: { go: (path: string) => void }) {
   return (
     <main className="metrics study">
@@ -65,11 +75,19 @@ export function Study({ slug, go }: { slug: string; go: (path: string) => void }
 
         <section className="section" aria-label="Findings">
           <p className="lead" data-testid="study-lead">
-            {meta.lead} {s.counts.exposed} do not offer TLS 1.3 at all (Exposed); {s.counts['at-risk']} offer TLS 1.3 without a post-quantum key exchange (At risk); {s.counts.protected} accept a hybrid post-quantum key exchange (Protected); {s.counts.ready} add the foundations for what comes next (Ready). The median institution scores {s.median} of 100.
+            {meta.lead} The {s.notYetCount} split in two: {s.counts.exposed} are <Word stage="exposed" /> (their sites still run a protocol generation that cannot carry post-quantum protection) and {s.counts['at-risk']} are <Word stage="at-risk" /> (modern protocol, post-quantum protection not switched on). The {s.protectedCount} are <Word stage="protected" /> ({s.counts.protected}) or <Word stage="ready" /> ({s.counts.ready}). The median institution scores {s.median} of 100.
           </p>
-          <p className="calm" data-testid="study-calm">
-            Nothing is broken today. No account, login or transaction at any of these institutions is at risk from what this note describes; every connection tested is encrypted with algorithms no computer that exists can break. The question is about recordings: traffic captured now can be kept and decrypted once a large enough quantum computer exists, which is why NIST has set 2030 and 2035 as the dates for retiring today's key exchange, and why browsers and the largest web properties already negotiate a hybrid post-quantum key exchange. For {s.counts.exposed} of the {s.notYetCount} not yet protected, the next step is to enable TLS 1.3; for the other {s.counts['at-risk']} it is to enable the X25519MLKEM768 key exchange, which on current servers and content-delivery networks is a configuration line or a toggle.
-          </p>
+          <div className="calm" data-testid="study-calm">
+            <p>
+              <strong>Nothing is broken today.</strong> No account, login or transaction at any of these institutions is at risk from what this note describes; every connection tested is encrypted with algorithms no computer that exists can break.
+            </p>
+            <p>
+              <strong>The risk is time.</strong> Encrypted traffic can be recorded now and decrypted once a large enough quantum computer exists, so anything that must stay confidential for years is already inside the window. That window is narrowing: in 2025 the estimated size of the machine needed to break today's key exchange fell from about twenty million qubits to under one million, and NIST has set 2030 to begin retiring today's key exchange and 2035 to end it. Browsers and the largest web properties already protect their traffic the new way.
+            </p>
+            <p>
+              <strong>The fix is small.</strong> For the {s.counts.exposed} <Word stage="exposed" /> institutions, the next step is to enable TLS 1.3; for the {s.counts['at-risk']} <Word stage="at-risk" />, to switch on the post-quantum key exchange (X25519MLKEM768), which on current servers and content-delivery networks is a configuration line or a toggle. Most are one change away from <Word stage="protected" />.
+            </p>
+          </div>
           <div className="counts">
             {STUDY_STAGES.map((st) => (
               <Panel key={st} className="count" corners>

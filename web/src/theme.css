@@ -912,11 +912,22 @@ details.tech summary {
 }
 
 .study .calm,
+.study .calm p,
 .study .section p {
   color: var(--text-dim);
   line-height: 1.6;
   max-width: 820px;
   margin: 0 0 14px;
+}
+
+.study .calm strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.stage-inline {
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .study .counts {
