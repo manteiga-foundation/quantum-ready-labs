@@ -1,0 +1,193 @@
+{
+  "page": {
+    "size": "Letter",
+    "margins_mm": {
+      "top": 25,
+      "bottom": 25,
+      "left": 25,
+      "right": 25
+    }
+  },
+  "header": "FOR IMMEDIATE RELEASE",
+  "footer": "Manteiga Foundation  |  quantumreadylabs.com  |  Draft for review, 19 October 2026",
+  "styles": [
+    {
+      "name": "Headline",
+      "font": "Georgia",
+      "size": 17,
+      "bold": true
+    },
+    {
+      "name": "Subhead",
+      "font": "Georgia",
+      "size": 12,
+      "italic": true,
+      "color": "333333"
+    },
+    {
+      "name": "Body",
+      "font": "Calibri",
+      "size": 11
+    },
+    {
+      "name": "Boiler",
+      "font": "Calibri",
+      "size": 10
+    },
+    {
+      "name": "Note",
+      "font": "Calibri",
+      "size": 10,
+      "color": "7A4B00"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "paragraph",
+      "style": "Headline",
+      "text": "One Third of Florida's Banks and Credit Unions Not Yet Protected Against Future Quantum Decryption, Open-Source Scan Finds"
+    },
+    {
+      "type": "paragraph",
+      "style": "Subhead",
+      "text": "Manteiga Foundation publishes a state-of-readiness note on 81 Florida institutions and a free scanner that tests any host in a second"
+    },
+    {
+      "type": "paragraph",
+      "style": "Body",
+      "runs": [
+        {
+          "text": "[CITY], Fla., Oct. 21, 2026 /PRNewswire/ -- ",
+          "bold": true
+        },
+        {
+          "text": "Of 81 Florida-headquartered banks and credit unions, 54 already protect their customers' connections against future quantum decryption and 27 do not yet, according to a state-of-readiness note published today by Manteiga Foundation, a Florida public benefit company. The note, the first from the foundation's Quantum Ready Labs, lists every institution with its result: quantumreadylabs.com/studies/florida-financial-2026q4."
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "style": "Body",
+      "text": "Nothing is broken today. No account, login or transaction is at risk from what the note describes; every connection tested is encrypted with algorithms no existing computer can break. The question is about recordings: traffic captured now can be stored and decrypted once a large enough quantum computer exists (harvest now, decrypt later). NIST has set 2030 and 2035 as the dates for retiring today's key exchange, and browsers already negotiate a hybrid post-quantum key exchange by default."
+    },
+    {
+      "type": "paragraph",
+      "style": "Body",
+      "text": "The note sorts each institution into one of four stages, in plain words rather than letter grades: 10 do not offer TLS 1.3 at all (Exposed); 17 offer TLS 1.3 without a post-quantum key exchange (At risk); 30 accept a hybrid post-quantum key exchange (Protected); 24 add the foundations for what comes next (Ready). The median score is 85 of 100. For the 10 Exposed, the next step is to enable TLS 1.3; for the 17 At risk, to enable the X25519MLKEM768 key exchange, on current servers and content-delivery networks a configuration line or a toggle."
+    },
+    {
+      "type": "paragraph",
+      "style": "Body",
+      "text": "\"Nothing is broken today, and that is exactly why this is the moment to act,\" said [FULL NAME], [TITLE] of Manteiga Foundation. \"Confidentiality is the urgent part of the quantum transition, the fix is small, and most of these institutions are one setting away. We built the scanner so that anyone, not only specialists, can see where a host stands in under a second and what to do next.\""
+    },
+    {
+      "type": "paragraph",
+      "style": "Body",
+      "text": "Quantum Ready Labs is free and open source under the MIT licence. Typing a host name at quantumreadylabs.com opens a handful of TLS connections to it, as a browser visit would, and returns the stage, a score for quantum readiness alone, the one next step and the standards cited (NIST IR 8547, FIPS 203, CNSA 2.0), shareable by link or as a five-page PDF; an open API runs the same test for services and agents. On certificates the report is deliberately calm: none on the public web can be quantum-safe yet, and it says so."
+    },
+    {
+      "type": "paragraph",
+      "style": "Body",
+      "text": "Each institution's public primary domain was tested on October 18, 2026 with fourteen TLS handshakes and one ordinary connection; no page was opened and no login attempted. Every Exposed result was cross-checked with OpenSSL and curl. The population, compiled from public regulator lists with each domain verified, will be re-scanned each quarter; any institution can run a fresh test at once."
+    },
+    {
+      "type": "paragraph",
+      "style": "Body",
+      "text": "For organizations that want help making the change, the foundation operates N30.ai, its cybersecurity consulting practice. The scanner and its results remain free and open."
+    },
+    {
+      "type": "paragraph",
+      "style": "Body",
+      "runs": [
+        {
+          "text": "About Manteiga Foundation",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "style": "Boiler",
+      "text": "Manteiga Foundation is a Florida public benefit company at the meeting of technology and art, bringing more beauty into technology through open-source tools for the public good, among them Quantum Ready Labs and medet.ink. More at manteiga.org."
+    },
+    {
+      "type": "paragraph",
+      "style": "Body",
+      "runs": [
+        {
+          "text": "About N30.ai",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "style": "Boiler",
+      "text": "N30.ai is the cybersecurity consulting practice of Manteiga Foundation for the post-quantum transition and related security work. More at n30.ai."
+    },
+    {
+      "type": "paragraph",
+      "style": "Body",
+      "runs": [
+        {
+          "text": "Media contact",
+          "bold": true
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "style": "Boiler",
+      "text": "[FULL NAME], [TITLE], Manteiga Foundation\n[EMAIL]  |  [PHONE]\nquantumreadylabs.com/studies/florida-financial-2026q4  |  github.com/manteiga-foundation/quantum-ready-labs"
+    },
+    {
+      "type": "paragraph",
+      "style": "Boiler",
+      "text": "###"
+    },
+    {
+      "type": "page_break",
+      "text": "Word count of the release, headline to ###: 600 exactly (PR Pro allows 600; boilerplate and contact lines count). Any addition needs a matching cut; the method paragraph is the one to shorten."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Submission notes (not part of the release)"
+    },
+    {
+      "type": "paragraph",
+      "style": "Note",
+      "text": "Placeholders to fill before submission: [CITY] in the dateline, [FULL NAME], [TITLE], [EMAIL], [PHONE]. The quote is a draft in your voice; change any word of it."
+    },
+    {
+      "type": "paragraph",
+      "style": "Note",
+      "text": "Word count of the release body, headline to ###: see the figure printed when this file was generated (target under 600 for PR Pro). If a cut is needed, the method paragraph is the one to shorten."
+    },
+    {
+      "type": "paragraph",
+      "style": "Note",
+      "text": "Images for the wire (PNG, two included in the package): docs/readme/hero.png (the scanner) and web/public/og/study-florida-financial-2026q4.png (the note's figure, 1200x630). The GIF animates only on LinkedIn, Hacker News comments and the note page; the wire shows stills."
+    },
+    {
+      "type": "paragraph",
+      "style": "Note",
+      "text": "Industry target lists (three): Computer and Electronics or Cybersecurity; Banking and Financial Services; Technology (general). Geographic: Florida state and national."
+    },
+    {
+      "type": "paragraph",
+      "style": "Note",
+      "text": "Timing: Tuesday, October 21, 2026, 8:00 a.m. ET. Post the Show HN and the LinkedIn post the same morning, both linking to the note, not the landing page. The page is live now at the URL above; the OG preview (title, figure image) is in place for LinkedIn unfurls."
+    },
+    {
+      "type": "paragraph",
+      "style": "Note",
+      "text": "Before 8:00: the n30.ai page should state what the practice does and how to reach it, and the fictitious-name filing should be on record, since the release names N30.ai as the foundation's practice. The 27 letters should be mailed the same week."
+    },
+    {
+      "type": "paragraph",
+      "style": "Note",
+      "text": "What the release does not do, on purpose: name any institution (the note does, all 81, alphabetically), compare anyone with the median, or use a letter grade. Every number in it is the number the page computes from the study file."
+    }
+  ]
+}
