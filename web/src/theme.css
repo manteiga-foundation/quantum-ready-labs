@@ -127,8 +127,42 @@ code,
 }
 
 .topbar nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   color: var(--text-dim);
   text-decoration: none;
+}
+
+.topbar nav a svg {
+  width: 13px;
+  height: 13px;
+  opacity: 0.75;
+}
+
+.topbar nav a:hover svg {
+  opacity: 1;
+}
+
+.brand-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.byline {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+  opacity: 0.8;
+  padding-left: 32px;
+}
+
+.byline:hover {
+  color: var(--accent-text);
+  opacity: 1;
 }
 
 .topbar nav a:hover {
@@ -153,6 +187,17 @@ code,
 
 .footer p {
   margin: 4px 0;
+}
+
+.footer a {
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in oklab, var(--text-dim) 40%, transparent);
+}
+
+.footer a:hover {
+  color: var(--accent-text);
 }
 
 /* Entry */

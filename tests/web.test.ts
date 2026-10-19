@@ -38,6 +38,14 @@ describe('view 1: entry', () => {
   test('the question, one field, one button; nothing starts without a valid host', async () => {
     const { page, errors } = await open('/');
     await see(page.getByRole('heading', { level: 1 }), exact('Are you quantum ready?'));
+    // The top bar: the name with "By Manteiga Foundation" small under it; Source, How we score, API, each with an icon.
+    await see(page.getByTestId('byline'), exact('By Manteiga Foundation'));
+    expect(await page.getByTestId('byline').getAttribute('href')).toBe('https://manteiga.org');
+    const nav = page.getByRole('navigation', { name: 'Site' });
+    expect(await nav.getByRole('link').allTextContents()).toEqual(['Source', 'How we score', 'API']);
+    expect(await nav.locator('a svg').count()).toBe(3);
+    expect(await nav.getByRole('link', { name: 'API' }).getAttribute('href')).toBe('/api');
+    expect(await page.getByRole('contentinfo').getByRole('link', { name: 'Manteiga Foundation' }).getAttribute('href')).toBe('https://manteiga.org');
     const field = page.getByRole('textbox', { name: 'Host' });
     await see(field);
     await see(page.getByRole('button', { name: 'Test' }));

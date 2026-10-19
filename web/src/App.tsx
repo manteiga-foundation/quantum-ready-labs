@@ -1,6 +1,7 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { loadResult, startScan, type ScanHandle } from './api';
 import { applyEvent, initialReport, reportFromResult, type ReportState, type StreamEvent } from './report-model';
+import { FaBalanceScale, FaGithub, FaPlug } from 'react-icons/fa';
 import { Api } from './views/Api';
 import { Entry } from './views/Entry';
 import { Metrics } from './views/Metrics';
@@ -81,19 +82,27 @@ export function App() {
   return (
     <div className="shell">
       <header className="topbar">
-        <a className="brand" href="/" onClick={(e) => { e.preventDefault(); go('/'); }}>
-          <span className="mark" aria-hidden="true" />
-          Quantum Ready Labs
-        </a>
+        <div className="brand-block">
+          <a className="brand" href="/" onClick={(e) => { e.preventDefault(); go('/'); }}>
+            <span className="mark" aria-hidden="true" />
+            Quantum Ready Labs
+          </a>
+          <a className="byline" data-testid="byline" href="https://manteiga.org" rel="noopener">
+            By Manteiga Foundation
+          </a>
+        </div>
         <nav aria-label="Site">
           <a href="https://github.com/manteiga-foundation/quantum-ready-labs" rel="noopener">
+            <FaGithub aria-hidden="true" />
             Source
           </a>
           <a href="https://github.com/manteiga-foundation/quantum-ready-labs/blob/main/docs/scoring.md" rel="noopener">
+            <FaBalanceScale aria-hidden="true" />
             How we score
           </a>
-          <a href="https://manteiga.org" rel="noopener">
-            Manteiga Foundation
+          <a href="/api" onClick={(e) => { e.preventDefault(); go('/api'); }}>
+            <FaPlug aria-hidden="true" />
+            API
           </a>
         </nav>
       </header>
@@ -107,7 +116,7 @@ export function App() {
       <footer className="footer">
         <p>Quantum Ready Labs tests the key exchange, protocol versions and certificate chain a host negotiates, and explains where it stands on the post-quantum transition. It is not a general TLS audit.</p>
         <p>
-          Open source under the MIT licence. A Manteiga Foundation project. <a href="/api">API</a> for scripts, services and agents. Abuse or questions: hello@manteiga.org
+          Open source under the MIT licence. A <a href="https://manteiga.org" rel="noopener">Manteiga Foundation</a> project. <a href="/api">API</a> for scripts, services and agents. Abuse or questions: hello@manteiga.org
         </p>
       </footer>
     </div>
