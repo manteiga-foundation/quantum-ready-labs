@@ -892,10 +892,144 @@ details.tech summary {
   vertical-align: middle;
 }
 
+/* A study: the state-of-readiness note */
+.study {
+  max-width: 1040px;
+}
+
+.study h1 {
+  font-size: 1.8rem;
+  line-height: 1.2;
+  max-width: 760px;
+}
+
+.study .lead {
+  font-size: 1.15rem;
+  line-height: 1.55;
+  max-width: 820px;
+  margin: 0 0 14px;
+  color: var(--text);
+}
+
+.study .calm,
+.study .section p {
+  color: var(--text-dim);
+  line-height: 1.6;
+  max-width: 820px;
+  margin: 0 0 14px;
+}
+
+.study .counts {
+  margin-top: 22px;
+}
+
+.study-bar {
+  display: flex;
+  height: 12px;
+  margin-top: 18px;
+  gap: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.study-bar .seg {
+  min-width: 2px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 14px;
+}
+
+.chip {
+  --chip: var(--text-dim);
+  font: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--chip) 55%, transparent);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.chip[aria-pressed='true'] {
+  background: color-mix(in oklab, var(--chip) 22%, transparent);
+  border-color: var(--chip);
+}
+
+.study-table td .domain {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+.study-table td.links a {
+  color: var(--accent-text);
+  white-space: nowrap;
+}
+
+.study-table td.links a + a {
+  margin-left: 12px;
+}
+
+.study-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.study-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--line) 20%, transparent);
+}
+
+.study-list a {
+  color: var(--accent-text);
+  font-size: 1.05rem;
+}
+
+.study-list .dim,
+.study .dim {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+}
+
+.study .cta {
+  margin: 8px 0 24px;
+}
+
 /* Phones */
 @media (max-width: 820px) {
   .content {
     padding: 16px;
+  }
+
+  .study .optional {
+    display: none;
+  }
+
+  .study-table td,
+  .study-table th {
+    padding: 8px 6px;
+  }
+
+  .study-table td.links a {
+    display: block;
+  }
+
+  .study-table td.links a + a {
+    margin: 4px 0 0;
+  }
+
+  .study-table td .domain {
+    overflow-wrap: anywhere;
   }
 
   .report {

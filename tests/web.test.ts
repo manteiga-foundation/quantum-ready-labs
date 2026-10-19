@@ -42,8 +42,9 @@ describe('view 1: entry', () => {
     await see(page.getByTestId('byline'), exact('By Manteiga Foundation'));
     expect(await page.getByTestId('byline').getAttribute('href')).toBe('https://manteiga.org');
     const nav = page.getByRole('navigation', { name: 'Site' });
-    expect(await nav.getByRole('link').allTextContents()).toEqual(['Source', 'How we score', 'API']);
-    expect(await nav.locator('a svg').count()).toBe(3);
+    expect(await nav.getByRole('link').allTextContents()).toEqual(['Source', 'How we score', 'Studies', 'API']);
+    expect(await nav.locator('a svg').count()).toBe(4);
+    expect(await nav.getByRole('link', { name: 'Studies' }).getAttribute('href')).toBe('/studies');
     expect(await nav.getByRole('link', { name: 'API' }).getAttribute('href')).toBe('/api');
     expect(await page.getByRole('contentinfo').getByRole('link', { name: 'Manteiga Foundation' }).getAttribute('href')).toBe('https://manteiga.org');
     // Below the field: the questions people ask, answered in a list, the certificate one first.
@@ -191,6 +192,71 @@ describe('view 3: the private metrics view', () => {
     await see(page.getByTestId('api-limits'), /20 scans/);
     expect(await page.getByRole('link', { name: 'openapi.json' }).getAttribute('href')).toBe('/openapi.json');
     expect(await page.getByRole('link', { name: 'llms.txt' }).getAttribute('href')).toBe('/llms.txt');
+    expect(errors).toEqual([]);
+    await page.context().close();
+  });
+});
+
+describe('view 5: a study, the state-of-readiness note', () => {
+  test('the figures, the calm paragraph, every institution with its links, a filter by stage', async () => {
+    const { page, errors } = await open('/studies/florida-financial-2026q4');
+    await see(page.getByRole('heading', { level: 1 }), /Florida/);
+    // The lead states the figures; the next paragraph says nothing is broken today (alarmism is a bug).
+    await see(page.getByTestId('study-lead'), /81/);
+    await see(page.getByTestId('study-lead'), /54/);
+    await see(page.getByTestId('study-calm'), /nothing is broken today/i);
+    // Four counts, one per stage, and a distribution bar with four segments.
+    await see(page.getByTestId('count-exposed'), exact('10'));
+    await see(page.getByTestId('count-at-risk'), exact('17'));
+    await see(page.getByTestId('count-protected'), exact('30'));
+    await see(page.getByTestId('count-ready'), exact('24'));
+    expect(await page.getByTestId('study-bar').locator('.seg').count()).toBe(4);
+    // Every institution, alphabetical, with stage, score, the result page and the PDF.
+    const rows = page.getByTestId('institution-row');
+    expect(await rows.count()).toBe(81);
+    const first = rows.first();
+    await see(first.getByTestId('institution-name'), exact('121 Financial Credit Union'));
+    await see(first.getByTestId('institution-stage'), exact('AT RISK'));
+    await see(first.getByTestId('institution-score'), exact('43'));
+    expect(await first.getByRole('link', { name: 'Report' }).getAttribute('href')).toMatch(/^https:\/\/quantumreadylabs\.com\/r\/[A-Za-z0-9_-]{12}$/);
+    expect(await first.getByRole('link', { name: 'PDF' }).getAttribute('href')).toMatch(/\/api\/report\/[A-Za-z0-9_-]{12}\.pdf$/);
+    expect(await first.getByRole('link', { name: 'Test again' }).getAttribute('href')).toBe('/scan?host=121fcu.org');
+    // The filter: Exposed shows the ten, All brings them back.
+    await page.getByRole('button', { name: /^Exposed/ }).click();
+    expect(await rows.count()).toBe(10);
+    await see(rows.first().getByTestId('institution-stage'), exact('EXPOSED'));
+    await page.getByRole('button', { name: /^All/ }).click();
+    expect(await rows.count()).toBe(81);
+    // The method states the date and the handshakes; the page ends with a way to check one's own host.
+    await see(page.getByTestId('study-method'), /18 October 2026/);
+    await see(page.getByTestId('study-method'), /fourteen TLS handshakes/i);
+    await see(page.getByRole('link', { name: /check your own host/i }));
+    expect(await page.title()).toMatch(/Florida/);
+    expect(errors).toEqual([]);
+    await page.context().close();
+  });
+
+  test('on a phone the table keeps name, stage, score and the report link, and nothing overflows', async () => {
+    const { page } = await open('/studies/florida-financial-2026q4', { width: 390, height: 844 });
+    const first = page.getByTestId('institution-row').first();
+    await see(first.getByTestId('institution-name'));
+    await see(first.getByTestId('institution-stage'));
+    await see(first.getByRole('link', { name: 'Report' }));
+    expect(await first.getByTestId('institution-next').isVisible()).toBe(false);
+    // The table itself fits the phone: no sideways scroll inside the wrap either.
+    const tableRight = await page.evaluate("document.querySelector('.study-table').getBoundingClientRect().right");
+    expect(tableRight).toBeLessThanOrEqual(390);
+    const overflow = await page.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth');
+    expect(overflow).toBeLessThanOrEqual(0);
+    await page.context().close();
+  });
+
+  test('an unknown study says so, and /studies lists the studies', async () => {
+    const { page, errors } = await open('/studies/nope');
+    await see(page.getByRole('heading', { level: 1 }), exact('No such study'));
+    await page.goto(vite.url + '/studies');
+    await see(page.getByRole('heading', { level: 1 }), exact('Studies'));
+    expect(await page.getByRole('link', { name: /Florida/ }).getAttribute('href')).toBe('/studies/florida-financial-2026q4');
     expect(errors).toEqual([]);
     await page.context().close();
   });

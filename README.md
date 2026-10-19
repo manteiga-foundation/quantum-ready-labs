@@ -66,6 +66,15 @@ at `/api/result/<id>`, PDFs at `/api/report/<id>.pdf`. Limits: 20 scans per call
 [quantumreadylabs.com/api](https://quantumreadylabs.com/api), machine-readable at
 [/openapi.json](https://quantumreadylabs.com/openapi.json) and [/llms.txt](https://quantumreadylabs.com/llms.txt).
 
+## Studies
+
+A study is a named population scanned on one day and published as a state-of-readiness note:
+the figures, every institution with its result page and PDF, the method and the standards.
+Studies are kept apart from the scanner's organic use. The first,
+[Florida's banks and credit unions](https://quantumreadylabs.com/studies/florida-financial-2026q4),
+covers 81 institutions. The data is `studies/<slug>/results.csv`; the page computes every figure
+from it and a test keeps the note's lead sentence in step with the file.
+
 ## Install and run
 
 Everything runs on [Bun](https://bun.sh) (1.4 or later). The hosted service is at
@@ -158,7 +167,7 @@ the edge whenever a result page is viewed.
 engine/      the scanner: target parsing and refusal list, probes, assessment, HTTP server, terminal renderer, report and letter templates
 render/      the PDF renderer: Playwright Chromium printing the templates (Fly Machines)
 worker/      the edge: validation, rate limits, 24 h cache, link previews, PDFs, studies, metrics (Cloudflare Worker + D1)
-web/         the views: entry, live report, API page, private metrics (Vite, React, Arwes)
+web/         the views: entry, live report, API page, studies, private metrics (Vite, React, Arwes)
 scripts/     screenshots, README media, OG images, studies and letters, report page review
 studies/     named populations scanned with scripts/study.ts and their results
 tests/       bun test: offline unit and fixture-server tests, the views in real Chromium, the renderer

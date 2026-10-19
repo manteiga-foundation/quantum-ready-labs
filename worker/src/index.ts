@@ -5,6 +5,7 @@
 import type { ScanResult } from '../../engine/events';
 import { isCanonicalIpv4, isPublicAddress, parseTarget, TargetError } from '../../engine/target';
 import { SCAN_FIXTURES } from '../../web/src/fixtures';
+import { studyPreview } from '../../web/src/study-model';
 import { addressesFromDoh, decideRateLimit, escapeAttr, isFresh, newShareId, previewFor, studyClient, type RateKind } from './policy';
 
 export interface Env {
@@ -47,6 +48,9 @@ export default {
       warmRenderer(env, ctx);
       return sharedPage(shared[1], request, env);
     }
+
+    const study = pathname.match(/^\/studies\/([a-z0-9-]+)$/);
+    if (study && request.method === 'GET') return studyPage(study[1], request, env);
 
     if (pathname === '/metrics') {
       // Cloudflare Access fronts this path; this is the belt to its braces.
@@ -384,12 +388,25 @@ async function sharedPage(id: string, request: Request, env: Env): Promise<Respo
   if (!row) return index;
   const origin = env.PUBLIC_ORIGIN || new URL(request.url).origin;
   const preview = previewFor(JSON.parse(row.result) as ScanResult, id, origin);
+  return withPreview(index, preview, `<meta name="robots" content="noindex" data-shared="${escapeAttr(id)}">`);
+}
+
+/** A study's page: the index with the note's title, description and image, indexable. */
+async function studyPage(slug: string, request: Request, env: Env): Promise<Response> {
+  const index = await env.ASSETS.fetch(new Request(new URL('/', request.url), { headers: request.headers }));
+  const origin = env.PUBLIC_ORIGIN || new URL(request.url).origin;
+  const preview = studyPreview(slug, origin);
+  if (!preview) return index;
+  return withPreview(index, preview);
+}
+
+function withPreview(index: Response, preview: { title: string; description: string; image: string; url: string }, headExtra?: string): Response {
   const set = (attr: string, value: string) => ({
     element(el: Element) {
       el.setAttribute(attr, value);
     },
   });
-  return new HTMLRewriter()
+  const rewriter = new HTMLRewriter()
     .on('title', { element: (el) => { el.setInnerContent(preview.title); } })
     .on('meta[name="description"]', set('content', preview.description))
     .on('meta[property="og:title"]', set('content', preview.title))
@@ -400,9 +417,9 @@ async function sharedPage(id: string, request: Request, env: Env): Promise<Respo
     .on('meta[name="twitter:title"]', set('content', preview.title))
     .on('meta[name="twitter:description"]', set('content', preview.description))
     .on('meta[name="twitter:image"]', set('content', preview.image))
-    .on('link[rel="canonical"]', set('href', preview.url))
-    .on('head', { element: (el) => { el.append(`<meta name="robots" content="noindex" data-shared="${escapeAttr(id)}">`, { html: true }); } })
-    .transform(index);
+    .on('link[rel="canonical"]', set('href', preview.url));
+  if (headExtra) rewriter.on('head', { element: (el) => { el.append(headExtra, { html: true }); } });
+  return rewriter.transform(index);
 }
 
 async function metricsRoute(request: Request, env: Env): Promise<Response> {

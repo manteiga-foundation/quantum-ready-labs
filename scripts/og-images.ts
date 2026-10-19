@@ -1,9 +1,21 @@
-// Link-preview images, one per stage plus the default: 1200x630, rendered from a template in
-// Chromium. `bun run scripts/og-images.ts` writes web/public/og/*.png.
+// Link-preview images, one per stage plus the default and one per study: 1200x630, rendered
+// from a template in Chromium. `bun run scripts/og-images.ts` writes web/public/og/*.png.
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
+import { parseStudyCsv, STUDY_META, summarize } from '../web/src/study-model';
 
-const STAGES: Record<string, { word: string; colour: string; line: string; score: string }> = {
+interface Card {
+  word: string;
+  colour: string;
+  line: string;
+  score: string;
+  /** Overrides for study cards: the ring's fill, the small caption under the number, the title. */
+  pct?: number;
+  of?: string;
+  h1?: string;
+}
+
+const STAGES: Record<string, Card> = {
   default: { word: 'ARE YOU QUANTUM READY?', colour: '#e0b85c', line: 'Test any public host for post-quantum readiness.', score: '' },
   exposed: { word: 'EXPOSED', colour: '#e05a4f', line: 'TLS 1.3 is not available. Sessions can be recorded today and decrypted later.', score: '27' },
   'at-risk': { word: 'AT RISK', colour: '#e0b85c', line: 'Safe today; recordable now and decryptable when a large quantum computer exists.', score: '49' },
@@ -13,10 +25,24 @@ const STAGES: Record<string, { word: string; colour: string; line: string; score
   inconclusive: { word: 'INCONCLUSIVE', colour: '#9aa8d8', line: 'The server answered in a way the probes could not read with confidence.', score: '' },
 };
 
+// One card per study, its figures computed from results.csv, never typed.
+for (const meta of Object.values(STUDY_META)) {
+  const s = summarize(parseStudyCsv(await Bun.file(`studies/${meta.slug}/results.csv`).text()));
+  STAGES[`study-${meta.slug}`] = {
+    word: 'PROTECTED OR READY',
+    colour: '#43b48a',
+    line: meta.lead,
+    score: String(s.protectedCount),
+    pct: s.protectedShare,
+    of: `OF ${s.total}`,
+    h1: meta.title.split(':')[0],
+  };
+}
+
 function html(stage: string): string {
   const s = STAGES[stage];
   const isDefault = stage === 'default';
-  const pct = s.score ? Number(s.score) : 100;
+  const pct = s.pct ?? (s.score ? Number(s.score) : 100);
   const C = 2 * Math.PI * 150;
   return `<!doctype html><html><head><meta charset="utf-8"><style>
   body{margin:0;width:1200px;height:630px;background:#060c22;color:#eef2ff;font-family:'Titillium Web','Helvetica Neue',Arial,sans-serif;position:relative;overflow:hidden}
@@ -39,10 +65,10 @@ function html(stage: string): string {
     <circle cx="200" cy="200" r="190" fill="none" stroke="rgba(150,170,230,.35)" stroke-width="2" stroke-dasharray="3 9"/>
     <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(150,170,230,.18)" stroke-width="10"/>
     <circle cx="200" cy="200" r="150" fill="none" stroke="${s.colour}" stroke-width="16" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct / 100)}"/>
-  </svg><div class="centre">${isDefault ? `<div class="word" style="font-size:34px">QUANTUM<br>READY<br>LABS</div>` : `<div class="word">${s.word}</div>${s.score ? `<div class="num">${s.score}</div><div class="of">OF 100</div>` : ''}`}</div></div>
+  </svg><div class="centre">${isDefault ? `<div class="word" style="font-size:34px">QUANTUM<br>READY<br>LABS</div>` : `<div class="word">${s.word}</div>${s.score ? `<div class="num">${s.score}</div><div class="of">${s.of ?? 'OF 100'}</div>` : ''}`}</div></div>
   <div class="text"><div class="brand"><span class="mark"></span>Quantum Ready Labs</div>
-  <h1>${isDefault ? 'Are you quantum ready?' : `This host is <span style="color:${s.colour}">${s.word.toLowerCase()}</span>`}</h1>
-  <p>${s.line}</p></div>
+  <h1${s.h1 ? ' style="font-size:46px"' : ''}>${s.h1 ?? (isDefault ? 'Are you quantum ready?' : `This host is <span style="color:${s.colour}">${s.word.toLowerCase()}</span>`)}</h1>
+  <p${s.h1 ? ' style="font-size:24px"' : ''}>${s.line}</p></div>
   <div class="url">quantumreadylabs.com</div>
   </body></html>`;
 }

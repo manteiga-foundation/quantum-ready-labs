@@ -62,9 +62,18 @@ slice that changes it; `AGENTS.md` stays the contract.
   certificate one first).
 - README: executive summary first, then a hero still and a GIF of a scan (`docs/readme/`, made by
   `scripts/readme-media.ts`), pinned by `tests/readme.test.ts`.
-- Tests: 103 (`bun run test`): 90 offline (unit, fixture TLS server, engine HTTP, edge policy,
-  report model, pacer, README shape, report and letter HTML), 8 web tests in real Chromium, 5 renderer tests. CI (Linux) runs check, the unit
-  tests and the build.
+- Studies published: `/studies` lists them; `/studies/<slug>` is the state-of-readiness note for
+  one population: the lead figures (computed from `results.csv` by `web/src/study-model.ts`,
+  never typed; a test pins the lead sentence to the file), a calm paragraph stating that nothing
+  is broken today, four counts and a distribution bar, every institution alphabetically with
+  stage, score, next step, result page, PDF and a Test again link, filter chips by stage, the
+  method (date, fourteen handshakes, the OpenSSL and curl cross-check of the Exposed results),
+  the standards, a corrections address. The edge rewrites the page's title, description, canonical
+  and Open Graph image (`og/study-<slug>.png`, drawn by `scripts/og-images.ts` from the same
+  figures); study pages are indexable, unlike shared results.
+- Tests: 114 (`bun run test`): 98 offline (unit, fixture TLS server, engine HTTP, edge policy,
+  report model, pacer, README shape, report and letter HTML, study model), 11 web tests in real
+  Chromium, 5 renderer tests. CI (Linux) runs check, the unit tests and the build.
 
 Measured on real hosts (2026-10-18): cloudflare.com, google.com, manteiga.org PROTECTED 85;
 github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan from the Mac,
@@ -72,9 +81,6 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
 
 ## Emulated / not yet
 
-- The edge is verified locally (`wrangler dev` against the live engine: streaming, cache hit,
-  refusals recorded, previews) and not yet deployed: the Cloudflare login, the D1 database, the
-  secret and the custom domain are the next steps.
 - Metrics view: per-day p50/p95 are placeholders (the 24 h figures are real); the "signals" list
   has two computed lines, not the richer emulated set. Cloudflare Access on `/metrics` is a
   dashboard step; until then the header check keeps it closed.
@@ -97,11 +103,15 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
 
 ## Next, in order
 
-1. Deploy the edge: `wrangler login`, D1 create and schema, `ENGINE_TOKEN` secret, deploy, the
-   custom domain, Access on `/metrics`.
-2. Publish the repository (manteiga-foundation/quantum-ready-labs, MIT).
-3. Per-day p50/p95 and the real signals in metrics.
-4. CLI (`qready`): same engine, terminal renderer, `bun build --compile` for three OSes, Homebrew.
+1. Deploy the study page (`bun run deploy:edge`) once the maintainer has read it; then the
+   press release (docx, led by the Florida figure, the foundation as issuer), Show HN and
+   LinkedIn pointing at the note.
+2. Mail the 27 letters (postal addresses still to be gathered; the letter can now cite the note).
+3. Cloudflare Access on `/metrics`; per-day p50/p95 and the real signals in metrics.
+4. Engine capacity for a launch week: measure refusals under load, then `ENGINE_MAX_CONCURRENT`
+   or a second machine.
+5. CLI (`qready`): same engine, terminal renderer, `bun build --compile` for three OSes, Homebrew.
+6. Quarterly re-scan of the Florida population (`florida-financial-2027q1`), the first trend.
 
 ## Open questions
 

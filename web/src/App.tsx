@@ -1,18 +1,30 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { loadResult, startScan, type ScanHandle } from './api';
 import { applyEvent, initialReport, reportFromResult, type ReportState, type StreamEvent } from './report-model';
-import { FaBalanceScale, FaGithub, FaPlug } from 'react-icons/fa';
+import { FaBalanceScale, FaChartBar, FaGithub, FaPlug } from 'react-icons/fa';
 import { Api } from './views/Api';
 import { Entry } from './views/Entry';
 import { Metrics } from './views/Metrics';
 import { Report } from './views/Report';
+import { Study, StudyIndex } from './views/Study';
+import { STUDY_META } from './study-model';
 
-type Route = { view: 'entry' } | { view: 'scan'; host: string } | { view: 'shared'; id: string } | { view: 'metrics' } | { view: 'api' };
+type Route =
+  | { view: 'entry' }
+  | { view: 'scan'; host: string }
+  | { view: 'shared'; id: string }
+  | { view: 'metrics' }
+  | { view: 'api' }
+  | { view: 'studies' }
+  | { view: 'study'; slug: string };
 
 function routeFromLocation(): Route {
   const { pathname, search } = window.location;
   if (pathname === '/metrics') return { view: 'metrics' };
   if (pathname === '/api') return { view: 'api' };
+  if (pathname === '/studies' || pathname === '/studies/') return { view: 'studies' };
+  const study = pathname.match(/^\/studies\/([a-z0-9-]+)$/);
+  if (study) return { view: 'study', slug: study[1] };
   const shared = pathname.match(/^\/r\/([A-Za-z0-9_-]+)$/);
   if (shared) return { view: 'shared', id: shared[1] };
   const host = new URLSearchParams(search).get('host');
@@ -75,6 +87,8 @@ export function App() {
     if (route.view === 'entry') document.title = 'Quantum Ready Labs: is your host ready for the quantum era?';
     else if (route.view === 'metrics') document.title = 'Metrics · Quantum Ready Labs';
     else if (route.view === 'api') document.title = 'API · Quantum Ready Labs';
+    else if (route.view === 'studies') document.title = 'Studies · Quantum Ready Labs';
+    else if (route.view === 'study') document.title = `${STUDY_META[route.slug]?.title ?? 'No such study'} · Quantum Ready Labs`;
     else if (host && report.status === 'done') document.title = `${host}: ${stage.replace('-', ' ')} · Quantum Ready Labs`;
     else if (host) document.title = `Testing ${host} · Quantum Ready Labs`;
   }, [route, report.host, report.status, report.assessment.stage]);
@@ -100,6 +114,10 @@ export function App() {
             <FaBalanceScale aria-hidden="true" />
             How we score
           </a>
+          <a href="/studies" onClick={(e) => { e.preventDefault(); go('/studies'); }}>
+            <FaChartBar aria-hidden="true" />
+            Studies
+          </a>
           <a href="/api" onClick={(e) => { e.preventDefault(); go('/api'); }}>
             <FaPlug aria-hidden="true" />
             API
@@ -112,6 +130,8 @@ export function App() {
         {route.view === 'shared' && <Report state={report} shared onAnother={() => go('/')} />}
         {route.view === 'metrics' && <Metrics />}
         {route.view === 'api' && <Api />}
+        {route.view === 'studies' && <StudyIndex go={go} />}
+        {route.view === 'study' && <Study key={route.slug} slug={route.slug} go={go} />}
       </div>
       <footer className="footer">
         <p>Quantum Ready Labs tests the key exchange, protocol versions and certificate chain a host negotiates, and explains where it stands on the post-quantum transition. It is not a general TLS audit.</p>
