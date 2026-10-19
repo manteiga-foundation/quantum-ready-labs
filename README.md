@@ -1,5 +1,11 @@
 # Quantum Ready Labs
 
+[![CI](https://github.com/manteiga-foundation/quantum-ready-labs/actions/workflows/ci.yml/badge.svg)](https://github.com/manteiga-foundation/quantum-ready-labs/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/manteiga-foundation/quantum-ready-labs?label=release&color=1034a6)](https://github.com/manteiga-foundation/quantum-ready-labs/releases)
+[![Licence: MIT](https://img.shields.io/badge/licence-MIT-e0b85c)](LICENSE)
+[![Test your host](https://img.shields.io/badge/test%20your%20host-quantumreadylabs.com-43b48a)](https://quantumreadylabs.com)
+[![API](https://img.shields.io/badge/API-open%2C%20no%20key-1034a6)](https://quantumreadylabs.com/api)
+
 Quantum Ready Labs answers one question about any public host: is it ready for the quantum era?
 Type a host name, and in about a second the service opens a handful of TLS connections to it,
 exactly as a browser would, and reports in plain language where the host stands on the
@@ -94,7 +100,7 @@ bun run dev                          # the views on http://127.0.0.1:5180
 
 `bun run dev` serves the pages with recorded scans: open `/?demo=protected`, `/?demo=exposed` or
 `/?demo=at-risk` to watch a report build, `/metrics` for the private view with emulated figures,
-`/api` for the documentation. Live scans need the edge (step 3).
+`/api` for the documentation, and the questions under the field on `/`. Live scans need the edge (step 3).
 
 ### 3. The whole service on your machine
 

@@ -46,6 +46,13 @@ describe('view 1: entry', () => {
     expect(await nav.locator('a svg').count()).toBe(3);
     expect(await nav.getByRole('link', { name: 'API' }).getAttribute('href')).toBe('/api');
     expect(await page.getByRole('contentinfo').getByRole('link', { name: 'Manteiga Foundation' }).getAttribute('href')).toBe('https://manteiga.org');
+    // Below the field: the questions people ask, answered in a list, the certificate one first.
+    await see(page.getByRole('heading', { name: 'Questions' }));
+    const questions = page.getByTestId('faq-question');
+    expect(await questions.count()).toBeGreaterThanOrEqual(6);
+    await see(questions.first(), /certificate/i);
+    await see(page.getByTestId('faq'), /harvest now, decrypt later/i);
+    await see(page.getByTestId('faq'), /--private/);
     const field = page.getByRole('textbox', { name: 'Host' });
     await see(field);
     await see(page.getByRole('button', { name: 'Test' }));

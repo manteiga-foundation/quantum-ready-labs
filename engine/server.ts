@@ -24,7 +24,10 @@ export interface EngineServer {
   stop(): void;
 }
 
-export const ENGINE_VERSION = '0.1.0';
+import pkg from '../package.json';
+
+/** One version for the engine, the CLI, the API description and the release tag: package.json's. */
+export const ENGINE_VERSION: string = pkg.version;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });

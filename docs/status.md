@@ -56,6 +56,10 @@ slice that changes it; `AGENTS.md` stays the contract.
   terminal's width (tested at 80).
 - README: install and run in four steps (verified locally end to end); `docs/readme/cli.png` from
   `scripts/readme-cli.ts` (a real scan, truecolor ANSI to HTML in a terminal frame, Chromium at 2x).
+- Version 1.1.0, one source: package.json, read by the engine (`ENGINE_VERSION`), checked against
+  openapi.json by a test; tag v1.1.0 and a GitHub release. README badges: CI, release, licence,
+  test your host, API. Landing page: a Questions section under the field (eight answers, the
+  certificate one first).
 - README: executive summary first, then a hero still and a GIF of a scan (`docs/readme/`, made by
   `scripts/readme-media.ts`), pinned by `tests/readme.test.ts`.
 - Tests: 103 (`bun run test`): 90 offline (unit, fixture TLS server, engine HTTP, edge policy,

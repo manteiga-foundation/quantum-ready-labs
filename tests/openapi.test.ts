@@ -14,9 +14,14 @@ const worker = await Bun.file('worker/src/index.ts').text();
 const llms = await Bun.file('web/public/llms.txt').text();
 
 describe('the API description', () => {
-  test('is OpenAPI 3 for the production origin', () => {
+  test('is OpenAPI 3 for the production origin, at the version of the package', async () => {
     expect(spec.openapi.startsWith('3.')).toBe(true);
     expect(spec.servers[0].url).toBe('https://quantumreadylabs.com');
+    const pkg = (await Bun.file('package.json').json()) as { version: string };
+    const { ENGINE_VERSION } = await import('../engine/server');
+    expect((spec as unknown as { info: { version: string } }).info.version).toBe(pkg.version);
+    expect(ENGINE_VERSION).toBe(pkg.version);
+    expect(pkg.version).toMatch(/^1\.1\./);
   });
 
   test('names the public routes, each of which the edge serves', () => {

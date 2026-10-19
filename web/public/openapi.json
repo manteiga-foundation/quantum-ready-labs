@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Quantum Ready Labs API",
-    "version": "0.1.0",
+    "version": "1.1.0",
     "summary": "Post-quantum TLS readiness of a public host: a stage, a score, the one next step.",
     "description": "Open, no key. The scan opens TLS connections to the host you name, exactly as a browser visit would: fourteen handshakes and one ordinary connection. Only test hosts you are allowed to connect to. Results are kept for 24 hours and answered from that cache, each with a permanent share link and a PDF. Rate limits: 20 scans per caller address and 6 per host in any 10 minutes (429 with Retry-After). CORS is open (Access-Control-Allow-Origin: *). Source: https://github.com/manteiga-foundation/quantum-ready-labs (MIT).",
     "contact": { "name": "Manteiga Foundation", "email": "hello@manteiga.org", "url": "https://quantumreadylabs.com/api" },
