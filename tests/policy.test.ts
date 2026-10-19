@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { addressesFromDoh, decideRateLimit, isFresh, newShareId, previewFor, RATE_LIMITS } from '../worker/src/policy';
+import { addressesFromDoh, decideRateLimit, isFresh, newShareId, previewFor, RATE_LIMITS, studyClient } from '../worker/src/policy';
 import protectedFixture from '../web/src/fixtures/protected.json';
 
 describe('edge policy', () => {
@@ -38,5 +38,14 @@ describe('edge policy', () => {
     expect(p.description).toContain('protected against future quantum decryption');
     expect(p.image).toBe('https://quantumreadylabs.com/og/protected.png');
     expect(p.url).toBe('https://quantumreadylabs.com/r/abc123XYZ_-1');
+  });
+
+  test('study rows are tagged by a strict slug so they never mix with organic scans', () => {
+    expect(studyClient('florida-financial-2026q4')).toBe('study:florida-financial-2026q4');
+    expect(studyClient('Web')).toBeNull();
+    expect(studyClient('web')).toBe('study:web'); // still distinct from the organic client 'web'
+    expect(studyClient('a')).toBeNull();
+    expect(studyClient('drop table; --')).toBeNull();
+    expect(studyClient(42)).toBeNull();
   });
 });

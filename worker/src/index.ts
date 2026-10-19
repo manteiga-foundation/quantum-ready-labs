@@ -5,7 +5,7 @@
 import type { ScanResult } from '../../engine/events';
 import { isCanonicalIpv4, isPublicAddress, parseTarget, TargetError } from '../../engine/target';
 import { SCAN_FIXTURES } from '../../web/src/fixtures';
-import { addressesFromDoh, decideRateLimit, escapeAttr, isFresh, newShareId, previewFor, type RateKind } from './policy';
+import { addressesFromDoh, decideRateLimit, escapeAttr, isFresh, newShareId, previewFor, studyClient, type RateKind } from './policy';
 
 export interface Env {
   DB: D1Database;
@@ -14,6 +14,8 @@ export interface Env {
   ENGINE_TOKEN: string;
   RENDER_URL: string;
   RENDER_TOKEN: string;
+  /** Lets the maintainer's batch script scan a named population; rows are tagged study:<slug>. */
+  STUDY_TOKEN: string;
   PUBLIC_ORIGIN: string;
   ALLOWED_PORTS: string;
 }
@@ -31,6 +33,7 @@ export default {
     }
 
     if (pathname === '/api/scan' && request.method === 'POST') return scanRoute(request, env, ctx);
+    if (pathname === '/api/study/scan' && request.method === 'POST') return studyScanRoute(request, env, ctx);
     if (pathname.startsWith('/api/result/') && request.method === 'GET') return resultRoute(pathname.slice('/api/result/'.length), env, ctx);
     const pdf = pathname.match(/^\/api\/report\/([A-Za-z0-9_-]+)\.pdf$/);
     if (pdf && request.method === 'GET') return reportPdfRoute(pdf[1], request, env, ctx);
@@ -202,6 +205,52 @@ async function scanRoute(request: Request, env: Env, ctx: ExecutionContext): Pro
   return new Response(upstream.body.pipeThrough(transform), { headers: { 'content-type': 'application/x-ndjson', 'cache-control': 'no-store' } });
 }
 
+/**
+ * A study scan: the maintainer's batch tool scanning a named population. No rate limit, no cache
+ * read, and the row is tagged `study:<slug>` so it never counts as organic use. Answers when the
+ * scan is complete.
+ */
+async function studyScanRoute(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  if (!env.STUDY_TOKEN || request.headers.get('authorization') !== `Bearer ${env.STUDY_TOKEN}`) return json({ error: 'unauthorized' }, 401);
+  let body: { host?: unknown; study?: unknown; name?: unknown };
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return json({ error: 'The request body must be JSON.' }, 400);
+  }
+  const client = studyClient(body.study);
+  if (!client) return json({ error: 'study must be a slug: lower-case letters, digits and dashes' }, 400);
+  if (typeof body.host !== 'string') return json({ error: 'host is required' }, 400);
+  let target;
+  try {
+    target = parseTarget(body.host);
+  } catch (e) {
+    if (e instanceof TargetError) return json({ error: e.message, refused: true }, 400);
+    throw e;
+  }
+  const addresses = await resolvePublic(target.host);
+  if (addresses.length === 0) return json({ error: `${target.host} does not resolve to any address.`, refused: true }, 400);
+  const refused = addresses.find((a) => !isPublicAddress(a));
+  if (refused) return json({ error: `${target.host} resolves to ${refused}, which is not a public Internet address.`, refused: true }, 400);
+
+  const upstream = await fetch(`${env.ENGINE_URL}/scan`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${env.ENGINE_TOKEN}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ host: target.host, port: target.port }),
+  });
+  if (!upstream.ok) return json({ error: `engine answered ${upstream.status}` }, 502);
+  const lines = (await upstream.text()).split('\n').filter((l) => l.trim());
+  const last = lines.length ? (JSON.parse(lines.at(-1)!) as { type: string; result?: ScanResult; error?: string }) : null;
+  if (!last || last.type !== 'result' || !last.result) return json({ error: last?.error ?? 'the engine did not finish the scan' }, 502);
+  const result = last.result;
+  const id = newShareId();
+  await env.DB.prepare('INSERT INTO scans (id, host, port, address, stage, score, ms, created_at, result, country, referrer, client, cache_hit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)')
+    .bind(id, target.host, target.port, result.address, result.assessment.stage, result.assessment.score, result.ms, Date.now(), JSON.stringify(result), null, typeof body.name === 'string' ? body.name.slice(0, 120) : null, client)
+    .run();
+  ctx.waitUntil(Promise.resolve());
+  return json({ id, host: target.host, port: target.port, stage: result.assessment.stage, score: result.assessment.score, nextStep: result.assessment.nextStep.title, ms: result.ms });
+}
+
 function refererHost(referer: string | null): string | null {
   if (!referer) return null;
   try {
@@ -295,24 +344,29 @@ async function metricsRoute(request: Request, env: Env): Promise<Response> {
             SUM(cache_hit) AS cache_hits,
             SUM(stage = 'exposed') AS exposed, SUM(stage = 'at-risk') AS at_risk, SUM(stage = 'protected') AS protected, SUM(stage = 'ready') AS ready,
             SUM(stage = 'unreachable' OR stage = 'inconclusive') AS odd
-     FROM scans WHERE created_at >= ? GROUP BY day ORDER BY day`,
+     FROM scans WHERE created_at >= ? AND client = 'web' GROUP BY day ORDER BY day`,
   )
     .bind(since)
     .all<{ day: string; scans: number; hosts: number; cache_hits: number; exposed: number; at_risk: number; protected: number; ready: number; odd: number }>();
   const failuresByDay = await env.DB.prepare(`SELECT date(created_at / 1000, 'unixepoch') AS day, COUNT(*) AS n FROM failures WHERE created_at >= ? GROUP BY day`).bind(since).all<{ day: string; n: number }>();
   const failures = await env.DB.prepare('SELECT reason, COUNT(*) AS count FROM failures WHERE created_at >= ? GROUP BY reason ORDER BY count DESC').bind(since).all<{ reason: string; count: number }>();
-  const referrers = await env.DB.prepare("SELECT COALESCE(referrer, 'Direct') AS source, COUNT(*) AS count FROM scans WHERE created_at >= ? GROUP BY source ORDER BY count DESC LIMIT 8").bind(since).all<{ source: string; count: number }>();
-  const countries = await env.DB.prepare("SELECT COALESCE(country, 'Unknown') AS country, COUNT(*) AS count FROM scans WHERE created_at >= ? GROUP BY country ORDER BY count DESC LIMIT 8").bind(since).all<{ country: string; count: number }>();
-  const timings = await env.DB.prepare('SELECT ms FROM scans WHERE created_at >= ? AND cache_hit = 0 AND ms IS NOT NULL ORDER BY ms').bind(now - 86400_000).all<{ ms: number }>();
+  const referrers = await env.DB.prepare("SELECT COALESCE(referrer, 'Direct') AS source, COUNT(*) AS count FROM scans WHERE created_at >= ? AND client = 'web' GROUP BY source ORDER BY count DESC LIMIT 8").bind(since).all<{ source: string; count: number }>();
+  const countries = await env.DB.prepare("SELECT COALESCE(country, 'Unknown') AS country, COUNT(*) AS count FROM scans WHERE created_at >= ? AND client = 'web' GROUP BY country ORDER BY count DESC LIMIT 8").bind(since).all<{ country: string; count: number }>();
+  const timings = await env.DB.prepare("SELECT ms FROM scans WHERE created_at >= ? AND cache_hit = 0 AND ms IS NOT NULL AND client = 'web' ORDER BY ms").bind(now - 86400_000).all<{ ms: number }>();
+  const studies = await env.DB.prepare(
+    `SELECT substr(client, 7) AS study, COUNT(*) AS scans, COUNT(DISTINCT host) AS hosts, MIN(created_at) AS firstAt, MAX(created_at) AS lastAt,
+            SUM(stage = 'exposed') AS exposed, SUM(stage = 'at-risk') AS at_risk, SUM(stage = 'protected') AS protected, SUM(stage = 'ready') AS ready, SUM(stage = 'unreachable' OR stage = 'inconclusive') AS odd
+     FROM scans WHERE client LIKE 'study:%' GROUP BY client ORDER BY lastAt DESC`,
+  ).all<{ study: string; scans: number; hosts: number; firstAt: number; lastAt: number; exposed: number; at_risk: number; protected: number; ready: number; odd: number }>();
   const opens = await env.DB.prepare('SELECT COUNT(*) AS n FROM opens WHERE created_at >= ?').bind(since).first<{ n: number }>();
   const ports = await env.DB.prepare("SELECT detail, COUNT(*) AS n FROM failures WHERE reason = 'Port not allowed' AND created_at >= ? GROUP BY detail ORDER BY n DESC LIMIT 5").bind(since).all<{ detail: string; n: number }>();
 
   const hosts = await env.DB.prepare(
     `SELECT s.host, s.port, s.stage, s.score, s.id AS lastId, s.created_at AS lastAt,
-            (SELECT COUNT(*) FROM scans c WHERE c.host = s.host AND c.port = s.port AND c.created_at >= ?) AS scans
+            (SELECT COUNT(*) FROM scans c WHERE c.host = s.host AND c.port = s.port AND c.created_at >= ? AND c.client = 'web') AS scans
      FROM scans s
-     WHERE s.cache_hit = 0 AND s.created_at >= ?
-       AND s.created_at = (SELECT MAX(created_at) FROM scans m WHERE m.host = s.host AND m.port = s.port AND m.cache_hit = 0)
+     WHERE s.cache_hit = 0 AND s.created_at >= ? AND s.client = 'web'
+       AND s.created_at = (SELECT MAX(created_at) FROM scans m WHERE m.host = s.host AND m.port = s.port AND m.cache_hit = 0 AND m.client = 'web')
      ORDER BY s.created_at DESC LIMIT 300`,
   )
     .bind(since, since)
@@ -338,6 +392,14 @@ async function metricsRoute(request: Request, env: Env): Promise<Response> {
     })),
     failures: failures.results,
     hosts: hosts.results.map((h) => ({ ...h, lastAt: new Date(h.lastAt).toISOString() })),
+    studies: studies.results.map((st) => ({
+      study: st.study,
+      scans: st.scans,
+      hosts: st.hosts,
+      firstAt: new Date(st.firstAt).toISOString(),
+      lastAt: new Date(st.lastAt).toISOString(),
+      stages: { exposed: st.exposed, 'at-risk': st.at_risk, protected: st.protected, ready: st.ready, other: st.odd },
+    })),
     referrers: referrers.results,
     countries: countries.results,
     signals: [

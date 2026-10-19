@@ -1,0 +1,89 @@
+# Florida-headquartered financial institutions: banks, credit unions and two large financial
+# companies. Public primary domains (where customers sign in). Candidate list compiled by hand;
+# `scripts/study.ts <slug> <this file> --verify-only` checks every domain resolves and answers
+# and records the page title, which is how a wrong domain is caught before it is scanned.
+# Dropped after verification: Prime Meridian (now MIDFLORIDA), Marine Bank & Trust (now ELGA CU), Apollo Bank (now Seacoast),
+# Englewood Bank (a Crews division), citizensfirst.com (Verve, WI), centralcu.org (Illinois), Eastern National (no DNS),
+# Envision CU (404), fnbnwfl.com (certificate for another name).
+name,domain,note
+Raymond James,raymondjames.com,St. Petersburg; broker-dealer and bank
+FIS,fisglobal.com,Jacksonville; financial technology
+SouthState Bank,southstatebank.com,Winter Haven
+BankUnited,bankunited.com,Miami Lakes
+Seacoast Bank,seacoastbank.com,Stuart
+Amerant Bank,amerantbank.com,Coral Gables
+City National Bank of Florida,citynational.com,Miami
+Capital City Bank,ccbg.com,Tallahassee
+Ocean Bank,oceanbank.com,Miami
+FineMark National Bank & Trust,finemarkbank.com,Fort Myers; a division of Commerce Bank since 2025
+The Bank of Tampa,bankoftampa.com,Tampa
+Seaside Bank and Trust,seasidebank.com,Orlando
+Cogent Bank,cogentbank.com,Orlando
+One Florida Bank,onefloridabank.com,Orlando
+Intercredit Bank,intercreditbank.com,Miami
+Banesco USA,banescousa.com,Coral Gables
+U.S. Century Bank,uscentury.com,Doral
+Pacific National Bank,pnb.com,Miami
+Crews Bank & Trust,crews.bank,Wauchula
+Drummond Community Bank,drummondbank.com,Chiefland
+First Federal Bank,ffbf.com,Lake City
+Axiom Bank,axiombanking.com,Maitland
+Climate First Bank,climatefirstbank.com,St. Petersburg
+Locality Bank,localitybank.com,Fort Lauderdale
+Gulfside Bank,gulfsidebank.com,Sarasota
+Sanibel Captiva Community Bank,sancapbank.com,Sanibel
+BayFirst National Bank,bayfirstfinancial.com,St. Petersburg
+Pilot Bank,pilotbank.com,Tampa
+Flagler Bank,flaglerbank.com,West Palm Beach
+Grove Bank & Trust,grovebankandtrust.com,Miami
+Interamerican Bank,interamericanbank.com,Miami
+Terrabank,terrabank.com,Miami
+Helm Bank USA,helmbankusa.com,Miami
+International Finance Bank,ifbbank.com,Miami
+Suncoast Credit Union,suncoastcreditunion.com,Tampa
+VyStar Credit Union,vystarcu.org,Jacksonville
+Space Coast Credit Union,sccu.com,Melbourne
+Fairwinds Credit Union,fairwinds.org,Orlando
+MIDFLORIDA Credit Union,midflorida.com,Lakeland
+GTE Financial,gtefinancial.org,Tampa
+Grow Financial Federal Credit Union,growfinancial.org,Tampa
+Addition Financial Credit Union,additionfi.com,Lake Mary
+Achieva Credit Union,achievacu.com,Dunedin
+Tropical Financial Credit Union,tropicalfcu.com,Miramar
+Campus USA Credit Union,campuscu.com,Gainesville
+Community First Credit Union of Florida,communityfirstfl.org,Jacksonville
+Launch Credit Union,launchcu.com,Merritt Island
+Insight Credit Union,insightcreditunion.com,Orlando
+Eglin Federal Credit Union,eglinfcu.org,Fort Walton Beach
+Pen Air Credit Union,penair.org,Pensacola
+Tyndall Federal Credit Union,tyndall.org,Panama City
+First Florida Credit Union,firstflorida.org,Jacksonville
+Florida Credit Union,flcu.org,Gainesville
+Publix Employees Federal Credit Union,pefcu.com,Lakeland
+Power Financial Credit Union,powerfi.org,Pembroke Pines
+Dade County Federal Credit Union,dcfcu.org,Doral
+RadiFi Credit Union (formerly Jax Federal),jaxfcu.org,Jacksonville
+121 Financial Credit Union,121fcu.org,Jacksonville; home page certificate expired at verification
+Orlando Credit Union,orlandocreditunion.org,Orlando
+McCoy Federal Credit Union,mccoyfcu.org,Orlando
+Gulf Winds Credit Union,gogulfwinds.com,Pensacola
+First Commerce Credit Union,firstcommercecu.org,Tallahassee
+Champions First Credit Union (formerly FSU CU),fsucu.org,Tallahassee
+iTHINK Financial,ithinkfi.org,Delray Beach
+Priority Credit Union,prioritycu.org,Orlando
+Alive Credit Union,alivecu.coop,Jacksonville
+Members First Credit Union of Florida,membersfirstfl.org,Pensacola
+USF Federal Credit Union,usffcu.org,Tampa
+BrightStar Credit Union,bscu.org,Sunrise
+Guardians Credit Union,guardianscu.coop,West Palm Beach
+Velocity Community Credit Union,velocitycu.com,Palm Beach Gardens
+Harvesters Federal Credit Union,harvestersfcu.org,Pensacola
+Innovations Financial Credit Union,innovationsfcu.org,Panama City
+JetStream Federal Credit Union,jetstreamfcu.org,Miami Lakes
+University Credit Union,ucumiami.org,Miami
+Radiant Credit Union,radiantcu.org,Gainesville
+Florida Central Credit Union,floridacentralcu.com,Tampa
+Coastal Community Bank,coastalcommunity.bank,Panama City
+Citizens Bank & Trust,citizensbanktrust.com,Frostproof
+Mainstreet Community Bank of Florida,mainstreetcbf.com,DeLand
+Surety Bank,suretybank.com,DeLand

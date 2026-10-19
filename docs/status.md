@@ -29,9 +29,15 @@ slice that changes it; `AGENTS.md` stays the contract.
   bytes for the same result. Deployed as `qrl-render` on Fly (Playwright image, 1 GB, stops when
   idle); the edge serves `/api/report/<id>.pdf` and caches it for a week. Download report in the
   web offers the PDF when the result has an id. Page images for review: `scripts/report-pages.ts`.
+- Studies: a named population scanned by the maintainer through `POST /api/study/scan`
+  (STUDY_TOKEN; no rate limit, no cache read), rows tagged `study:<slug>` and excluded from every
+  organic figure on `/metrics`, which gained a Studies table. `scripts/study.ts <slug> <list.csv>`
+  verifies each domain (DNS, home page title) then scans and writes `studies/<slug>/results.csv`
+  with share and PDF links. First study: `florida-financial-2026q4`, 81 Florida-headquartered
+  banks and credit unions (10 Exposed, 17 At risk, 30 Protected, 24 Ready; median 85).
 - README: executive summary first, then a hero still and a GIF of a scan (`docs/readme/`, made by
   `scripts/readme-media.ts`), pinned by `tests/readme.test.ts`.
-- Tests: 83 (`bun run test`): 72 offline (unit, fixture TLS server, engine HTTP, edge policy,
+- Tests: 84 (`bun run test`): 73 offline (unit, fixture TLS server, engine HTTP, edge policy,
   report model, pacer, README shape, report HTML), 7 web tests in real Chromium, 4 renderer tests. CI (Linux) runs check, the unit
   tests and the build.
 

@@ -68,3 +68,9 @@ export function previewFor(result: ScanResult, id: string, origin: string): Prev
 export function escapeAttr(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+
+/** A study slug: lower-case, digits and dashes, 3-40 chars. Rows it owns are tagged `study:<slug>`. */
+export function studyClient(slug: unknown): string | null {
+  if (typeof slug !== 'string' || !/^[a-z0-9][a-z0-9-]{2,39}$/.test(slug)) return null;
+  return `study:${slug}`;
+}

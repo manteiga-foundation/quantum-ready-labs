@@ -44,6 +44,16 @@ export interface MetricsData {
   countries: { country: string; count: number }[];
   signals: { label: string; detail: string }[];
   hosts: HostRow[];
+  studies: StudyRow[];
+}
+
+export interface StudyRow {
+  study: string;
+  scans: number;
+  hosts: number;
+  firstAt: string;
+  lastAt: string;
+  stages: Record<string, number>;
 }
 
 export interface HostRow {
@@ -118,6 +128,7 @@ export function demoMetrics(now = new Date('2026-10-18T12:00:00Z')): MetricsData
       { host: 'shop.example', port: 443, stage: 'protected', score: 79, scans: 4, lastId: 'demo-protected', lastAt: days[27].date + 'T15:02:00Z' },
       { host: 'intranet-portal.example', port: 443, stage: 'at-risk', score: 43, scans: 1, lastId: 'demo-at-risk', lastAt: days[26].date + 'T08:44:00Z' },
     ],
+    studies: [{ study: 'sample-population-2026q4', scans: 60, hosts: 60, firstAt: days[25].date + 'T14:00:00Z', lastAt: days[25].date + 'T14:06:00Z', stages: { exposed: 9, 'at-risk': 38, protected: 12, ready: 1, other: 0 } }],
     signals: [
       { label: 'Probe disagreement', detail: '3 hosts answered the hybrid probe but a real connection negotiated x25519 (server preference). Worth a note in the report.' },
       { label: 'Ports requested', detail: '8443 asked 41 times, 993 asked 12 times, 22 asked 9 times. Demand for the next allowlist.' },

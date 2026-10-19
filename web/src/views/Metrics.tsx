@@ -129,6 +129,46 @@ export function Metrics() {
       </section>
 
       <section className="section">
+        <h2>Studies</h2>
+        <p className="notice">Named populations scanned by the maintainer. Kept apart from organic use: nothing above counts them.</p>
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Study</th>
+                <th>Hosts</th>
+                <th>Exposed</th>
+                <th>At risk</th>
+                <th>Protected</th>
+                <th>Ready</th>
+                <th>Scanned</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(data.studies ?? []).map((st) => (
+                <tr key={st.study} data-testid="study-row">
+                  <td className="mono">{st.study}</td>
+                  <td className="mono">{st.hosts}</td>
+                  <td className="mono" style={{ color: 'var(--stage-exposed)' }}>{st.stages.exposed}</td>
+                  <td className="mono" style={{ color: 'var(--stage-at-risk)' }}>{st.stages['at-risk']}</td>
+                  <td className="mono" style={{ color: 'var(--stage-protected)' }}>{st.stages.protected}</td>
+                  <td className="mono" style={{ color: 'var(--stage-ready)' }}>{st.stages.ready}</td>
+                  <td className="dim">{st.lastAt.slice(0, 10)}</td>
+                </tr>
+              ))}
+              {(data.studies ?? []).length === 0 && (
+                <tr>
+                  <td colSpan={7} className="dim">
+                    No studies yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="section">
         <h2>Health</h2>
         <div className="counts">
           <Count label="Probe time p50, today" value={`${last.p50} ms`} />

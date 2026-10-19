@@ -148,6 +148,8 @@ describe('view 3: the private metrics view', () => {
     await see(first.getByTestId('host-stage'), /EXPOSED|AT RISK|PROTECTED|READY/);
     await see(first.getByTestId('host-score'), /^\s*\d+\s*$/);
     expect(await first.getByRole('link').getAttribute('href')).toMatch(/^\/r\/[A-Za-z0-9_-]+$/);
+    await see(page.getByRole('heading', { name: 'Studies' }));
+    expect(await page.getByTestId('study-row').count()).toBeGreaterThanOrEqual(1);
     expect(errors).toEqual([]);
     await page.context().close();
   });
