@@ -146,8 +146,7 @@
       "text": "###"
     },
     {
-      "type": "page_break",
-      "text": "Word count of the release, headline to ###: 600 exactly (PR Pro allows 600; boilerplate and contact lines count). Any addition needs a matching cut; the method paragraph is the one to shorten."
+      "type": "page_break"
     },
     {
       "type": "heading",
@@ -162,7 +161,7 @@
     {
       "type": "paragraph",
       "style": "Note",
-      "text": "Word count of the release body, headline to ###: see the figure printed when this file was generated (target under 600 for PR Pro). If a cut is needed, the method paragraph is the one to shorten."
+      "text": "Word count of the release, headline to ###: 600 exactly (PR Pro allows 600; boilerplate and contact lines count). Any addition needs a matching cut; the method paragraph is the one to shorten."
     },
     {
       "type": "paragraph",
