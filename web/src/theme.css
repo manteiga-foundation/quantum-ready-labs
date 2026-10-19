@@ -624,6 +624,41 @@ details.tech summary {
   margin-bottom: 14px;
 }
 
+/* The API page */
+.api .code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.5;
+  padding: 14px 16px;
+  margin: 10px 0 14px;
+  overflow-x: auto;
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg) 70%, black);
+  border: 1px solid var(--line-dim);
+  border-radius: var(--radius);
+  white-space: pre;
+}
+
+.api ul.plain {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.api ul.plain li + li {
+  margin-top: 6px;
+}
+
+.api .section p {
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.api a {
+  color: var(--accent);
+}
+
 /* The PDF being prepared inside the dialog */
 .pdf-progress {
   display: flex;

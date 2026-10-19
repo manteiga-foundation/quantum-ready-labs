@@ -1,15 +1,17 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { loadResult, startScan, type ScanHandle } from './api';
 import { applyEvent, initialReport, reportFromResult, type ReportState, type StreamEvent } from './report-model';
+import { Api } from './views/Api';
 import { Entry } from './views/Entry';
 import { Metrics } from './views/Metrics';
 import { Report } from './views/Report';
 
-type Route = { view: 'entry' } | { view: 'scan'; host: string } | { view: 'shared'; id: string } | { view: 'metrics' };
+type Route = { view: 'entry' } | { view: 'scan'; host: string } | { view: 'shared'; id: string } | { view: 'metrics' } | { view: 'api' };
 
 function routeFromLocation(): Route {
   const { pathname, search } = window.location;
   if (pathname === '/metrics') return { view: 'metrics' };
+  if (pathname === '/api') return { view: 'api' };
   const shared = pathname.match(/^\/r\/([A-Za-z0-9_-]+)$/);
   if (shared) return { view: 'shared', id: shared[1] };
   const host = new URLSearchParams(search).get('host');
@@ -71,6 +73,7 @@ export function App() {
     const stage = report.assessment.stage;
     if (route.view === 'entry') document.title = 'Quantum Ready Labs: is your host ready for the quantum era?';
     else if (route.view === 'metrics') document.title = 'Metrics · Quantum Ready Labs';
+    else if (route.view === 'api') document.title = 'API · Quantum Ready Labs';
     else if (host && report.status === 'done') document.title = `${host}: ${stage.replace('-', ' ')} · Quantum Ready Labs`;
     else if (host) document.title = `Testing ${host} · Quantum Ready Labs`;
   }, [route, report.host, report.status, report.assessment.stage]);
@@ -99,10 +102,13 @@ export function App() {
         {route.view === 'scan' && <Report state={report} shared={false} onAnother={() => go('/')} />}
         {route.view === 'shared' && <Report state={report} shared onAnother={() => go('/')} />}
         {route.view === 'metrics' && <Metrics />}
+        {route.view === 'api' && <Api />}
       </div>
       <footer className="footer">
         <p>Quantum Ready Labs tests the key exchange, protocol versions and certificate chain a host negotiates, and explains where it stands on the post-quantum transition. It is not a general TLS audit.</p>
-        <p>Open source under the MIT licence. A Manteiga Foundation project. Abuse or questions: hello@manteiga.org</p>
+        <p>
+          Open source under the MIT licence. A Manteiga Foundation project. <a href="/api">API</a> for scripts, services and agents. Abuse or questions: hello@manteiga.org
+        </p>
       </footer>
     </div>
   );

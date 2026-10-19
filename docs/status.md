@@ -42,10 +42,15 @@ slice that changes it; `AGENTS.md` stays the contract.
   signature and a footer stating the letter holds no private data. `scripts/letters.ts <slug>`
   builds one PDF for a study's Exposed and At risk hosts (27 pages for Florida), `--pages` writes
   a PNG per letter with a DOM measure of the signature against the footer.
+- The API, open: `GET /api/scan?host=` and `POST /api/scan` with `Accept: application/json`
+  answer once with `{id, url, pdf, cached, result}` (the stream stays the default for the page);
+  CORS `*` on every `/api` response with a preflight; unknown `/api` paths answer 404 with the
+  documentation links. `/api` page in the console's style, `/openapi.json` (3.1, checked against
+  the worker's routes and the engine's stage enum by `tests/openapi.test.ts`) and `/llms.txt`.
 - README: executive summary first, then a hero still and a GIF of a scan (`docs/readme/`, made by
   `scripts/readme-media.ts`), pinned by `tests/readme.test.ts`.
-- Tests: 88 (`bun run test`): 76 offline (unit, fixture TLS server, engine HTTP, edge policy,
-  report model, pacer, README shape, report and letter HTML), 7 web tests in real Chromium, 5 renderer tests. CI (Linux) runs check, the unit
+- Tests: 93 (`bun run test`): 80 offline (unit, fixture TLS server, engine HTTP, edge policy,
+  report model, pacer, README shape, report and letter HTML), 8 web tests in real Chromium, 5 renderer tests. CI (Linux) runs check, the unit
   tests and the build.
 
 Measured on real hosts (2026-10-18): cloudflare.com, google.com, manteiga.org PROTECTED 85;

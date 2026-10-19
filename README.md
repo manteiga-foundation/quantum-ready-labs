@@ -50,6 +50,16 @@ edge (a Cloudflare Worker with D1) that validates, rate-limits, caches results f
 serves shareable result pages with link previews and aggregates private metrics; and the views
 (Vite, React, Arwes frames).
 
+## API
+
+Open, no key, for scripts, services and agents: `curl 'https://quantumreadylabs.com/api/scan?host=example.com'`
+answers with the finished scan, its share link and its PDF link in one JSON object; `POST /api/scan`
+streams the events the page draws from, or one object with `Accept: application/json`. Stored results
+at `/api/result/<id>`, PDFs at `/api/report/<id>.pdf`. Limits: 20 scans per caller and 6 per host in any
+10 minutes; results under 24 hours are served from cache. Documentation at
+[quantumreadylabs.com/api](https://quantumreadylabs.com/api), machine-readable at
+[/openapi.json](https://quantumreadylabs.com/openapi.json) and [/llms.txt](https://quantumreadylabs.com/llms.txt).
+
 ## Repository
 
 ```
@@ -63,7 +73,7 @@ docs/        status, scoring rubric, screenshots, README media
 
 ```
 bun install
-bun run test                  # 88 tests (Chromium: bunx playwright install chromium)
+bun run test                  # 93 tests (Chromium: bunx playwright install chromium)
 bun run scan github.com       # scan from the terminal
 bun run dev                   # the views on http://127.0.0.1:5180 (?demo=protected replays a recorded scan)
 bun run engine                # the HTTP engine (ENGINE_TOKEN required)

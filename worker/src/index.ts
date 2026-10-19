@@ -32,18 +32,15 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
 
-    if (pathname === '/api/scan' && request.method === 'POST') {
-      warmRenderer(env, ctx);
-      return scanRoute(request, env, ctx);
+    // The API is open to other services and agents: CORS without conditions, a preflight that says so.
+    if (pathname.startsWith('/api/') && request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
+    if (pathname.startsWith('/api/')) {
+      const res = await api(pathname, request, env, ctx);
+      const out = new Response(res.body, res); // cached responses carry immutable headers
+      for (const [k, v] of Object.entries(CORS)) out.headers.set(k, v);
+      return out;
     }
-    if (pathname === '/api/study/scan' && request.method === 'POST') return studyScanRoute(request, env, ctx);
-    if (pathname.startsWith('/api/result/') && request.method === 'GET') return resultRoute(pathname.slice('/api/result/'.length), env, ctx);
-    const pdf = pathname.match(/^\/api\/report\/([A-Za-z0-9_-]+)\.pdf$/);
-    if (pdf && request.method === 'GET') return reportPdfRoute(pdf[1], request, env, ctx);
-    if (pathname === '/api/metrics' && request.method === 'GET') return metricsRoute(request, env);
-    if (pathname === '/api/subscribe' && request.method === 'POST') return subscribeRoute(request, env);
-    if (pathname === '/api/health') return json({ ok: true });
-    if (pathname.startsWith('/api/')) return json({ error: 'not found' }, 404);
+
 
     const shared = pathname.match(/^\/r\/([A-Za-z0-9_-]{12})$/);
     if (shared && request.method === 'GET') {
@@ -272,6 +269,69 @@ async function resultRoute(id: string, env: Env, ctx: ExecutionContext): Promise
   if (!row) return json({ error: 'not found' }, 404);
   ctx.waitUntil(env.DB.prepare('INSERT INTO opens (scan_id, created_at) VALUES (?, ?)').bind(id, Date.now()).run());
   return new Response(row.result, { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300' } });
+}
+
+const CORS: Record<string, string> = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, OPTIONS',
+  'access-control-allow-headers': 'content-type, accept, authorization',
+  'access-control-expose-headers': 'content-disposition, retry-after',
+  'access-control-max-age': '86400',
+};
+
+async function api(pathname: string, request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  const url = new URL(request.url);
+  if (pathname === '/api/scan' && request.method === 'POST') {
+    warmRenderer(env, ctx);
+    const res = await scanRoute(request, env, ctx);
+    return wantsOneAnswer(request) ? oneAnswer(res, url.origin, env) : res;
+  }
+  if (pathname === '/api/scan' && request.method === 'GET') {
+    // The shell form: curl 'https://quantumreadylabs.com/api/scan?host=example.com'
+    const host = url.searchParams.get('host');
+    if (!host) return json({ error: 'host is required: /api/scan?host=example.com' }, 400);
+    warmRenderer(env, ctx);
+    const asPost = new Request(request.url, { method: 'POST', headers: request.headers, body: JSON.stringify({ host }) });
+    return oneAnswer(await scanRoute(asPost, env, ctx), url.origin, env);
+  }
+  if (pathname === '/api/study/scan' && request.method === 'POST') return studyScanRoute(request, env, ctx);
+  if (pathname.startsWith('/api/result/') && request.method === 'GET') return resultRoute(pathname.slice('/api/result/'.length), env, ctx);
+  const pdf = pathname.match(/^\/api\/report\/([A-Za-z0-9_-]+)\.pdf$/);
+  if (pdf && request.method === 'GET') return reportPdfRoute(pdf[1], request, env, ctx);
+  if (pathname === '/api/metrics' && request.method === 'GET') return metricsRoute(request, env);
+  if (pathname === '/api/subscribe' && request.method === 'POST') return subscribeRoute(request, env);
+  if (pathname === '/api/health') return json({ ok: true });
+  return json({ error: 'not found', documentation: `${url.origin}/api`, openapi: `${url.origin}/openapi.json` }, 404);
+}
+
+/** `Accept: application/json` on POST /api/scan asks for the finished scan as one object instead of the event stream. */
+function wantsOneAnswer(request: Request): boolean {
+  const accept = request.headers.get('accept') ?? '';
+  return accept.includes('application/json') && !accept.includes('x-ndjson');
+}
+
+/** Drains the scan's event stream and answers once: {id, url, pdf, cached, result}. Errors pass through untouched. */
+async function oneAnswer(stream: Response, origin: string, env: Env): Promise<Response> {
+  if (!stream.ok || !stream.body) return stream;
+  const text = await stream.text();
+  let result: ScanResult | null = null;
+  let id: string | null = null;
+  let cached = false;
+  let error: string | null = null;
+  for (const line of text.split('\n')) {
+    if (!line.trim()) continue;
+    try {
+      const e = JSON.parse(line) as { type: string; result?: ScanResult; id?: string; cached?: boolean; error?: string };
+      if (e.type === 'result' && e.result) result = e.result;
+      else if (e.type === 'saved' && e.id) (id = e.id), (cached = !!e.cached);
+      else if (e.type === 'error') error = e.error ?? 'scan failed';
+    } catch {
+      // not an event line
+    }
+  }
+  if (!result || !id) return json({ error: error ?? 'The scan did not complete.' }, 502);
+  const publicOrigin = env.PUBLIC_ORIGIN || origin;
+  return json({ id, url: `${publicOrigin}/r/${id}`, pdf: `${publicOrigin}/api/report/${id}.pdf`, cached, result });
 }
 
 /** Wakes the render machine (it stops when idle) so the first PDF after a quiet spell is not a cold start. */

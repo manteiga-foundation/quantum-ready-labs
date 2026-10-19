@@ -1,0 +1,40 @@
+# Quantum Ready Labs
+
+> Post-quantum TLS readiness of a public host: a stage (EXPOSED, AT RISK, PROTECTED, READY), a score 0-100, and the one next step. Free, open source (MIT), no key.
+
+The scan opens TLS connections to the host you name, exactly as a browser visit would: fourteen handshakes, one ordinary connection, nothing else. Only test hosts you are allowed to connect to.
+
+## API
+
+- One answer: GET https://quantumreadylabs.com/api/scan?host=example.com
+  or POST /api/scan with {"host": "example.com"} and `Accept: application/json`.
+  Returns {id, url, pdf, cached, result}; result.assessment has stage, score, verdict, nextStep.
+- Live events: POST /api/scan without that Accept header streams application/x-ndjson
+  (start, probe..., connection, result, saved).
+- Stored result: GET /api/result/{id} (never changes).
+- PDF report: GET /api/report/{id}.pdf (five pages; the first after a quiet spell may take 20 s).
+- Human page: https://quantumreadylabs.com/r/{id} (unlisted, Open Graph preview).
+- Full description: https://quantumreadylabs.com/openapi.json
+- Human documentation: https://quantumreadylabs.com/api
+
+## Limits
+
+- 20 scans per caller address and 6 per host in any 10 minutes; 429 with Retry-After.
+- Results under 24 hours old are answered from cache (cached: true); a host does not need
+  re-scanning more often than that.
+- Public hosts on port 443 only; private, loopback and link-local addresses are refused.
+- CORS open: Access-Control-Allow-Origin: *.
+
+## Reading a result
+
+- exposed: TLS 1.3 unavailable; sessions recorded today can be decrypted later. Next step: enable TLS 1.3.
+- at-risk: TLS 1.3, forward secrecy, no post-quantum key exchange; safe today, harvestable. Next step: enable X25519MLKEM768.
+- protected: hybrid post-quantum key exchange accepted.
+- ready: protected, no RSA key transport, short-lived automated certificates.
+- The certificate is reported, never alarmed: no public certificate can be quantum-safe yet.
+- Scoring: https://github.com/manteiga-foundation/quantum-ready-labs/blob/main/docs/scoring.md
+
+## Source
+
+- https://github.com/manteiga-foundation/quantum-ready-labs
+- Contact: hello@manteiga.org

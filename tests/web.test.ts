@@ -165,4 +165,18 @@ describe('view 3: the private metrics view', () => {
     expect(errors).toEqual([]);
     await page.context().close();
   });
+
+  test('view 4: the API page tells an agent how to scan, read, and fetch the PDF', async () => {
+    const { page, errors } = await open('/api');
+    await see(page.getByRole('heading', { level: 1 }), exact('The API'));
+    await see(page.getByTestId('api-scan'), /POST \/api\/scan/);
+    await see(page.getByTestId('api-scan'), /Accept: application\/json/);
+    await see(page.getByTestId('api-result'), /GET \/api\/result\//);
+    await see(page.getByTestId('api-report'), /GET \/api\/report\//);
+    await see(page.getByTestId('api-limits'), /20 scans/);
+    expect(await page.getByRole('link', { name: 'openapi.json' }).getAttribute('href')).toBe('/openapi.json');
+    expect(await page.getByRole('link', { name: 'llms.txt' }).getAttribute('href')).toBe('/llms.txt');
+    expect(errors).toEqual([]);
+    await page.context().close();
+  });
 });

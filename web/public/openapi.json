@@ -1,0 +1,127 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Quantum Ready Labs API",
+    "version": "0.1.0",
+    "summary": "Post-quantum TLS readiness of a public host: a stage, a score, the one next step.",
+    "description": "Open, no key. The scan opens TLS connections to the host you name, exactly as a browser visit would: fourteen handshakes and one ordinary connection. Only test hosts you are allowed to connect to. Results are kept for 24 hours and answered from that cache, each with a permanent share link and a PDF. Rate limits: 20 scans per caller address and 6 per host in any 10 minutes (429 with Retry-After). CORS is open (Access-Control-Allow-Origin: *). Source: https://github.com/manteiga-foundation/quantum-ready-labs (MIT).",
+    "contact": { "name": "Manteiga Foundation", "email": "hello@manteiga.org", "url": "https://quantumreadylabs.com/api" },
+    "license": { "name": "MIT", "identifier": "MIT" }
+  },
+  "servers": [{ "url": "https://quantumreadylabs.com" }],
+  "paths": {
+    "/api/scan": {
+      "post": {
+        "summary": "Scan a host",
+        "description": "Default response is a stream of newline-delimited JSON events (application/x-ndjson): start, one probe per group or protocol, connection, result, saved. Send `Accept: application/json` to wait for the end and receive one JSON object instead. A fresh cached result (under 24 hours) is returned at once in both forms.",
+        "operationId": "scan",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "required": ["host"], "properties": { "host": { "type": "string", "description": "A host name or IP literal, optionally with :port. Only port 443 is scanned publicly.", "examples": ["example.com", "203.0.113.10"] } } } } }
+        },
+        "responses": {
+          "200": {
+            "description": "The scan.",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/ScanAnswer" } },
+              "application/x-ndjson": { "schema": { "type": "string", "description": "One JSON event per line: {type: 'start'|'probe'|'connection'|'result'|'saved'|'error', ...}. The `result` event carries a ScanResult; `saved` carries the share id." } }
+            }
+          },
+          "400": { "description": "Not a public host, an unsupported port, or malformed input.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "429": { "description": "Rate limited; Retry-After in seconds.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "502": { "description": "The engine could not complete the scan.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "get": {
+        "summary": "Scan a host (one JSON answer)",
+        "description": "The same scan as POST with `Accept: application/json`, for a shell or an agent: `curl 'https://quantumreadylabs.com/api/scan?host=example.com'`.",
+        "operationId": "scanGet",
+        "parameters": [{ "name": "host", "in": "query", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": { "description": "The finished scan.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ScanAnswer" } } } },
+          "400": { "description": "Not a public host or malformed input.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "429": { "description": "Rate limited; Retry-After in seconds.", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/result/{id}": {
+      "get": {
+        "summary": "A stored result",
+        "operationId": "result",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^[A-Za-z0-9_-]{12}$" } }],
+        "responses": {
+          "200": { "description": "The ScanResult as stored (never changes).", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ScanResult" } } } },
+          "404": { "description": "Unknown id." }
+        }
+      }
+    },
+    "/api/report/{id}.pdf": {
+      "get": {
+        "summary": "The five-page PDF report for a result",
+        "operationId": "reportPdf",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": { "description": "application/pdf, landscape Letter, five pages; Content-Disposition names the file. The first render after a quiet spell can take up to 20 seconds; later ones are cached.", "content": { "application/pdf": { "schema": { "type": "string", "format": "binary" } } } },
+          "404": { "description": "Unknown id." }
+        }
+      }
+    },
+    "/r/{id}": {
+      "get": {
+        "summary": "The human page for a result",
+        "description": "Unlisted (noindex), with Open Graph preview. Share this with people; share the JSON with machines.",
+        "operationId": "sharePage",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "HTML." }, "404": { "description": "Unknown id." } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Stage": {
+        "type": "string",
+        "enum": ["unreachable", "inconclusive", "exposed", "at-risk", "protected", "ready"],
+        "description": "exposed: TLS 1.3 is not available, sessions can be recorded today and decrypted later. at-risk: TLS 1.3 with forward secrecy and no post-quantum key exchange, safe today, harvestable. protected: hybrid post-quantum key exchange accepted. ready: protected, with no legacy key transport and short-lived automated certificates. unreachable / inconclusive: no TLS answer, or one the probes could not read with confidence."
+      },
+      "ScanAnswer": {
+        "type": "object",
+        "required": ["id", "url", "pdf", "result"],
+        "properties": {
+          "id": { "type": "string", "description": "Share id." },
+          "url": { "type": "string", "format": "uri", "description": "The human page, /r/{id}." },
+          "pdf": { "type": "string", "format": "uri", "description": "The PDF report, /api/report/{id}.pdf." },
+          "cached": { "type": "boolean", "description": "True when answered from a result under 24 hours old." },
+          "result": { "$ref": "#/components/schemas/ScanResult" }
+        }
+      },
+      "ScanResult": {
+        "type": "object",
+        "required": ["target", "address", "startedAt", "ms", "findings", "assessment"],
+        "properties": {
+          "target": { "type": "object", "properties": { "host": { "type": "string" }, "port": { "type": "integer" } } },
+          "address": { "type": "string", "description": "The IP address scanned." },
+          "startedAt": { "type": "string", "format": "date-time" },
+          "ms": { "type": "integer", "description": "Scan duration." },
+          "findings": { "type": "object", "description": "Raw probe answers: groups (per key-exchange group: yes | no | error), tls13, tls12, rsaKeyTransport, preferredModernGroup, connection, chain, errors." },
+          "assessment": { "$ref": "#/components/schemas/Assessment" }
+        }
+      },
+      "Assessment": {
+        "type": "object",
+        "required": ["stage", "score", "verdict", "nextStep"],
+        "properties": {
+          "stage": { "$ref": "#/components/schemas/Stage" },
+          "score": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Quantum readiness only, not general TLS hygiene. Key exchange 60, foundations 30, certificate 10. See /docs/scoring." },
+          "verdict": { "type": "string", "description": "One sentence for the reader." },
+          "nextStep": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "detail": { "type": "string" } } },
+          "keyExchange": { "type": "object", "properties": { "status": { "type": "string", "enum": ["hybrid", "classical", "legacy", "none"] }, "hybridGroups": { "type": "array", "items": { "type": "string" } }, "classicalGroups": { "type": "array", "items": { "type": "string" } }, "preferred": { "type": ["string", "null"] }, "rsaKeyTransport": { "type": ["boolean", "null"] }, "tls13": { "type": ["boolean", "null"] }, "tls12": { "type": ["boolean", "null"] } } },
+          "certificate": { "type": "object", "properties": { "status": { "type": "string", "enum": ["quantum-safe", "not-actionable", "unknown"] }, "quantumSafe": { "type": "boolean" }, "leafKey": { "type": ["string", "null"] }, "leafSignature": { "type": ["string", "null"] }, "leafDaysValid": { "type": ["integer", "null"] }, "leafDaysRemaining": { "type": ["integer", "null"] }, "chainLength": { "type": "integer" }, "trusted": { "type": ["boolean", "null"] } } },
+          "foundations": { "type": "object", "description": "Five booleans (null when not measured): tls13, noRsaKeyTransport, shortLivedCertificate, prefersHybrid, trustedChain." },
+          "points": { "type": "object", "description": "The score's parts: keyExchange /60, noRsaKeyTransport /10, shortLivedCertificate /8, prefersHybrid /6, trustedChain /6, certificate /10." },
+          "notes": { "type": "array", "items": { "type": "object", "properties": { "text": { "type": "string" } } } }
+        }
+      },
+      "Error": { "type": "object", "required": ["error"], "properties": { "error": { "type": "string" }, "refused": { "type": "boolean" } } }
+    }
+  }
+}
