@@ -60,26 +60,102 @@ at `/api/result/<id>`, PDFs at `/api/report/<id>.pdf`. Limits: 20 scans per call
 [quantumreadylabs.com/api](https://quantumreadylabs.com/api), machine-readable at
 [/openapi.json](https://quantumreadylabs.com/openapi.json) and [/llms.txt](https://quantumreadylabs.com/llms.txt).
 
+## Install and run
+
+Everything runs on [Bun](https://bun.sh) (1.4 or later). The hosted service is at
+quantumreadylabs.com; these steps give you the same tool on your own machine, from the
+terminal scanner alone to the full service.
+
+### 1. The scanner in your terminal (two minutes)
+
+```
+git clone https://github.com/manteiga-foundation/quantum-ready-labs.git
+cd quantum-ready-labs
+bun install
+bun run scan github.com
+```
+
+That is a complete scan: the stage, the score, the verdict, the one next step, the three cards and
+every probe. Useful flags: `--verbose` (chain and score breakdown), `--share` (also records the scan
+at quantumreadylabs.com and prints the share and PDF links), `--json` (one result per line, for
+scripts), `--private` (hosts on your own network, which the public service refuses). Several hosts
+at once end with a worst-first summary.
+
+### 2. The tests and the views
+
+```
+bunx playwright install chromium     # once: the browser the view tests and the PDF renderer use
+bun run check                        # TypeScript, all three projects
+bun run test                         # 103 tests: engine, edge policy, templates, views in Chromium, renderer
+bun run dev                          # the views on http://127.0.0.1:5180
+```
+
+`bun run dev` serves the pages with recorded scans: open `/?demo=protected`, `/?demo=exposed` or
+`/?demo=at-risk` to watch a report build, `/metrics` for the private view with emulated figures,
+`/api` for the documentation. Live scans need the edge (step 3).
+
+### 3. The whole service on your machine
+
+Three processes: the engine (owns the sockets), the renderer (prints PDFs) and the edge (validation,
+limits, cache, the pages). Tokens are shared secrets between them; any random string works locally.
+
+```
+# terminal 1: the engine on :8787
+ENGINE_TOKEN=local bun run engine
+
+# terminal 2: the renderer on :8790 (needs the Chromium from step 2)
+RENDER_TOKEN=local bun run render
+
+# terminal 3: the edge on :8788, with a local database
+printf 'ENGINE_TOKEN=local\nRENDER_TOKEN=local\nENGINE_URL=http://127.0.0.1:8787\nRENDER_URL=http://127.0.0.1:8790\nPUBLIC_ORIGIN=http://127.0.0.1:8788\n' > .dev.vars
+bunx wrangler d1 execute qrl --local --file worker/schema.sql
+bun run build
+bun run edge:dev --port 8788
+```
+
+Then open http://127.0.0.1:8788 and scan a host, or from a shell:
+`curl 'http://127.0.0.1:8788/api/scan?host=example.com'`. `.dev.vars` is ignored by git; the
+database lives under `.wrangler/`. No Cloudflare account is needed for this step.
+
+### 4. Deploying your own copy
+
+The production shape is one Fly app for the engine, one for the renderer, and one Cloudflare Worker
+with a D1 database for the edge. Accounts on both; `fly` and `wrangler` logged in.
+
+```
+# the engine and the renderer (edit the app names in fly.toml and fly.render.toml first)
+fly apps create <engine-app> && fly apps create <render-app>
+fly secrets set ENGINE_TOKEN=$(openssl rand -hex 32) -a <engine-app>
+fly secrets set RENDER_TOKEN=$(openssl rand -hex 32) -a <render-app>
+bun run deploy:engine
+bun run deploy:render
+
+# the edge (edit wrangler.toml: name, ENGINE_URL, RENDER_URL, PUBLIC_ORIGIN, routes, database_id)
+bunx wrangler d1 create <db>                       # paste the id into wrangler.toml
+bunx wrangler d1 execute <db> --remote --file worker/schema.sql
+bunx wrangler secret put ENGINE_TOKEN              # the same values as above
+bunx wrangler secret put RENDER_TOKEN
+bun run deploy:edge
+```
+
+`/metrics` expects Cloudflare Access in front of it (any path without the Access header answers 403
+except from localhost); configure a self-hosted application for `/metrics` and `/api/metrics` in
+Zero Trust, or remove the check in `worker/src/index.ts` for a private deployment. The engine on
+Fly stops when idle and starts on the first request; the renderer does the same and is woken by
+the edge whenever a result page is viewed.
+
 ## Repository
 
 ```
-engine/      the scanner: target parsing and refusal list, probes, assessment, HTTP server (Bun, Fly Machines)
-worker/      the edge: validation, rate limits, 24 h cache, link previews, metrics (Cloudflare Worker + D1)
-web/         the views: entry, live report, private metrics (Vite, React, Arwes)
-tests/       bun test: offline unit and fixture-server tests, plus the views in real Chromium
+engine/      the scanner: target parsing and refusal list, probes, assessment, HTTP server, terminal renderer, report and letter templates
+render/      the PDF renderer: Playwright Chromium printing the templates (Fly Machines)
+worker/      the edge: validation, rate limits, 24 h cache, link previews, PDFs, studies, metrics (Cloudflare Worker + D1)
+web/         the views: entry, live report, API page, private metrics (Vite, React, Arwes)
+scripts/     screenshots, README media, OG images, studies and letters, report page review
+studies/     named populations scanned with scripts/study.ts and their results
+tests/       bun test: offline unit and fixture-server tests, the views in real Chromium, the renderer
 spikes/      throwaway experiments with their verdicts
 docs/        status, scoring rubric, screenshots, README media
-```
-
-```
-bun install
-bun run test                  # 103 tests (Chromium: bunx playwright install chromium)
-bun run scan github.com       # scan from the terminal (--verbose, --share, --json, several hosts)
-bun run dev                   # the views on http://127.0.0.1:5180 (?demo=protected replays a recorded scan)
-bun run engine                # the HTTP engine (ENGINE_TOKEN required)
-bun run render                # the PDF renderer (RENDER_TOKEN required; Playwright Chromium)
-bun run edge:dev              # the edge locally (wrangler dev; .dev.vars holds ENGINE_TOKEN)
-bun run build                 # check + production bundle
 ```
 
 Scoring: `docs/scoring.md`. Where things stand: `docs/status.md`. How we work: `AGENTS.md`.
