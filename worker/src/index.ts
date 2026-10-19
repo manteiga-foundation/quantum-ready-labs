@@ -4,6 +4,7 @@
 
 import type { ScanResult } from '../../engine/events';
 import { isCanonicalIpv4, isPublicAddress, parseTarget, TargetError } from '../../engine/target';
+import { SCAN_FIXTURES } from '../../web/src/fixtures';
 import { addressesFromDoh, decideRateLimit, escapeAttr, isFresh, newShareId, previewFor, type RateKind } from './policy';
 
 export interface Env {
@@ -11,6 +12,8 @@ export interface Env {
   ASSETS: Fetcher;
   ENGINE_URL: string;
   ENGINE_TOKEN: string;
+  RENDER_URL: string;
+  RENDER_TOKEN: string;
   PUBLIC_ORIGIN: string;
   ALLOWED_PORTS: string;
 }
@@ -29,6 +32,8 @@ export default {
 
     if (pathname === '/api/scan' && request.method === 'POST') return scanRoute(request, env, ctx);
     if (pathname.startsWith('/api/result/') && request.method === 'GET') return resultRoute(pathname.slice('/api/result/'.length), env, ctx);
+    const pdf = pathname.match(/^\/api\/report\/([A-Za-z0-9_-]+)\.pdf$/);
+    if (pdf && request.method === 'GET') return reportPdfRoute(pdf[1], request, env, ctx);
     if (pathname === '/api/metrics' && request.method === 'GET') return metricsRoute(request, env);
     if (pathname === '/api/subscribe' && request.method === 'POST') return subscribeRoute(request, env);
     if (pathname === '/api/health') return json({ ok: true });
@@ -212,6 +217,44 @@ async function resultRoute(id: string, env: Env, ctx: ExecutionContext): Promise
   if (!row) return json({ error: 'not found' }, 404);
   ctx.waitUntil(env.DB.prepare('INSERT INTO opens (scan_id, created_at) VALUES (?, ?)').bind(id, Date.now()).run());
   return new Response(row.result, { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300' } });
+}
+
+/** The PDF: the stored result rendered by the render service, cached per id (results never change). */
+async function reportPdfRoute(id: string, request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  const cache = caches.default;
+  const cacheKey = new Request(new URL(request.url).toString(), { method: 'GET' });
+  const hit = await cache.match(cacheKey);
+  if (hit) return hit;
+
+  let result: ScanResult | null = null;
+  if (id.startsWith('demo-')) {
+    result = SCAN_FIXTURES[id.slice(5)]?.result ?? null;
+  } else if (/^[A-Za-z0-9_-]{12}$/.test(id)) {
+    const row = await env.DB.prepare('SELECT result FROM scans WHERE id = ?').bind(id).first<{ result: string }>();
+    result = row ? (JSON.parse(row.result) as ScanResult) : null;
+  }
+  if (!result) return json({ error: 'not found' }, 404);
+  if (!env.RENDER_URL || !env.RENDER_TOKEN) return json({ error: 'The PDF renderer is not configured.' }, 503);
+
+  const origin = env.PUBLIC_ORIGIN || new URL(request.url).origin;
+  const upstream = await fetch(`${env.RENDER_URL}/pdf`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${env.RENDER_TOKEN}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ result, shareUrl: id.startsWith('demo-') ? null : `${origin}/r/${id}`, generatedAt: result.startedAt }),
+  });
+  if (!upstream.ok) {
+    ctx.waitUntil(recordFailure(env, 'Render failed', String(upstream.status), null));
+    return json({ error: 'The report could not be rendered right now. Please try again in a moment.' }, 502);
+  }
+  const response = new Response(upstream.body, {
+    headers: {
+      'content-type': 'application/pdf',
+      'content-disposition': upstream.headers.get('content-disposition') ?? `attachment; filename="quantum-readiness-${id}.pdf"`,
+      'cache-control': 'public, max-age=604800',
+    },
+  });
+  ctx.waitUntil(cache.put(cacheKey, response.clone()));
+  return response;
 }
 
 async function sharedPage(id: string, request: Request, env: Env): Promise<Response> {

@@ -1,6 +1,6 @@
 # The edge. Deploy from the repository root after `bun run build`:
 #   bunx wrangler deploy
-# Secrets (never in files):  bunx wrangler secret put ENGINE_TOKEN
+# Secrets (never in files):  bunx wrangler secret put ENGINE_TOKEN ; bunx wrangler secret put RENDER_TOKEN
 name = "quantum-ready-labs"
 main = "worker/src/index.ts"
 compatibility_date = "2026-10-01"
@@ -14,6 +14,7 @@ run_worker_first = true
 
 [vars]
 ENGINE_URL = "https://qrl-engine.fly.dev"
+RENDER_URL = "https://qrl-render.fly.dev"
 PUBLIC_ORIGIN = "https://quantumreadylabs.com"
 ALLOWED_PORTS = "443"
 

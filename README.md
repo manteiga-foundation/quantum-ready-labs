@@ -6,7 +6,7 @@ exactly as a browser would, and reports in plain language where the host stands 
 post-quantum transition, what is urgent, what cannot be fixed yet, and the one next step. It is
 built for the people who have to decide and explain, not only for the engineers who will
 implement: the result is a stage word (Exposed, At risk, Protected, Ready), a score, and a report
-that can be shared by link or printed. Free and open source, at https://quantumreadylabs.com.
+that can be shared by link or downloaded as a print-ready PDF. Free and open source, at https://quantumreadylabs.com.
 
 ![A finished report: the ring reads PROTECTED 85, the verdict, the one next step, and the recommendations](docs/readme/hero.png)
 
@@ -63,10 +63,11 @@ docs/        status, scoring rubric, screenshots, README media
 
 ```
 bun install
-bun run test                  # 73 tests (Chromium: bunx playwright install chromium)
+bun run test                  # 83 tests (Chromium: bunx playwright install chromium)
 bun run scan github.com       # scan from the terminal
 bun run dev                   # the views on http://127.0.0.1:5180 (?demo=protected replays a recorded scan)
 bun run engine                # the HTTP engine (ENGINE_TOKEN required)
+bun run render                # the PDF renderer (RENDER_TOKEN required; Playwright Chromium)
 bun run edge:dev              # the edge locally (wrangler dev; .dev.vars holds ENGINE_TOKEN)
 bun run build                 # check + production bundle
 ```

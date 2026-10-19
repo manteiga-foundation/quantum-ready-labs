@@ -5,3 +5,5 @@ worker
 tests
 spikes
 docs
+dist
+.wrangler

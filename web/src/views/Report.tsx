@@ -154,7 +154,7 @@ export function Report({ state, shared, onAnother }: { state: ReportState; share
             </>
           )}
         </div>
-        {dialog && <DownloadDialog host={state.host ?? ''} onClose={() => setDialog(false)} />}
+        {dialog && <DownloadDialog host={state.host ?? ''} pdfUrl={state.shareId ? `/api/report/${state.shareId}.pdf` : null} onClose={() => setDialog(false)} />}
         <div className="print-footer">
           Quantum Ready Labs · quantumreadylabs.com · {state.host} · {state.startedAt ? new Date(state.startedAt).toUTCString() : ''} · A Manteiga Foundation project
         </div>
@@ -252,7 +252,9 @@ function ProbeTable({ state }: { state: ReportState }) {
                 {p.label}
                 {p.id.startsWith('group:') && <div className="dim">{GROUP_KIND[p.id.slice(6) as GroupName]}</div>}
               </td>
-              <td className={`answer answer-${p.answer}`}>{p.answer === 'yes' ? 'supported' : p.answer === 'no' ? 'not supported' : 'no answer'}</td>
+              <td className={`answer answer-${p.id === 'rsa-transport' && p.answer !== 'error' ? (p.answer === 'yes' ? 'warn' : 'yes') : p.answer}`}>
+                {p.id === 'rsa-transport' ? (p.answer === 'yes' ? 'still accepted' : p.answer === 'no' ? 'refused' : 'no answer') : p.answer === 'yes' ? 'supported' : p.answer === 'no' ? 'not supported' : 'no answer'}
+              </td>
               <td className="dim">{p.detail}</td>
               <td className="dim">{p.ms}</td>
             </tr>
@@ -320,25 +322,37 @@ function Rubric({ a }: { a: Assessment }) {
   );
 }
 
-function DownloadDialog({ host, onClose }: { host: string; onClose: () => void }) {
+function DownloadDialog({ host, pdfUrl, onClose }: { host: string; pdfUrl: string | null; onClose: () => void }) {
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
-  const print = () => {
+  const download = () => {
     onClose();
-    setTimeout(() => window.print(), 50);
+    if (pdfUrl) {
+      const a = document.createElement('a');
+      a.href = pdfUrl;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } else {
+      setTimeout(() => window.print(), 50);
+    }
   };
+  const print = download;
   const withEmail = async () => {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return;
     setBusy(true);
     await subscribe(email, host).catch(() => false);
     setBusy(false);
-    print();
+    download();
   };
   return (
     <div className="dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="dl-title">
       <div className="dialog">
         <h2 id="dl-title">Download the report</h2>
-        <p>The report prints to PDF from your browser. If you would like a quarterly readiness report for {host}, leave an address; this is optional, and nothing is sent until the quarterly reports begin.</p>
+        <p>
+          {pdfUrl ? 'A five-page PDF, print-ready: cover, executive summary, where the host stands, technical details, method and standards.' : 'The report prints to PDF from your browser.'} If you would like a quarterly readiness report for {host}, leave an address; this is optional, and nothing is sent until the quarterly reports begin.
+        </p>
         <label htmlFor="email" className="sr-only">
           Email
         </label>
@@ -347,8 +361,8 @@ function DownloadDialog({ host, onClose }: { host: string; onClose: () => void }
           <button type="button" className="button" onClick={withEmail} disabled={busy || !email}>
             Download and subscribe
           </button>
-          <button type="button" className="button ghost" onClick={print}>
-            Download only
+          <button type="button" className="button ghost" onClick={print} data-testid="download-only">
+            {pdfUrl ? 'Download PDF' : 'Print'}
           </button>
           <button type="button" className="button ghost" onClick={onClose}>
             Cancel

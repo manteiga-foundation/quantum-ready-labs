@@ -23,10 +23,16 @@ slice that changes it; `AGENTS.md` stays the contract.
   three cards, probe matrix, chain, rubric folded); shared results with the call to action; the
   private metrics view. One-column phone layout. Static SEO and Open Graph, JSON-LD, link-preview
   images per stage (`scripts/og-images.ts`).
+- The PDF report (`engine/report-html.ts`, pure; `render/server.ts`, Chromium kept warm): five
+  landscape Letter pages in the spirit of the medet.ink archetypes (cover, executive summary,
+  where the host stands, technical details, method and standards), bundled fonts, deterministic
+  bytes for the same result. Deployed as `qrl-render` on Fly (Playwright image, 1 GB, stops when
+  idle); the edge serves `/api/report/<id>.pdf` and caches it for a week. Download report in the
+  web offers the PDF when the result has an id. Page images for review: `scripts/report-pages.ts`.
 - README: executive summary first, then a hero still and a GIF of a scan (`docs/readme/`, made by
   `scripts/readme-media.ts`), pinned by `tests/readme.test.ts`.
-- Tests: 73 (`bun run test`): 66 offline (unit, fixture TLS server, engine HTTP, edge policy,
-  report model, pacer, README shape), 7 in real Chromium against emulated scans. CI (Linux) runs check, the unit
+- Tests: 83 (`bun run test`): 72 offline (unit, fixture TLS server, engine HTTP, edge policy,
+  report model, pacer, README shape, report HTML), 7 web tests in real Chromium, 4 renderer tests. CI (Linux) runs check, the unit
   tests and the build.
 
 Measured on real hosts (2026-10-18): cloudflare.com, google.com, manteiga.org PROTECTED 85;
@@ -42,6 +48,8 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
   has two computed lines, not the richer emulated set. Cloudflare Access on `/metrics` is a
   dashboard step; until then the header check keeps it closed.
 - Quarterly reports: addresses are stored; nothing is sent, and the dialog says so.
+- PDF: the cover has room for a client name (`preparedFor`); no UI asks for it yet. The first
+  render after idle takes about 14 s (machine start + Chromium); warm renders under a second.
 - Real-client lines ("what Chrome gets"): the server's preference among Chrome's offered groups
   is measured (`preferredModernGroup`); a true Chromium probe over CDP is optional, later.
 - Chain validation uses the runtime's trust store (`authorized`); a vendored, dated Mozilla

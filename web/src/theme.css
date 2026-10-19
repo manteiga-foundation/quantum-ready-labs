@@ -553,6 +553,10 @@ code,
   color: var(--stage-exposed);
 }
 
+.answer-warn {
+  color: var(--stage-at-risk);
+}
+
 .table .dim {
   color: var(--text-faint);
 }

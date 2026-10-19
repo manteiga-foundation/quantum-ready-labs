@@ -86,6 +86,10 @@ describe('view 2: the live report', () => {
     expect(await page.getByTestId('probe-row').count()).toBe(14);
     expect(await page.getByTestId('chain-link').count()).toBe(4);
     await see(page.getByRole('button', { name: 'Download report' }));
+    await page.getByRole('button', { name: 'Download report' }).click();
+    await see(page.getByRole('dialog'), /five-page PDF/);
+    await see(page.getByTestId('download-only'), exact('Download PDF'));
+    await page.getByRole('button', { name: 'Cancel' }).click();
     expect(errors).toEqual([]);
     await page.context().close();
   });

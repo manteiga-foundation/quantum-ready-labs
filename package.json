@@ -14,7 +14,9 @@
     "scan": "bun run engine/cli.ts",
     "deploy:engine": "fly deploy --config fly.toml --remote-only --ha=false",
     "deploy:edge": "bun run build && wrangler deploy",
-    "edge:dev": "wrangler dev"
+    "edge:dev": "wrangler dev",
+    "render": "bun run render/server.ts",
+    "deploy:render": "fly deploy --config fly.render.toml --remote-only --ha=false"
   },
   "dependencies": {
     "@arwes/react": "1.0.0-alpha.23",
