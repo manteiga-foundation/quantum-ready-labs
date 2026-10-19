@@ -73,8 +73,8 @@ docs/        status, scoring rubric, screenshots, README media
 
 ```
 bun install
-bun run test                  # 93 tests (Chromium: bunx playwright install chromium)
-bun run scan github.com       # scan from the terminal
+bun run test                  # 103 tests (Chromium: bunx playwright install chromium)
+bun run scan github.com       # scan from the terminal (--verbose, --share, --json, several hosts)
 bun run dev                   # the views on http://127.0.0.1:5180 (?demo=protected replays a recorded scan)
 bun run engine                # the HTTP engine (ENGINE_TOKEN required)
 bun run render                # the PDF renderer (RENDER_TOKEN required; Playwright Chromium)

@@ -47,9 +47,16 @@ slice that changes it; `AGENTS.md` stays the contract.
   CORS `*` on every `/api` response with a preflight; unknown `/api` paths answer 404 with the
   documentation links. `/api` page in the console's style, `/openapi.json` (3.1, checked against
   the worker's routes and the engine's stage enum by `tests/openapi.test.ts`) and `/llms.txt`.
+- The terminal (`engine/terminal.ts`, pure, tested; `engine/cli.ts`): a QREADY banner in the
+  Artemis launcher's manner (gold faces, blue shadows; one line when narrow), then per host the
+  stage word and score, the verdict, the one next step, the three cards, the probes as a grid
+  (RSA key transport amber when accepted), `--verbose` for the chain and the score's parts,
+  `--share` for the public links, `--json` for machines, a worst-first summary for several hosts.
+  Truecolor, 256 or none by NO_COLOR, FORCE_COLOR, COLORTERM and the TTY; every line fits the
+  terminal's width (tested at 80).
 - README: executive summary first, then a hero still and a GIF of a scan (`docs/readme/`, made by
   `scripts/readme-media.ts`), pinned by `tests/readme.test.ts`.
-- Tests: 93 (`bun run test`): 80 offline (unit, fixture TLS server, engine HTTP, edge policy,
+- Tests: 103 (`bun run test`): 90 offline (unit, fixture TLS server, engine HTTP, edge policy,
   report model, pacer, README shape, report and letter HTML), 8 web tests in real Chromium, 5 renderer tests. CI (Linux) runs check, the unit
   tests and the build.
 
