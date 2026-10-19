@@ -57,7 +57,7 @@
       "style": "Body",
       "runs": [
         {
-          "text": "[CITY], Fla., Oct. 20, 2026 /PRNewswire/ -- ",
+          "text": "MIAMI, Fla., Oct. 20, 2026 /PRNewswire/ -- ",
           "bold": true
         },
         {
@@ -161,7 +161,7 @@
     {
       "type": "paragraph",
       "style": "Note",
-      "text": "Placeholder left to fill before submission: [CITY] in the dateline. Name, title and contact are in."
+      "text": "No placeholders remain: dateline Miami, name, title and contact are in. Submitted and scheduled 19 October 2026."
     },
     {
       "type": "paragraph",
