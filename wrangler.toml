@@ -20,7 +20,16 @@ ALLOWED_PORTS = "443"
 [[d1_databases]]
 binding = "DB"
 database_name = "qrl"
-database_id = "REPLACE_AFTER_CREATE"
+database_id = "ce9cc226-efee-486d-a451-19a9489d6d1d"
 
 [observability]
 enabled = true
+
+# The public hostnames. Workers custom domains create the DNS records and certificates.
+[[routes]]
+pattern = "quantumreadylabs.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.quantumreadylabs.com"
+custom_domain = true

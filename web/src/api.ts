@@ -3,6 +3,7 @@
 
 import type { ScanResult } from '../../engine/events';
 import { demoMetrics, SCAN_FIXTURES, type MetricsData } from './fixtures';
+import { pacer } from './pace';
 import type { StreamEvent } from './report-model';
 
 export function demoName(): string | null {
@@ -15,12 +16,15 @@ export interface ScanHandle {
 }
 
 const DEMO_DELAY_MS = 90;
+/** Live events are released to the view at this pace so a fast host still shows the ring climbing. */
+const LIVE_PACE_MS = 70;
 
 export function startScan(host: string, onEvent: (e: StreamEvent) => void, onEnd: () => void): ScanHandle {
   const demo = demoName();
   if (demo) return replayFixture(demo, host, onEvent, onEnd);
 
   const controller = new AbortController();
+  const paced = pacer<StreamEvent>(onEvent, onEnd, LIVE_PACE_MS, displayRank);
   (async () => {
     try {
       const res = await fetch('/api/scan', {
@@ -31,7 +35,7 @@ export function startScan(host: string, onEvent: (e: StreamEvent) => void, onEnd
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
-        onEvent({ type: 'error', error: body.error ?? (res.status === 429 ? 'Too many scans right now. Try again in a moment.' : `The scan could not start (${res.status}).`) });
+        paced.push({ type: 'error', error: body.error ?? (res.status === 429 ? 'Too many scans right now. Try again in a moment.' : `The scan could not start (${res.status}).`) });
         return;
       }
       const reader = res.body!.getReader();
@@ -45,16 +49,46 @@ export function startScan(host: string, onEvent: (e: StreamEvent) => void, onEnd
         while ((nl = buffer.indexOf('\n')) !== -1) {
           const line = buffer.slice(0, nl).trim();
           buffer = buffer.slice(nl + 1);
-          if (line) onEvent(JSON.parse(line) as StreamEvent);
+          if (line) paced.push(JSON.parse(line) as StreamEvent);
         }
       }
-    } catch (e) {
-      if (!controller.signal.aborted) onEvent({ type: 'error', error: 'The connection to the scanner was lost.' });
+    } catch {
+      if (!controller.signal.aborted) paced.push({ type: 'error', error: 'The connection to the scanner was lost.' });
     } finally {
-      onEnd();
+      paced.end();
     }
   })();
-  return { cancel: () => controller.abort() };
+  return {
+    cancel: () => {
+      controller.abort();
+      paced.cancel();
+    },
+  };
+}
+
+/** Worse to better: the start, legacy and classical answers, then the hybrid ones, then the connection and the result. */
+function displayRank(e: StreamEvent): number {
+  switch (e.type) {
+    case 'start':
+      return 0;
+    case 'probe':
+      if (e.id === 'rsa-transport' || e.id === 'tls12') return 1;
+      if (e.id === 'tls13') return 2;
+      if (e.id.startsWith('group:') && !/MLKEM|Kyber/.test(e.id)) return 3;
+      if (e.id === 'modern') return 4;
+      return 5;
+    case 'connection':
+      return 6;
+    case 'assessment':
+    case 'done':
+      return 7;
+    case 'result':
+      return 8;
+    case 'saved':
+      return 9;
+    default:
+      return 10;
+  }
 }
 
 function replayFixture(name: string, host: string, onEvent: (e: StreamEvent) => void, onEnd: () => void): ScanHandle {

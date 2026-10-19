@@ -66,7 +66,7 @@ export function Report({ state, shared, onAnother }: { state: ReportState; share
             <Animated as="section" className="summary" data-testid="summary" animated={['fade', ['y', 10, 0]]}>
               <h1>
                 <span className="mark" aria-hidden="true" data-mark={good ? '✓' : live ? '…' : '!'} />
-                {live ? 'Testing' : good ? 'Quantum ready' : a.stage === 'unreachable' || a.stage === 'inconclusive' ? STAGE_LABEL[a.stage].charAt(0) + STAGE_LABEL[a.stage].slice(1).toLowerCase() : 'Not yet quantum ready'}
+                {live ? 'Testing' : state.status === 'error' ? 'Scan not run' : good ? 'Quantum ready' : a.stage === 'unreachable' || a.stage === 'inconclusive' ? STAGE_LABEL[a.stage].charAt(0) + STAGE_LABEL[a.stage].slice(1).toLowerCase() : 'Not yet quantum ready'}
               </h1>
               {state.status === 'error' ? (
                 <p className="verdict alert" role="alert" data-testid="verdict">

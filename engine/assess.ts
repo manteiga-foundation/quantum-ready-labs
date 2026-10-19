@@ -186,7 +186,9 @@ export function assess(f: Findings): Assessment {
   const classicalGroups = CLASSICAL.filter((g) => f.groups[g] === 'yes');
   const anyAnswer =
     Object.values(f.groups).some((v) => v === 'yes' || v === 'no') || f.tls13 !== null || f.tls12 !== null || f.rsaKeyTransport !== null;
-  const allGroupsNo = (Object.keys(f.groups) as GroupName[]).every((g) => f.groups[g] === 'no' || f.groups[g] === 'untested') && hybridGroups.length === 0 && classicalGroups.length === 0;
+  // Every group answered, and every answer was no: with TLS 1.3 negotiable that is contradictory.
+  // Untested groups do not count, so a live partial picture never reads as inconclusive.
+  const allGroupsNo = (Object.keys(f.groups) as GroupName[]).every((g) => f.groups[g] === 'no');
 
   const leaf = f.chain[0] ?? null;
   const leafDaysValid = leaf ? daysBetween(leaf.notBefore, leaf.notAfter) : null;

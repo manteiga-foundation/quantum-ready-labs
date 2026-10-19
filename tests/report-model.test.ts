@@ -39,6 +39,13 @@ describe('report model: the live report built from the event stream', () => {
     }
   });
 
+  test('a live partial picture never reads as inconclusive: TLS 1.3 yes with groups still untested is at risk', () => {
+    const events = protectedFixture.events as ScanEvent[];
+    let s = applyEvent(initialReport(), events[0]);
+    s = applyEvent(s, events.find((e) => e.type === 'probe' && e.id === 'tls13')!);
+    expect(s.assessment.stage).toBe('at-risk');
+  });
+
   test('the stage word is live: exposed before TLS 1.3 answers, protected once the hybrid group answers yes', () => {
     const events = protectedFixture.events as ScanEvent[];
     let s = initialReport();
