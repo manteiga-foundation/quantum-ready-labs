@@ -1,21 +1,16 @@
 # Quantum Ready Labs
 
-Is this host ready for the quantum era?
+Quantum Ready Labs answers one question about any public host: is it ready for the quantum era?
+Type a host name, and in about a second the service opens a handful of TLS connections to it,
+exactly as a browser would, and reports in plain language where the host stands on the
+post-quantum transition, what is urgent, what cannot be fixed yet, and the one next step. It is
+built for the people who have to decide and explain, not only for the engineers who will
+implement: the result is a stage word (Exposed, At risk, Protected, Ready), a score, and a report
+that can be shared by link or printed. Free and open source, at https://quantumreadylabs.com.
 
-Quantum Ready Labs is an open-source tool that tests a public host's TLS configuration for one
-thing: where it stands on the post-quantum transition, and what the next step is. Type a host
-name or an IP address; the service opens a handful of TLS connections to it, exactly as a browser
-would, and reports in plain language.
+![A finished report: the ring reads PROTECTED 85, the verdict, the one next step, and the recommendations](docs/readme/hero.png)
 
-It is not a general TLS checker and does not compete with the excellent tools that are. The
-readiness score measures quantum readiness only, as a stage name:
-
-| Stage | Meaning |
-|---|---|
-| Exposed | TLS 1.3 is not available. Sessions can be recorded today and decrypted later. |
-| At risk | TLS 1.3 with forward secrecy, no post-quantum key exchange. Safe today, harvestable. |
-| Protected | Hybrid post-quantum key exchange (X25519MLKEM768 or equivalent) is accepted. |
-| Ready | Protected, no legacy key transport, short-lived automated certificates: ready for what comes next. |
+![A scan as it runs: the host is typed, the ring climbs from AT RISK to PROTECTED as the probes answer, and the verdict settles](docs/readme/scan.gif)
 
 ## Why key exchange, and not the certificate
 
@@ -29,15 +24,31 @@ Certificates (authentication) are a different matter. A signature cannot be forg
 so there is no harvest-now risk, and the public Web PKI has no post-quantum roots yet. The report
 says so plainly and does not alarm about something nobody can act on today.
 
+## The stages
+
+| Stage | Meaning |
+|---|---|
+| Exposed | TLS 1.3 is not available. Sessions can be recorded today and decrypted later. |
+| At risk | TLS 1.3 with forward secrecy, no post-quantum key exchange. Safe today, harvestable. |
+| Protected | Hybrid post-quantum key exchange (X25519MLKEM768 or equivalent) is accepted. |
+| Ready | Protected, no legacy key transport, short-lived automated certificates: ready for what comes next. |
+
+The score (0 to 100) sits under the stage word; the rubric is `docs/scoring.md`. It measures
+quantum readiness only and does not compete with the general TLS checkers.
+
 ## How it works
 
 The engine builds TLS ClientHello messages by hand and reads the server's first reply in clear:
-offer one key-exchange group with no key share and a supporting server answers HelloRetryRequest
+offer one key-exchange group with no key share, and a supporting server answers HelloRetryRequest
 naming it, while a non-supporting server sends an alert. No post-quantum cryptography is
 implemented, no handshake completes, and the result is identical on every platform. One ordinary
-connection reads the negotiated parameters and the certificate chain.
+connection reads the negotiated parameters and the certificate chain. Fourteen probes per scan,
+run concurrently: 20 to 500 ms per host.
 
-Fourteen probes per scan, run concurrently: 20 to 500 ms per host.
+The hosted service has three parts: the engine (Bun, on Fly Machines) that owns the sockets; the
+edge (a Cloudflare Worker with D1) that validates, rate-limits, caches results for 24 hours,
+serves shareable result pages with link previews and aggregates private metrics; and the views
+(Vite, React, Arwes frames).
 
 ## Repository
 
@@ -47,12 +58,12 @@ worker/      the edge: validation, rate limits, 24 h cache, link previews, metri
 web/         the views: entry, live report, private metrics (Vite, React, Arwes)
 tests/       bun test: offline unit and fixture-server tests, plus the views in real Chromium
 spikes/      throwaway experiments with their verdicts
-docs/        status, scoring rubric, screenshots
+docs/        status, scoring rubric, screenshots, README media
 ```
 
 ```
 bun install
-bun run test                  # 65 tests (Chromium: bunx playwright install chromium)
+bun run test                  # 73 tests (Chromium: bunx playwright install chromium)
 bun run scan github.com       # scan from the terminal
 bun run dev                   # the views on http://127.0.0.1:5180 (?demo=protected replays a recorded scan)
 bun run engine                # the HTTP engine (ENGINE_TOKEN required)
@@ -66,9 +77,10 @@ Scoring: `docs/scoring.md`. Where things stand: `docs/status.md`. How we work: `
 
 The public service connects only to public Internet addresses: the host is resolved first and
 every address is judged against the IANA special-purpose registries (private, loopback,
-link-local, CGNAT, multicast, documentation, and the IPv6 embeddings of those). A scan is a
-handful of TLS handshakes, the same traffic a browser visit causes; still, only test hosts you
-are allowed to connect to.
+link-local, CGNAT, multicast, documentation, and the IPv6 embeddings of those). Scans are
+rate-limited per caller and per target, results are cached for a day, and only port 443 is
+tested. A scan is a handful of TLS handshakes, the same traffic a browser visit causes; still,
+only test hosts you are allowed to connect to.
 
 ## Standards referenced
 
@@ -78,4 +90,5 @@ timeline: quantum-vulnerable algorithms deprecated after 2030, disallowed after 
 
 ## Licence
 
-MIT. A Manteiga Foundation project.
+MIT. A Manteiga Foundation project. Fonts Titillium Web and JetBrains Mono (SIL Open Font
+Licence); frames by Arwes (MIT).

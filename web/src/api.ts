@@ -95,7 +95,12 @@ function replayFixture(name: string, host: string, onEvent: (e: StreamEvent) => 
   const fixture = SCAN_FIXTURES[name];
   const alias = fixture.result.target.host;
   const rename = <T,>(v: T): T => JSON.parse(JSON.stringify(v).replaceAll(alias, host)) as T;
-  const events: StreamEvent[] = [...fixture.events.map(rename), { type: 'result', result: rename(fixture.result) }, { type: 'saved', id: `demo-${name}` }];
+  // Shown in the same worse-to-better order as a live scan.
+  const recorded: StreamEvent[] = [...fixture.events.map(rename), { type: 'result', result: rename(fixture.result) }, { type: 'saved', id: `demo-${name}` }];
+  const events = recorded
+    .map((e, i) => ({ e, i }))
+    .sort((a, b) => displayRank(a.e) - displayRank(b.e) || a.i - b.i)
+    .map(({ e }) => e);
   let i = 0;
   let timer: ReturnType<typeof setTimeout> | null = null;
   const step = () => {

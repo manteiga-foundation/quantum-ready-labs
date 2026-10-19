@@ -23,8 +23,10 @@ slice that changes it; `AGENTS.md` stays the contract.
   three cards, probe matrix, chain, rubric folded); shared results with the call to action; the
   private metrics view. One-column phone layout. Static SEO and Open Graph, JSON-LD, link-preview
   images per stage (`scripts/og-images.ts`).
-- Tests: 65 (`bun run test`): 58 offline (unit, fixture TLS server, engine HTTP, edge policy,
-  report model), 7 in real Chromium against emulated scans. CI (Linux) runs check, the unit
+- README: executive summary first, then a hero still and a GIF of a scan (`docs/readme/`, made by
+  `scripts/readme-media.ts`), pinned by `tests/readme.test.ts`.
+- Tests: 73 (`bun run test`): 66 offline (unit, fixture TLS server, engine HTTP, edge policy,
+  report model, pacer, README shape), 7 in real Chromium against emulated scans. CI (Linux) runs check, the unit
   tests and the build.
 
 Measured on real hosts (2026-10-18): cloudflare.com, google.com, manteiga.org PROTECTED 85;
