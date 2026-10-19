@@ -53,4 +53,16 @@ describe('the PDF renderer', () => {
     const res = await pdfFor({ nothing: true });
     expect(res.status).toBe(400);
   });
+
+  test('prints letters: one portrait page per institution', async () => {
+    const res = await fetch(`${server.url}/letters.pdf`, {
+      method: 'POST',
+      headers: { authorization: 'Bearer render-test', 'content-type': 'application/json' },
+      body: JSON.stringify({ generatedAt: '2026-10-18T12:00:00Z', signer: { name: 'A. Signer', title: 'Manteiga Foundation' }, letters: [{ result: protectedFixture.result, institution: 'One', shareUrl: 'https://quantumreadylabs.com/r/a' }, { result: protectedFixture.result, institution: 'Two', shareUrl: null }] }),
+    });
+    expect(res.status).toBe(200);
+    const text = Buffer.from(await res.arrayBuffer()).toString('latin1');
+    expect((text.match(/\/Type\s*\/Page[^s]/g) ?? []).length).toBe(2);
+    expect(text).toMatch(/\/MediaBox\s*\[\s*0\s+0\s+612\s+792\s*\]/);
+  }, 60000);
 });

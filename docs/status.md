@@ -35,10 +35,17 @@ slice that changes it; `AGENTS.md` stays the contract.
   verifies each domain (DNS, home page title) then scans and writes `studies/<slug>/results.csv`
   with share and PDF links. First study: `florida-financial-2026q4`, 81 Florida-headquartered
   banks and credit unions (10 Exposed, 17 At risk, 30 Protected, 24 Ready; median 85).
+- Letters (`engine/letter-html.ts`, pure, tested; renderer `POST /letters.pdf`): one portrait
+  Letter page per institution to its information security officer: letterhead, the result card
+  (ring, stage, score, the one next step, QR code and unlisted link), five short paragraphs
+  (who we are, what was observed and when, why it matters, the one change, where the report is),
+  signature and a footer stating the letter holds no private data. `scripts/letters.ts <slug>`
+  builds one PDF for a study's Exposed and At risk hosts (27 pages for Florida), `--pages` writes
+  a PNG per letter with a DOM measure of the signature against the footer.
 - README: executive summary first, then a hero still and a GIF of a scan (`docs/readme/`, made by
   `scripts/readme-media.ts`), pinned by `tests/readme.test.ts`.
-- Tests: 84 (`bun run test`): 73 offline (unit, fixture TLS server, engine HTTP, edge policy,
-  report model, pacer, README shape, report HTML), 7 web tests in real Chromium, 4 renderer tests. CI (Linux) runs check, the unit
+- Tests: 88 (`bun run test`): 76 offline (unit, fixture TLS server, engine HTTP, edge policy,
+  report model, pacer, README shape, report and letter HTML), 7 web tests in real Chromium, 5 renderer tests. CI (Linux) runs check, the unit
   tests and the build.
 
 Measured on real hosts (2026-10-18): cloudflare.com, google.com, manteiga.org PROTECTED 85;
@@ -54,6 +61,8 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
   has two computed lines, not the richer emulated set. Cloudflare Access on `/metrics` is a
   dashboard step; until then the header check keeps it closed.
 - Quarterly reports: addresses are stored; nothing is sent, and the dialog says so.
+- Letters: postal addresses are not in the list yet (`addressLines` exists in the template); the
+  signer defaults to the maintainer and is an argument.
 - PDF: the cover has room for a client name (`preparedFor`); no UI asks for it yet. The first
   render after idle takes about 14 s (machine start + Chromium); warm renders under a second.
 - Real-client lines ("what Chrome gets"): the server's preference among Chrome's offered groups

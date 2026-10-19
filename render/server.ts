@@ -5,6 +5,7 @@
 import { chromium, type Browser } from 'playwright';
 import { join } from 'node:path';
 import { FONT_FILES, renderReportHtml, type FontFile } from '../engine/report-html';
+import { renderLettersHtml, type Letter, type LetterOptions } from '../engine/letter-html';
 import type { ScanResult } from '../engine/events';
 
 export interface RenderServerOptions {
@@ -64,6 +65,39 @@ export async function createRenderServer(options: RenderServerOptions): Promise<
           if (await file.exists()) return new Response(file, { headers: { 'content-type': 'font/woff2', 'cache-control': 'public, max-age=31536000' } });
         }
         return new Response('not found', { status: 404 });
+      }
+      if (req.method === 'POST' && (url.pathname === '/letters.pdf' || url.pathname === '/letters.html')) {
+        if (!token || req.headers.get('authorization') !== `Bearer ${token}`) return json({ error: 'unauthorized' }, 401);
+        let body: { letters?: Letter[]; generatedAt?: string; signer?: LetterOptions['signer'] };
+        try {
+          body = (await req.json()) as typeof body;
+        } catch {
+          return json({ error: 'The request body must be JSON.' }, 400);
+        }
+        if (!Array.isArray(body.letters) || body.letters.length === 0 || body.letters.length > 200) return json({ error: 'letters: 1 to 200 entries' }, 400);
+        if (!body.signer || typeof body.signer.name !== 'string' || typeof body.signer.title !== 'string') return json({ error: 'signer {name, title} is required' }, 400);
+        for (const l of body.letters) if (!l || typeof l.institution !== 'string' || !l.result?.assessment || !l.result?.target) return json({ error: 'each letter needs institution and result' }, 400);
+        const generatedAt = body.generatedAt ? new Date(body.generatedAt) : new Date();
+        if (Number.isNaN(generatedAt.getTime())) return json({ error: 'generatedAt must be a date' }, 400);
+        const html = await renderLettersHtml(body.letters, { generatedAt, signer: body.signer, fontUrls });
+        if (url.pathname === '/letters.html') return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8' } });
+        rendering++;
+        try {
+          const page = await (await getBrowser()).newPage();
+          try {
+            await page.setContent(html, { waitUntil: 'load' });
+            await page.evaluate('document.fonts.ready');
+            const pdf = await page.pdf({ width: '8.5in', height: '11in', printBackground: true, preferCSSPageSize: true, margin: { top: 0, right: 0, bottom: 0, left: 0 } });
+            return new Response(pdf, { headers: { 'content-type': 'application/pdf', 'content-disposition': `attachment; filename="letters-${generatedAt.toISOString().slice(0, 10)}.pdf"`, 'cache-control': 'no-store' } });
+          } finally {
+            await page.close();
+          }
+        } catch (e) {
+          console.error(e);
+          return json({ error: 'The letters could not be rendered.' }, 500);
+        } finally {
+          rendering--;
+        }
       }
       if (req.method === 'POST' && (url.pathname === '/pdf' || url.pathname === '/html')) {
         if (!token || req.headers.get('authorization') !== `Bearer ${token}`) return json({ error: 'unauthorized' }, 401);

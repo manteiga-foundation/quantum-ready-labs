@@ -63,7 +63,7 @@ docs/        status, scoring rubric, screenshots, README media
 
 ```
 bun install
-bun run test                  # 84 tests (Chromium: bunx playwright install chromium)
+bun run test                  # 88 tests (Chromium: bunx playwright install chromium)
 bun run scan github.com       # scan from the terminal
 bun run dev                   # the views on http://127.0.0.1:5180 (?demo=protected replays a recorded scan)
 bun run engine                # the HTTP engine (ENGINE_TOKEN required)
