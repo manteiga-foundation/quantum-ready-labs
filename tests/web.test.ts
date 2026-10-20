@@ -166,6 +166,7 @@ describe('view 3: the private metrics view', () => {
     await see(page.getByRole('heading', { level: 1 }), exact('Metrics'));
     await see(page.getByTestId('metric-scans'), /\d/);
     await see(page.getByTestId('metric-hosts'), /\d/);
+    await see(page.getByTestId('metric-pdfs'), /\d/);
     await see(page.getByRole('heading', { name: 'Readiness over time' }));
     await see(page.getByRole('heading', { name: 'Failures' }));
     expect(await page.getByTestId('trend-day').count()).toBeGreaterThan(7);

@@ -37,7 +37,7 @@ export const FIXTURE_NAMES = Object.keys(SCAN_FIXTURES);
 /** The metrics the private view shows, generated deterministically for 30 days. */
 export interface MetricsData {
   generatedAt: string;
-  totals: { scans: number; hosts: number; cacheHits: number; sharedOpens: number; failures: number };
+  totals: { scans: number; hosts: number; cacheHits: number; sharedOpens: number; pdfDownloads: number; failures: number };
   days: { date: string; scans: number; hosts: number; stages: Record<string, number>; failures: number; p50: number; p95: number }[];
   failures: { reason: string; count: number }[];
   referrers: { source: string; count: number }[];
@@ -101,8 +101,8 @@ export function demoMetrics(now = new Date('2026-10-18T12:00:00Z')): MetricsData
     days.push({ date, scans, hosts, stages, failures, p50: Math.round(180 + rand() * 90), p95: Math.round(600 + rand() * 500) });
   }
   const totals = days.reduce(
-    (t, d) => ({ scans: t.scans + d.scans, hosts: t.hosts + d.hosts, cacheHits: t.cacheHits + Math.round(d.scans * 0.3), sharedOpens: t.sharedOpens + Math.round(d.scans * 0.18), failures: t.failures + d.failures }),
-    { scans: 0, hosts: 0, cacheHits: 0, sharedOpens: 0, failures: 0 },
+    (t, d) => ({ scans: t.scans + d.scans, hosts: t.hosts + d.hosts, cacheHits: t.cacheHits + Math.round(d.scans * 0.3), sharedOpens: t.sharedOpens + Math.round(d.scans * 0.18), pdfDownloads: t.pdfDownloads + Math.round(d.scans * 0.07), failures: t.failures + d.failures }),
+    { scans: 0, hosts: 0, cacheHits: 0, sharedOpens: 0, pdfDownloads: 0, failures: 0 },
   );
   return {
     generatedAt: now.toISOString(),

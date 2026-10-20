@@ -348,6 +348,8 @@ function warmRenderer(env: Env, ctx: ExecutionContext): void {
 
 /** The PDF: the stored result rendered by the render service, cached per id (results never change). */
 async function reportPdfRoute(id: string, request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  // Every report served counts as a download, cached or rendered; the demo reports do not.
+  if (!id.startsWith('demo-')) ctx.waitUntil(env.DB.prepare('INSERT INTO downloads (scan_id, created_at) VALUES (?, ?)').bind(id, Date.now()).run());
   const cache = caches.default;
   const cacheKey = new Request(new URL(request.url).toString(), { method: 'GET' });
   const hit = await cache.match(cacheKey);
@@ -450,6 +452,7 @@ async function metricsRoute(request: Request, env: Env): Promise<Response> {
      FROM scans WHERE client LIKE 'study:%' GROUP BY client ORDER BY lastAt DESC`,
   ).all<{ study: string; scans: number; hosts: number; firstAt: number; lastAt: number; exposed: number; at_risk: number; protected: number; ready: number; odd: number }>();
   const opens = await env.DB.prepare('SELECT COUNT(*) AS n FROM opens WHERE created_at >= ?').bind(since).first<{ n: number }>();
+  const downloads = await env.DB.prepare('SELECT COUNT(*) AS n FROM downloads WHERE created_at >= ?').bind(since).first<{ n: number }>();
   const subscriptions = await env.DB.prepare('SELECT email, host, created_at AS createdAt FROM subscriptions ORDER BY created_at DESC LIMIT 200').all<{ email: string; host: string; createdAt: number }>();
   const ports = await env.DB.prepare("SELECT detail, COUNT(*) AS n FROM failures WHERE reason = 'Port not allowed' AND created_at >= ? GROUP BY detail ORDER BY n DESC LIMIT 5").bind(since).all<{ detail: string; n: number }>();
 
@@ -472,7 +475,7 @@ async function metricsRoute(request: Request, env: Env): Promise<Response> {
 
   return json({
     generatedAt: new Date(now).toISOString(),
-    totals: { ...totals, sharedOpens: opens?.n ?? 0 },
+    totals: { ...totals, sharedOpens: opens?.n ?? 0, pdfDownloads: downloads?.n ?? 0 },
     days: days.results.map((d) => ({
       date: d.day,
       scans: d.scans,

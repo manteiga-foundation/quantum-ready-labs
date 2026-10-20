@@ -54,6 +54,7 @@ export function Metrics() {
           <Count label="Unique hosts" value={data.totals.hosts} testId="metric-hosts" />
           <Count label="Cache hits" value={data.totals.cacheHits} />
           <Count label="Shared links opened" value={data.totals.sharedOpens} />
+          <Count label="Reports downloaded" value={data.totals.pdfDownloads ?? 0} testId="metric-pdfs" />
           <Count label="Failures, 30 days" value={data.totals.failures} />
           <Count label="Scans today" value={last.scans} />
         </div>

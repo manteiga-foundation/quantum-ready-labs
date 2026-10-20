@@ -32,6 +32,14 @@ CREATE TABLE IF NOT EXISTS opens (
   created_at INTEGER NOT NULL
 );
 
+-- One row per PDF report served (cache hits included; demo ids excluded).
+CREATE TABLE IF NOT EXISTS downloads (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  scan_id TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS downloads_created ON downloads (created_at);
+
 CREATE TABLE IF NOT EXISTS rate (
   key TEXT PRIMARY KEY,
   window_start INTEGER NOT NULL,
