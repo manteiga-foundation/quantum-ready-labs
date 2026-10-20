@@ -85,6 +85,10 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
 - Metrics view: per-day p50/p95 are placeholders (the 24 h figures are real); the "signals" list
   has two computed lines, not the richer emulated set. Cloudflare Access is in front of `/metrics`
   and `/api/metrics` (verified: both redirect to the Access login).
+- In the press: the study page ends with a dated text list of where the study was written about
+  or carried (`press` on the study's meta in `web/src/study-model.ts`; kinds coverage, release,
+  syndication), and the README has the same as a section. Text links only: the scanner's landing
+  page carries no press logos by decision; trust there is the method, the code and the API.
 - Reports downloaded: every `/api/report/<id>.pdf` served (cached or rendered, demo ids excluded)
   writes a row to `downloads`; `/metrics` shows the 30-day count beside shared-link opens. Counting
   began 20 October 2026 (edge 3a184161); earlier downloads are not in it.

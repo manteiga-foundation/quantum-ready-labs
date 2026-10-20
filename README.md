@@ -75,6 +75,15 @@ Studies are kept apart from the scanner's organic use. The first,
 covers 81 institutions. The data is `studies/<slug>/results.csv`; the page computes every figure
 from it and a test keeps the note's lead sentence in step with the file.
 
+## In the press
+
+The first study, on 20 October 2026:
+
+- Quantum Zeitgeist wrote about it: [Manteiga Foundation Scans Florida Banks for Quantum Readiness](https://quantumzeitgeist.com/manteiga-foundation-scans-florida-banks/).
+- The release, issued by Manteiga Foundation on PR Newswire: [One Third of Florida's Banks and Credit Unions Not Yet Protected Against Future Quantum Decryption, Open-Source Scan Finds](https://www.prnewswire.com/news-releases/one-third-of-floridas-banks-and-credit-unions-not-yet-protected-against-future-quantum-decryption-open-source-scan-finds-302913890.html); carried by [Yahoo Finance](https://finance.yahoo.com/technology/ai/articles/one-third-floridas-banks-credit-125200422.html) and [Morningstar](https://www.morningstar.com/news/pr-newswire/20261020ph75865/one-third-of-floridas-banks-and-credit-unions-not-yet-protected-against-future-quantum-decryption-open-source-scan-finds) among 169 outlets.
+
+Press contact: Jaime Manteiga, Co-Founder, Manteiga Foundation, jaime@manteiga.org.
+
 ## Install and run
 
 Everything runs on [Bun](https://bun.sh) (1.4 or later). The hosted service is at

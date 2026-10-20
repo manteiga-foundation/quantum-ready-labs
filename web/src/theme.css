@@ -1012,6 +1012,53 @@ details.tech summary {
   font-size: 0.85rem;
 }
 
+/* Study: the press list, text only, one piece per line */
+.study .press-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.study .press-list li {
+  display: grid;
+  grid-template-columns: 150px 150px 1fr;
+  gap: 4px 18px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-top: 1px solid color-mix(in oklab, var(--line) 25%, transparent);
+}
+
+.study .press-list li:last-child {
+  border-bottom: 1px solid color-mix(in oklab, var(--line) 25%, transparent);
+}
+
+.study .press-outlet {
+  font-weight: 600;
+}
+
+.study .press-list a {
+  grid-column: 3;
+  color: var(--text);
+  text-wrap: pretty;
+}
+
+.study .press-kind {
+  grid-column: 3;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 720px) {
+  .study .press-list li {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .study .press-list a,
+  .study .press-kind {
+    grid-column: 1;
+  }
+}
+
 .study .cta {
   margin: 8px 0 24px;
 }

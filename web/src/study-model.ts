@@ -30,6 +30,17 @@ export interface StudyMeta {
   population: string;
   /** The one-sentence finding. Its numbers are checked against the CSV by a test. */
   lead: string;
+  /** Where the study was written about or carried, newest first. Text links only. */
+  press?: StudyPress[];
+}
+
+export interface StudyPress {
+  date: string;
+  outlet: string;
+  /** coverage: someone wrote about it; release: our own words on the wire; syndication: the release carried by the outlet. */
+  kind: 'coverage' | 'release' | 'syndication';
+  title: string;
+  url: string;
 }
 
 export const STUDY_META: Record<string, StudyMeta> = {
@@ -41,6 +52,12 @@ export const STUDY_META: Record<string, StudyMeta> = {
     population:
       'Banks and credit unions headquartered in Florida, with two large Florida financial companies, chosen from public regulator lists and compiled by hand. Each institution is represented by its public primary domain, the one customers type; online-banking portals that live on a vendor\u2019s host were not tested. Every domain was verified (DNS and home-page title) before the scan; institutions that had merged, renamed or answered for another name were dropped and are listed in the study\u2019s source file.',
     lead: 'Of 81 Florida banks and credit unions, 54 already protect their customers\u2019 connections against future quantum decryption; 27 do not yet.',
+    press: [
+      { date: '2026-10-20', outlet: 'Quantum Zeitgeist', kind: 'coverage', title: 'Manteiga Foundation Scans Florida Banks for Quantum Readiness', url: 'https://quantumzeitgeist.com/manteiga-foundation-scans-florida-banks/' },
+      { date: '2026-10-20', outlet: 'Yahoo Finance', kind: 'syndication', title: "One Third of Florida's Banks and Credit Unions Not Yet Protected Against Future Quantum Decryption", url: 'https://finance.yahoo.com/technology/ai/articles/one-third-floridas-banks-credit-125200422.html' },
+      { date: '2026-10-20', outlet: 'Morningstar', kind: 'syndication', title: "One Third of Florida's Banks and Credit Unions Not Yet Protected Against Future Quantum Decryption", url: 'https://www.morningstar.com/news/pr-newswire/20261020ph75865/one-third-of-floridas-banks-and-credit-unions-not-yet-protected-against-future-quantum-decryption-open-source-scan-finds' },
+      { date: '2026-10-20', outlet: 'PR Newswire', kind: 'release', title: "One Third of Florida's Banks and Credit Unions Not Yet Protected Against Future Quantum Decryption, Open-Source Scan Finds", url: 'https://www.prnewswire.com/news-releases/one-third-of-floridas-banks-and-credit-unions-not-yet-protected-against-future-quantum-decryption-open-source-scan-finds-302913890.html' },
+    ],
   },
 };
 

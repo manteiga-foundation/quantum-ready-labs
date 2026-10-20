@@ -245,6 +245,15 @@ describe('view 5: a study, the state-of-readiness note', () => {
     // The method states the date and the handshakes; the page ends with a way to check one's own host.
     await see(page.getByTestId('study-method'), /18 October 2026/);
     await see(page.getByTestId('study-method'), /fourteen TLS handshakes/i);
+    // The coverage of this study: a dated text list, each entry linking to the piece, no logos.
+    const press = page.getByTestId('study-press');
+    await see(press.getByRole('heading', { level: 2 }), /In the press/);
+    const items = press.getByRole('listitem');
+    expect(await items.count()).toBeGreaterThanOrEqual(3);
+    await see(items.first(), /Quantum Zeitgeist/);
+    const hrefs = (await page.evaluate("[...document.querySelectorAll('[data-testid=study-press] li a')].map(a => a.getAttribute('href'))")) as string[];
+    expect(hrefs.length).toBe(await items.count());
+    for (const href of hrefs) expect(href).toMatch(/^https:\/\//);
     await see(page.getByRole('link', { name: /check your own host/i }));
     expect(await page.title()).toMatch(/Florida/);
     expect(errors).toEqual([]);

@@ -178,6 +178,22 @@ export function Study({ slug, go }: { slug: string; go: (path: string) => void }
           </p>
         </section>
 
+        {(meta.press ?? []).length > 0 && (
+          <section className="section" aria-labelledby="press-title" data-testid="study-press">
+            <h2 id="press-title">In the press</h2>
+            <ul className="press-list">
+              {meta.press!.map((p) => (
+                <li key={p.url}>
+                  <span className="mono dim">{longDate(p.date)}</span>
+                  <span className="press-outlet">{p.outlet}</span>
+                  <a href={p.url} rel="noopener">{p.title}</a>
+                  <span className="mono dim press-kind">{p.kind === 'coverage' ? 'wrote about it' : p.kind === 'release' ? 'the release' : 'carried the release'}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <p className="cta">
           <a className="button" href="/" onClick={(e) => { e.preventDefault(); go('/'); }}>Check your own host</a>
         </p>
