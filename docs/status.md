@@ -128,8 +128,12 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
    429 on the warm round. After scaling to two shared-cpu-2x machines: 48 simultaneous, three
    rounds, all answered, p95 under 1 s; 96 simultaneous, all answered, p95 0.8 s. Edge now turns
    the engine's one-word "busy" into the sentence and a 429 with Retry-After on both scan paths.
-5. CLI (`qready`): same engine, terminal renderer, `bun build --compile` for three OSes, Homebrew.
-6. Quarterly re-scan of the Florida population (`florida-financial-2027q1`), the first trend.
+5. Candidate, not scheduled: a per-scan share card (host, stage word, score ring, next step, date)
+   rendered by the existing renderer and cached, replacing the per-stage PNGs. Decided against a
+   screenshot of the scanned page: it would break "no page was opened", reproduce the host's own
+   content under our verdict, and open a rendering attack surface.
+6. CLI (`qready`): same engine, terminal renderer, `bun build --compile` for three OSes, Homebrew.
+7. Quarterly re-scan of the Florida population (`florida-financial-2027q1`), the first trend.
 
 ## Open questions
 
