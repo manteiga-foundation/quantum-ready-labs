@@ -83,9 +83,10 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
 ## Emulated / not yet
 
 - Metrics view: per-day p50/p95 are placeholders (the 24 h figures are real); the "signals" list
-  has two computed lines, not the richer emulated set. Cloudflare Access on `/metrics` is a
-  dashboard step; until then the header check keeps it closed.
-- Quarterly reports: addresses are stored; nothing is sent, and the dialog says so.
+  has two computed lines, not the richer emulated set. Cloudflare Access is in front of `/metrics`
+  and `/api/metrics` (verified: both redirect to the Access login).
+- Quarterly reports: addresses are stored; nothing is sent, and the dialog says so. `/metrics`
+  lists them under "Quarterly report requests" (email, host, time; newest first, 200 most recent).
 - PDF cold start: the render machine stops when idle; a cold request took 13 to 20 s. Now a view
   of any result page or a scan wakes it (and Chromium starts with the process), so the first PDF
   after a wake measures about 2 s; the dialog prepares the PDF while open, with a progress bar
