@@ -33,6 +33,11 @@ export function Metrics() {
   }
 
   const last = data.days.at(-1)!;
+  // Over the 30 days: the share of assessed scans that landed Protected or Ready, and the share answered from cache.
+  const staged = data.days.reduce((t, d) => t + (d.stages.exposed ?? 0) + (d.stages['at-risk'] ?? 0) + (d.stages.protected ?? 0) + (d.stages.ready ?? 0), 0);
+  const good = data.days.reduce((t, d) => t + (d.stages.protected ?? 0) + (d.stages.ready ?? 0), 0);
+  const goodShare = staged ? Math.round((good / staged) * 100) : 0;
+  const repeat = data.totals.scans ? Math.round((data.totals.cacheHits / data.totals.scans) * 100) : 0;
   const maxScans = Math.max(...data.days.map((d) => d.scans));
   const share = (n: number, d: number) => (d ? Math.round((n / d) * 100) : 0);
   const protectedShareFirst = share(data.days[0].stages.protected + data.days[0].stages.ready, data.days[0].scans - data.days[0].failures);
@@ -57,6 +62,11 @@ export function Metrics() {
           <Count label="Reports downloaded" value={data.totals.pdfDownloads ?? 0} testId="metric-pdfs" />
           <Count label="Failures, 30 days" value={data.totals.failures} />
           <Count label="Scans today" value={last.scans} />
+          <Count label="Protected or ready, 30 days" value={`${goodShare}%`} testId="metric-share" />
+          <Count label="Median score, 30 days" value={data.totals.medianScore ?? 0} />
+          <Count label="Repeat tests" value={`${repeat}%`} />
+          <Count label="Countries, 30 days" value={data.totals.countries ?? 0} />
+          <Count label="Report requests" value={data.totals.subscriptions ?? (data.subscriptions ?? []).length} />
         </div>
       </section>
 

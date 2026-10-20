@@ -167,6 +167,11 @@ describe('view 3: the private metrics view', () => {
     await see(page.getByTestId('metric-scans'), /\d/);
     await see(page.getByTestId('metric-hosts'), /\d/);
     await see(page.getByTestId('metric-pdfs'), /\d/);
+    await see(page.getByTestId('metric-share'), /^\s*\d+%\s*$/);
+    // Twelve counts in two full rows of six at 1440.
+    const counts = (await page.evaluate("[...document.querySelector('.metrics .counts').querySelectorAll('.count')].map(c => Math.round(c.getBoundingClientRect().top))")) as number[];
+    expect(counts.length).toBe(12);
+    expect(new Set(counts).size).toBe(2);
     await see(page.getByRole('heading', { name: 'Readiness over time' }));
     await see(page.getByRole('heading', { name: 'Failures' }));
     expect(await page.getByTestId('trend-day').count()).toBeGreaterThan(7);

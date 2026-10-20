@@ -89,6 +89,10 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
   or carried (`press` on the study's meta in `web/src/study-model.ts`; kinds coverage, release,
   syndication), and the README has the same as a section. Text links only: the scanner's landing
   page carries no press logos by decision; trust there is the method, the code and the API.
+- Use counts on `/metrics`: twelve in two rows of six (scans 30 days, unique hosts, cache hits,
+  shared links opened, reports downloaded, failures, scans today, protected-or-ready share,
+  median score, repeat tests, countries, report requests). Share and repeat are computed in the
+  view from the per-day rows; median and countries are two more queries in `metricsRoute`.
 - Reports downloaded: every `/api/report/<id>.pdf` served (cached or rendered, demo ids excluded)
   writes a row to `downloads`; `/metrics` shows the 30-day count beside shared-link opens. Counting
   began 20 October 2026 (edge 3a184161); earlier downloads are not in it.

@@ -453,6 +453,9 @@ async function metricsRoute(request: Request, env: Env): Promise<Response> {
   ).all<{ study: string; scans: number; hosts: number; firstAt: number; lastAt: number; exposed: number; at_risk: number; protected: number; ready: number; odd: number }>();
   const opens = await env.DB.prepare('SELECT COUNT(*) AS n FROM opens WHERE created_at >= ?').bind(since).first<{ n: number }>();
   const downloads = await env.DB.prepare('SELECT COUNT(*) AS n FROM downloads WHERE created_at >= ?').bind(since).first<{ n: number }>();
+  const scores = await env.DB.prepare("SELECT score FROM scans WHERE created_at >= ? AND cache_hit = 0 AND client = 'web' AND stage IN ('exposed','at-risk','protected','ready') ORDER BY score").bind(since).all<{ score: number }>();
+  const medianScore = scores.results.length ? scores.results[Math.floor(scores.results.length / 2)].score : 0;
+  const countryCount = await env.DB.prepare("SELECT COUNT(DISTINCT country) AS n FROM scans WHERE created_at >= ? AND client = 'web' AND country IS NOT NULL").bind(since).first<{ n: number }>();
   const subscriptions = await env.DB.prepare('SELECT email, host, created_at AS createdAt FROM subscriptions ORDER BY created_at DESC LIMIT 200').all<{ email: string; host: string; createdAt: number }>();
   const ports = await env.DB.prepare("SELECT detail, COUNT(*) AS n FROM failures WHERE reason = 'Port not allowed' AND created_at >= ? GROUP BY detail ORDER BY n DESC LIMIT 5").bind(since).all<{ detail: string; n: number }>();
 
@@ -475,7 +478,7 @@ async function metricsRoute(request: Request, env: Env): Promise<Response> {
 
   return json({
     generatedAt: new Date(now).toISOString(),
-    totals: { ...totals, sharedOpens: opens?.n ?? 0, pdfDownloads: downloads?.n ?? 0 },
+    totals: { ...totals, sharedOpens: opens?.n ?? 0, pdfDownloads: downloads?.n ?? 0, medianScore, countries: countryCount?.n ?? 0, subscriptions: subscriptions.results.length },
     days: days.results.map((d) => ({
       date: d.day,
       scans: d.scans,
