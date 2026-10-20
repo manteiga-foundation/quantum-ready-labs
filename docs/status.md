@@ -118,9 +118,12 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
 
 1. The study page is deployed and the press release (docs/press/2026-10-20-florida-release,
    led by the Florida figure, Manteiga Foundation as issuer) is paid and scheduled on PR Newswire
-   via eReleases for Tuesday 20 October 2026, 8:00 ET. After it is live: the wire URL and the
-   pickups into n30.ai's Press section; Show HN and LinkedIn pointing at the note; watch the
-   engine for the first hours (`fly status -a qrl-engine`, the failures table on /metrics).
+   via eReleases, live Tuesday 20 October 2026, 8:52 ET: 169 pickups on the day (Yahoo Finance,
+   Morningstar, TheStreet, Business Chief among them); Quantum Zeitgeist wrote its own piece. The
+   wire URL and pickups are on n30.ai's Press section and the study page's In the press list.
+   LinkedIn posted the same afternoon (docs/press/2026-10-20-linkedin.md; the preview card
+   rendered the study's OG image). Show HN still to do, a weekday morning. First day: 104 web
+   scans, no engine refusals.
 2. Mail the 27 letters (postal addresses still to be gathered; the letter can now cite the note).
 3. Cloudflare Access on `/metrics`; per-day p50/p95 and the real signals in metrics.
 4. Engine capacity, done for the launch: `scripts/load-test.ts` (tagged rows through the study
