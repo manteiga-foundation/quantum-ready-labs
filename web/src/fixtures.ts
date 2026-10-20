@@ -45,6 +45,14 @@ export interface MetricsData {
   signals: { label: string; detail: string }[];
   hosts: HostRow[];
   studies: StudyRow[];
+  /** Emails left in the Download dialog for the quarterly report, newest first. Nothing is sent yet. */
+  subscriptions?: SubscriptionRow[];
+}
+
+export interface SubscriptionRow {
+  email: string;
+  host: string;
+  createdAt: string;
 }
 
 export interface StudyRow {
@@ -127,6 +135,10 @@ export function demoMetrics(now = new Date('2026-10-18T12:00:00Z')): MetricsData
       { host: 'exposed.example', port: 1012, stage: 'exposed', score: 27, scans: 2, lastId: 'demo-exposed', lastAt: days[28].date + 'T09:30:00Z' },
       { host: 'shop.example', port: 443, stage: 'protected', score: 79, scans: 4, lastId: 'demo-protected', lastAt: days[27].date + 'T15:02:00Z' },
       { host: 'intranet-portal.example', port: 443, stage: 'at-risk', score: 43, scans: 1, lastId: 'demo-at-risk', lastAt: days[26].date + 'T08:44:00Z' },
+    ],
+    subscriptions: [
+      { email: 'ciso@protected.example', host: 'protected.example', createdAt: days[29].date + 'T10:14:00Z' },
+      { email: 'it@at-risk.example', host: 'at-risk.example', createdAt: days[28].date + 'T22:07:00Z' },
     ],
     studies: [{ study: 'sample-population-2026q4', scans: 60, hosts: 60, firstAt: days[25].date + 'T14:00:00Z', lastAt: days[25].date + 'T14:06:00Z', stages: { exposed: 9, 'at-risk': 38, protected: 12, ready: 1, other: 0 } }],
     signals: [

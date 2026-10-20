@@ -450,6 +450,7 @@ async function metricsRoute(request: Request, env: Env): Promise<Response> {
      FROM scans WHERE client LIKE 'study:%' GROUP BY client ORDER BY lastAt DESC`,
   ).all<{ study: string; scans: number; hosts: number; firstAt: number; lastAt: number; exposed: number; at_risk: number; protected: number; ready: number; odd: number }>();
   const opens = await env.DB.prepare('SELECT COUNT(*) AS n FROM opens WHERE created_at >= ?').bind(since).first<{ n: number }>();
+  const subscriptions = await env.DB.prepare('SELECT email, host, created_at AS createdAt FROM subscriptions ORDER BY created_at DESC LIMIT 200').all<{ email: string; host: string; createdAt: number }>();
   const ports = await env.DB.prepare("SELECT detail, COUNT(*) AS n FROM failures WHERE reason = 'Port not allowed' AND created_at >= ? GROUP BY detail ORDER BY n DESC LIMIT 5").bind(since).all<{ detail: string; n: number }>();
 
   const hosts = await env.DB.prepare(
@@ -483,6 +484,7 @@ async function metricsRoute(request: Request, env: Env): Promise<Response> {
     })),
     failures: failures.results,
     hosts: hosts.results.map((h) => ({ ...h, lastAt: new Date(h.lastAt).toISOString() })),
+    subscriptions: subscriptions.results.map((r) => ({ email: r.email, host: r.host, createdAt: new Date(r.createdAt).toISOString() })),
     studies: studies.results.map((st) => ({
       study: st.study,
       scans: st.scans,

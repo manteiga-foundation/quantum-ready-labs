@@ -169,6 +169,40 @@ export function Metrics() {
       </section>
 
       <section className="section">
+        <h2>Quarterly report requests</h2>
+        <p className="notice">
+          Emails left in the Download dialog. Stored only; nothing has been sent and no quarterly job exists yet. <span className="mono" data-testid="metric-subscriptions">{(data.subscriptions ?? []).length}</span> so far.
+        </p>
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Host</th>
+                <th>When</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(data.subscriptions ?? []).map((r, i) => (
+                <tr key={`${r.email}-${i}`} data-testid="subscription-row">
+                  <td className="mono">{r.email}</td>
+                  <td className="mono">{r.host}</td>
+                  <td className="dim">{r.createdAt.slice(0, 16).replace('T', ' ')}</td>
+                </tr>
+              ))}
+              {(data.subscriptions ?? []).length === 0 && (
+                <tr>
+                  <td colSpan={3} className="dim">
+                    No requests yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="section">
         <h2>Health</h2>
         <div className="counts">
           <Count label="Probe time p50, today" value={`${last.p50} ms`} />

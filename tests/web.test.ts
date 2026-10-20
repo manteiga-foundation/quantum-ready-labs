@@ -178,6 +178,12 @@ describe('view 3: the private metrics view', () => {
     expect(await first.getByRole('link').getAttribute('href')).toMatch(/^\/r\/[A-Za-z0-9_-]+$/);
     await see(page.getByRole('heading', { name: 'Studies' }));
     expect(await page.getByTestId('study-row').count()).toBeGreaterThanOrEqual(1);
+    // The emails readers leave in the Download dialog: who, for which host, when.
+    await see(page.getByRole('heading', { name: 'Quarterly report requests' }));
+    await see(page.getByTestId('metric-subscriptions'), /\d/);
+    const sub = page.getByTestId('subscription-row').first();
+    await see(sub, /@/);
+    await see(sub, /\d{4}-\d{2}-\d{2}/);
     expect(errors).toEqual([]);
     await page.context().close();
   });
