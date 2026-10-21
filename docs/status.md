@@ -72,9 +72,10 @@ slice that changes it; `AGENTS.md` stays the contract.
   the standards, a corrections address. The edge rewrites the page's title, description, canonical
   and Open Graph image (`og/study-<slug>.png`, drawn by `scripts/og-images.ts` from the same
   figures); study pages are indexable, unlike shared results.
-- Tests: 114 (`bun run test`): 98 offline (unit, fixture TLS server, engine HTTP, edge policy,
-  report model, pacer, README shape, report and letter HTML, study model), 11 web tests in real
-  Chromium, 5 renderer tests. CI (Linux) runs check, the unit tests and the build.
+- Tests: 149 (`bun run test`): 131 offline (unit, fixture TLS server, engine HTTP, edge policy,
+  report model, pacer, README shape, report and letter HTML, study model, the hosts list, the
+  .xlsx package and its zip), 13 web tests in real Chromium, 5 renderer tests. CI (Linux) runs
+  check, the unit tests and the build.
 
 Measured on real hosts (2026-10-18): cloudflare.com, google.com, manteiga.org PROTECTED 85;
 github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan from the Mac,
@@ -93,6 +94,19 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
   shared links opened, reports downloaded, failures, scans today, protected-or-ready share,
   median score, repeat tests, countries, report requests). Share and repeat are computed in the
   view from the per-day rows; median and countries are two more queries in `metricsRoute`.
+- Hosts tested on `/metrics` (`web/src/components/HostsTable.tsx`, the arithmetic in the pure
+  `web/src/host-list.ts`): a search over host and port, one chip per stage carrying its count,
+  a score range and a minimum scans floor, every header sortable (stage sorts by rank on the
+  ladder, not by name), 50 to a page with first/previous/next/last and the range stated above the
+  table, and an .xlsx export of the filtered list in its sorted order, not the page on screen.
+  The demo lengthens the list with `?demo=1&hosts=<n>`, which is how the browser test reaches three
+  pages. On a phone the table drops Scans and Last tested rather than scrolling sideways inside
+  its wrap; the test measures the wrap's own scrollWidth, not just the page.
+- The .xlsx export (`web/src/xlsx.ts`) is written by hand, no dependency: a stored-entry zip of
+  the six Office Open XML parts, header row bold and frozen, column widths from the content,
+  text as inline strings (never a formula, so a host named `=cmd` stays text) and numbers as
+  numbers. `tests/zip.ts` parses the package back so a broken workbook fails in CI; the file was
+  also opened by macOS's own OOXML reader, which drew the header and all 27 filtered rows.
 - Reports downloaded: every `/api/report/<id>.pdf` served (cached or rendered, demo ids excluded)
   writes a row to `downloads`; `/metrics` shows the 30-day count beside shared-link opens. Counting
   began 20 October 2026 (edge 3a184161); earlier downloads are not in it.

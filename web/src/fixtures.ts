@@ -74,7 +74,19 @@ export interface HostRow {
   lastAt: string;
 }
 
-export function demoMetrics(now = new Date('2026-10-18T12:00:00Z')): MetricsData {
+/** Filler rows for the demo, so a long list pages: neutral names, a stage each, deterministic. */
+function extraHosts(n: number, from: string): HostRow[] {
+  const stages = ['exposed', 'at-risk', 'protected', 'ready'];
+  const lastIds: Record<string, string> = { exposed: 'demo-exposed', 'at-risk': 'demo-at-risk', protected: 'demo-protected', ready: 'demo-ready' };
+  const scores: Record<string, number> = { exposed: 28, 'at-risk': 47, protected: 78, ready: 93 };
+  return Array.from({ length: Math.min(500, Math.max(0, Math.trunc(n))) }, (_, i) => {
+    const stage = stages[i % stages.length];
+    const at = new Date(Date.parse(from + 'T12:00:00Z') - i * 3600_000).toISOString();
+    return { host: `host-${String(i + 1).padStart(3, '0')}.example`, port: 443, stage, score: scores[stage] - (i % 5), scans: 1 + (i % 9), lastId: lastIds[stage], lastAt: at };
+  });
+}
+
+export function demoMetrics(now = new Date('2026-10-18T12:00:00Z'), hostCount = 0): MetricsData {
   let seed = 7;
   const rand = () => {
     seed = (seed * 9301 + 49297) % 233280;
@@ -135,6 +147,7 @@ export function demoMetrics(now = new Date('2026-10-18T12:00:00Z')): MetricsData
       { host: 'exposed.example', port: 1012, stage: 'exposed', score: 27, scans: 2, lastId: 'demo-exposed', lastAt: days[28].date + 'T09:30:00Z' },
       { host: 'shop.example', port: 443, stage: 'protected', score: 79, scans: 4, lastId: 'demo-protected', lastAt: days[27].date + 'T15:02:00Z' },
       { host: 'intranet-portal.example', port: 443, stage: 'at-risk', score: 43, scans: 1, lastId: 'demo-at-risk', lastAt: days[26].date + 'T08:44:00Z' },
+      ...extraHosts(hostCount, days[25].date),
     ],
     subscriptions: [
       { email: 'ciso@protected.example', host: 'protected.example', createdAt: days[29].date + 'T10:14:00Z' },

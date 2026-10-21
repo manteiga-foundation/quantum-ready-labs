@@ -130,7 +130,9 @@ export async function loadResult(id: string): Promise<{ result: ScanResult } | {
 }
 
 export async function loadMetrics(): Promise<MetricsData | { error: string }> {
-  if (new URLSearchParams(window.location.search).has('demo')) return demoMetrics();
+  const params = new URLSearchParams(window.location.search);
+  // ?demo=1 replays the emulated metrics; &hosts=<n> lengthens the hosts list, to see it page.
+  if (params.has('demo')) return demoMetrics(undefined, Math.max(0, Number(params.get('hosts')) || 0));
   const res = await fetch('/api/metrics');
   if (!res.ok) return { error: `Metrics could not be loaded (${res.status}).` };
   return (await res.json()) as MetricsData;

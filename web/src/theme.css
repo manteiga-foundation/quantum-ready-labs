@@ -892,6 +892,157 @@ details.tech summary {
   vertical-align: middle;
 }
 
+/* The hosts table: search, chips and ranges over it; a sortable header; a pager under it */
+.host-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin: 10px 0 4px;
+}
+
+.host-tools .chips {
+  margin: 0;
+}
+
+.host-search {
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 7px 12px;
+  min-width: 240px;
+  flex: 1 1 240px;
+  max-width: 340px;
+  color: var(--text);
+  background: color-mix(in oklab, var(--bg) 80%, transparent);
+  border: 1px solid color-mix(in oklab, var(--line) 45%, transparent);
+  border-radius: var(--radius);
+  outline: none;
+}
+
+.host-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+.host-search::placeholder {
+  color: var(--text-faint);
+}
+
+.host-ranges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  flex: 1 1 100%;
+}
+
+.host-ranges label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.host-ranges label span[aria-hidden='true'] {
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-faint);
+}
+
+.host-ranges input {
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  width: 62px;
+  padding: 5px 8px;
+  color: var(--text);
+  background: color-mix(in oklab, var(--bg) 80%, transparent);
+  border: 1px solid color-mix(in oklab, var(--line) 45%, transparent);
+  border-radius: var(--radius);
+  outline: none;
+}
+
+.host-ranges input:focus {
+  border-color: var(--accent);
+}
+
+/* The one action on the row: same height as the inputs beside it, at the row's right edge. */
+.host-ranges .hosts-export {
+  margin-left: auto;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+}
+
+.host-count {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+}
+
+.hosts-table th .sort {
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hosts-table th .sort:hover {
+  color: var(--text-dim);
+}
+
+.hosts-table th[aria-sort='ascending'] .sort,
+.hosts-table th[aria-sort='descending'] .sort {
+  color: var(--accent-text);
+}
+
+/* The sort glyph at header size would be unreadable; at 0.75em it reads as an affordance. */
+.hosts-table .arrow {
+  font-size: 0.85em;
+  min-width: 0.7em;
+  opacity: 0.55;
+}
+
+.hosts-table th[aria-sort='ascending'] .arrow,
+.hosts-table th[aria-sort='descending'] .arrow {
+  opacity: 1;
+  color: var(--accent-text);
+}
+
+/* Numbers line up under their header: right-aligned, tabular, so 95 and 9 read as one column. */
+.hosts-table .numeric,
+.hosts-table th.numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.host-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 12px;
+}
+
+.host-pager .button {
+  padding: 7px 14px;
+  font-size: 0.75rem;
+}
+
+.host-pager .mono {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
 /* A study: the state-of-readiness note */
 .study {
   max-width: 1040px;
@@ -1069,8 +1220,34 @@ details.tech summary {
     padding: 16px;
   }
 
-  .study .optional {
+  /* Both tables drop their lowest-priority columns rather than scroll sideways inside the wrap:
+     the study keeps name, stage, score and links; the hosts table keeps host, stage and score. */
+  .study .optional,
+  .hosts-table .optional,
+  .hosts-table th.optional {
     display: none;
+  }
+
+  .hosts-table td,
+  .hosts-table th {
+    padding: 8px 6px;
+  }
+
+  .hosts-table td.mono a {
+    overflow-wrap: anywhere;
+  }
+
+  .host-pager .mono {
+    flex-basis: 100%;
+    order: -1;
+  }
+
+  .host-ranges {
+    gap: 8px 10px;
+  }
+
+  .host-ranges input {
+    width: 56px;
   }
 
   .study-table td,

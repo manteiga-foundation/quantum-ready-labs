@@ -194,6 +194,105 @@ describe('view 3: the private metrics view', () => {
     await page.context().close();
   });
 
+  test('the hosts table: search, stage chips, sortable columns, 50 to a page, and an .xlsx export', async () => {
+    const { page, errors } = await open('/metrics?demo=1');
+    await see(page.getByRole('heading', { name: 'Hosts tested' }));
+    const rows = page.getByTestId('host-row');
+    const all = await rows.count();
+    expect(all).toBeGreaterThan(3);
+    // The table says what it is showing: all of them, one page.
+    await see(page.getByTestId('hosts-count'), new RegExp(`1\u2013${all} of ${all}`));
+    // The default order is the most recently tested first, as the notice says.
+    const order = async () => (await page.evaluate("[...document.querySelectorAll('[data-testid=host-row] td:first-child')].map(td => td.textContent.trim())")) as string[];
+    expect(await order()).toEqual(['ready.example', 'protected.example', 'at-risk.example', 'exposed.example:1012', 'shop.example', 'intranet-portal.example']);
+    // The search narrows as it is typed; a stage chip narrows further; All brings everything back.
+    const search = page.getByRole('searchbox', { name: 'Search hosts' });
+    await search.fill('shop');
+    expect(await rows.count()).toBe(1);
+    await see(rows.first(), /shop\.example/);
+    await search.fill('');
+    expect(await rows.count()).toBe(all);
+    await page.getByRole('button', { name: /^Exposed 1$/ }).click();
+    expect(await rows.count()).toBe(1);
+    await see(rows.first().getByTestId('host-stage'), exact('EXPOSED'));
+    await page.getByRole('button', { name: /^Exposed 1$/ }).click(); // a chip toggles off
+    expect(await rows.count()).toBe(all);
+    // Score and scans narrow by number, both ends.
+    await page.getByRole('searchbox', { name: 'Search hosts' });
+    await page.getByLabel('Minimum score').fill('80');
+    expect(await rows.count()).toBe(2);
+    await page.getByLabel('Minimum scans').fill('5');
+    expect(await rows.count()).toBe(1);
+    await see(page.getByTestId('hosts-count'), /narrowed from 6/);
+    await page.getByRole('button', { name: 'Clear filters' }).click();
+    expect(await rows.count()).toBe(all);
+    // A header sorts: numbers biggest first, then the other way; names from the top.
+    const scores = async () => (await page.getByTestId('host-score').allTextContents()).map((t) => Number(t.trim()));
+    const nonIncreasing = (ns: number[]) => ns.every((n, i) => i === 0 || ns[i - 1] >= n);
+    const nonDecreasing = (ns: number[]) => ns.every((n, i) => i === 0 || ns[i - 1] <= n);
+    await page.getByRole('button', { name: 'Score' }).click();
+    expect(nonIncreasing(await scores())).toBe(true);
+    expect(await page.getByRole('button', { name: /^Score/ }).locator('xpath=..').getAttribute('aria-sort')).toBe('descending');
+    await page.getByRole('button', { name: 'Score' }).click();
+    expect(nonDecreasing(await scores())).toBe(true);
+    await page.getByRole('button', { name: 'Host' }).click();
+    expect((await order()).slice(0, 2)).toEqual(['at-risk.example', 'exposed.example:1012']);
+    // No match says so, rather than showing an empty table with no explanation.
+    await search.fill('nothing.matches.this');
+    expect(await rows.count()).toBe(0);
+    await see(page.getByTestId('hosts-empty'), /No host matches/i);
+    await page.getByRole('button', { name: 'Clear filters' }).click();
+    expect(await rows.count()).toBe(all);
+    // The export is a real .xlsx downloaded as a blob: the tab stays on the metrics view.
+    const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('hosts-export').click()]);
+    expect(download.suggestedFilename()).toMatch(/^quantum-ready-labs-hosts-\d{4}-\d{2}-\d{2}\.xlsx$/);
+    expect(page.url()).toContain('/metrics');
+    const file = await download.path();
+    const bytes = new Uint8Array(await Bun.file(file!).arrayBuffer());
+    expect([...bytes.subarray(0, 2)]).toEqual([0x50, 0x4b]); // a zip, PK
+    expect(errors).toEqual([]);
+    await page.context().close();
+  });
+
+  test('a long host list pages 50 at a time, on a phone as on a desktop', async () => {
+    // The six rows above plus 131 more: 137 hosts, three pages, the last one short.
+    const { page, errors } = await open('/metrics?demo=1&hosts=131');
+    await see(page.getByRole('heading', { name: 'Hosts tested' }));
+    const rows = page.getByTestId('host-row');
+    expect(await rows.count()).toBe(50);
+    await see(page.getByTestId('hosts-count'), /1\u201350 of 137/);
+    await see(page.getByTestId('hosts-page'), /Page 1 of 3/);
+    expect(await page.getByRole('button', { name: 'Previous page' }).isDisabled()).toBe(true);
+    // Every column is offered on a desktop.
+    expect(await page.getByRole('button', { name: /^Last tested/ }).isVisible()).toBe(true);
+    await page.getByRole('button', { name: 'Next page' }).click();
+    await see(page.getByTestId('hosts-page'), /Page 2 of 3/);
+    await see(page.getByTestId('hosts-count'), /51\u2013100 of 137/);
+    expect(await rows.count()).toBe(50);
+    await page.getByRole('button', { name: 'Last page' }).click();
+    await see(page.getByTestId('hosts-page'), /Page 3 of 3/);
+    await see(page.getByTestId('hosts-count'), /101\u2013137 of 137/);
+    expect(await rows.count()).toBe(37);
+    expect(await page.getByRole('button', { name: 'Next page' }).isDisabled()).toBe(true);
+    // A filter resets the pager: page 3 of a narrowed list is noise.
+    await page.getByRole('searchbox', { name: 'Search hosts' }).fill('host-');
+    await see(page.getByTestId('hosts-page'), /Page 1 of 3/);
+    // Phones matter here: the row keeps host, stage and score, the two low-priority columns go, and
+    // the table fits its wrap instead of scrolling sideways inside it.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const first = rows.first();
+    await see(first.getByRole('link'));
+    await see(first.getByTestId('host-stage'));
+    await see(first.getByTestId('host-score'));
+    expect(await page.getByRole('button', { name: 'Last tested' }).isVisible()).toBe(false);
+    const wrap = (await page.evaluate("(() => { const w = document.querySelector('.table-wrap'); return { scroll: w.scrollWidth, client: w.clientWidth }; })()")) as { scroll: number; client: number };
+    expect(wrap.scroll).toBeLessThanOrEqual(wrap.client + 1);
+    const overflow = await page.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth');
+    expect(overflow).toBeLessThanOrEqual(0);
+    expect(errors).toEqual([]);
+    await page.context().close();
+  });
+
   test('view 4: the API page tells an agent how to scan, read, and fetch the PDF', async () => {
     const { page, errors } = await open('/api');
     await see(page.getByRole('heading', { level: 1 }), exact('The API'));
