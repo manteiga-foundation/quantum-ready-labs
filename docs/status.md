@@ -73,9 +73,9 @@ slice that changes it; `AGENTS.md` stays the contract.
   and Open Graph image (`og/study-<slug>.png`, drawn by `scripts/og-images.ts` from the same
   figures); study pages are indexable, unlike shared results.
 - Tests: 149 (`bun run test`): 131 offline (unit, fixture TLS server, engine HTTP, edge policy,
-  report model, pacer, README shape, report and letter HTML, study model, the hosts list, the
-  .xlsx package and its zip), 13 web tests in real Chromium, 5 renderer tests. CI (Linux) runs
-  check, the unit tests and the build.
+  report model, pacer, README shape, report and letter HTML, study model, the hosts list in
+  `tests/host-list.test.ts`, the .xlsx export and the zip reader that parses it back), 13 web
+  tests in real Chromium, 5 renderer tests. CI (Linux) runs check, the unit tests and the build.
 
 Measured on real hosts (2026-10-18): cloudflare.com, google.com, manteiga.org PROTECTED 85;
 github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan from the Mac,
