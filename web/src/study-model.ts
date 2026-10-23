@@ -71,8 +71,10 @@ export const STUDY_META: Record<string, StudyMeta> = {
     lead: 'Of 81 Florida banks and credit unions, 54 already protect their customers\u2019 connections against future quantum decryption; 27 do not yet.',
     press: [
       { date: '2026-10-20', outlet: 'Quantum Zeitgeist', kind: 'coverage', title: 'Manteiga Foundation Scans Florida Banks for Quantum Readiness', url: 'https://quantumzeitgeist.com/manteiga-foundation-scans-florida-banks/' },
+      { date: '2026-10-20', outlet: 'Practical Commerce Chamber', kind: 'coverage', title: 'Florida Banks Face Quantum Readiness Gap', url: 'https://pcchamber.org/news/florida-banks-face-quantum-readiness-gap/' },
       { date: '2026-10-20', outlet: 'Yahoo Finance', kind: 'syndication', title: "One Third of Florida's Banks and Credit Unions Not Yet Protected Against Future Quantum Decryption", url: 'https://finance.yahoo.com/technology/ai/articles/one-third-floridas-banks-credit-125200422.html' },
       { date: '2026-10-20', outlet: 'Morningstar', kind: 'syndication', title: "One Third of Florida's Banks and Credit Unions Not Yet Protected Against Future Quantum Decryption", url: 'https://www.morningstar.com/news/pr-newswire/20261020ph75865/one-third-of-floridas-banks-and-credit-unions-not-yet-protected-against-future-quantum-decryption-open-source-scan-finds' },
+      { date: '2026-10-20', outlet: 'Morgan County Citizen', kind: 'syndication', title: "One Third of Florida's Banks and Credit Unions Not Yet Protected Against Future Quantum Decryption, Open-Source Scan Finds", url: 'https://www.morgancountycitizen.com/news/national/one-third-of-floridas-banks-and-credit-unions-not-yet-protected-against-future-quantum-decryption/article_209dc6f3-62c0-534d-b1cf-ff011aecc4a9.html' },
       { date: '2026-10-20', outlet: 'PR Newswire', kind: 'release', title: "One Third of Florida's Banks and Credit Unions Not Yet Protected Against Future Quantum Decryption, Open-Source Scan Finds", url: 'https://www.prnewswire.com/news-releases/one-third-of-floridas-banks-and-credit-unions-not-yet-protected-against-future-quantum-decryption-open-source-scan-finds-302913890.html' },
     ],
     translations: {

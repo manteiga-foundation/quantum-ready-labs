@@ -160,7 +160,9 @@ github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan f
 1. The study page is deployed and the press release (docs/press/2026-10-20-florida-release,
    led by the Florida figure, Manteiga Foundation as issuer) is paid and scheduled on PR Newswire
    via eReleases, live Tuesday 20 October 2026, 8:52 ET: 169 pickups on the day (Yahoo Finance,
-   Morningstar, TheStreet, Business Chief among them); Quantum Zeitgeist wrote its own piece. The
+   Morningstar, TheStreet, Business Chief among them); Quantum Zeitgeist and the Practical
+   Commerce Chamber newsroom wrote their own pieces, and the Morgan County Citizen carried the
+   release in its national news (both found 23 October). The
    wire URL and pickups are on n30.ai's Press section and the study page's In the press list.
    LinkedIn posted the same afternoon (docs/press/2026-10-20-linkedin.md; the preview card
    rendered the study's OG image). Show HN still to do, a weekday morning. First day: 104 web

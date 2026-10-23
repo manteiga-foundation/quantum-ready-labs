@@ -355,6 +355,8 @@ describe('view 5: a study, the state-of-readiness note', () => {
     const items = press.getByRole('listitem');
     expect(await items.count()).toBeGreaterThanOrEqual(3);
     await see(items.first(), /Quantum Zeitgeist/);
+    await see(press, /Practical Commerce Chamber/);
+    await see(press, /Morgan County Citizen/);
     const hrefs = (await page.evaluate("[...document.querySelectorAll('[data-testid=study-press] li a')].map(a => a.getAttribute('href'))")) as string[];
     expect(hrefs.length).toBe(await items.count());
     for (const href of hrefs) expect(href).toMatch(/^https:\/\//);
