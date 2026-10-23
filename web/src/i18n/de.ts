@@ -247,6 +247,51 @@ export const de: Messages = {
     standards: 'Standards: NIST FIPS 203 (ML-KEM), IR 8547 (nach 2030 veraltet, nach 2035 untersagt), NSA CNSA 2.0, IETF draft-ietf-tls-ecdhe-mlkem.',
     printFooter: 'Ein Projekt der Manteiga Foundation',
   },
+  study: {
+    indexTitle: 'Studien',
+    indexIntro:
+      'Eine Studie ist eine benannte Grundgesamtheit, die der Betreuer an einem Tag scannt und als Lagebericht zur Bereitschaft veröffentlicht: die Zahlen, jedes Institut mit seinem Ergebnis, die Methode. Studien werden von der normalen Nutzung des Scanners getrennt gehalten.',
+    observed: (date: string) => `Erhoben am ${date}.`,
+    notFoundTitle: 'Studie nicht gefunden',
+    notFoundBody: 'Unter diesem Namen ist nichts veröffentlicht. Die vorhandenen Studien sind unter [/studies](/studies) aufgeführt.',
+    byline: (subtitle: string, date: string) => `${subtitle}. Erhoben am ${date}. Von der Manteiga Foundation, mit dem quelloffenen Scanner Quantum Ready Labs.`,
+    findings: 'Ergebnisse',
+    leadRest:
+      'Die {notYet} teilen sich in zwei Gruppen: {exposedCount} sind {exposed} (ihre Websites nutzen noch eine Protokollgeneration, die keinen Post-Quanten-Schutz tragen kann) und {atRiskCount} sind {at-risk} (modernes Protokoll, Post-Quanten-Schutz nicht eingeschaltet). Die übrigen {protectedTotal} sind {protected} ({protectedCount}) oder {ready} ({readyCount}). Der Median liegt bei {median} von 100.',
+    calmBroken:
+      '**Heute ist nichts kaputt.** Kein Konto, keine Anmeldung und keine Transaktion bei diesen Instituten ist durch das gefährdet, was dieser Bericht beschreibt; jede getestete Verbindung ist mit Algorithmen verschlüsselt, die kein existierender Computer brechen kann.',
+    calmTime:
+      '**Das Risiko ist die Zeit.** Verschlüsselter Datenverkehr kann heute aufgezeichnet und entschlüsselt werden, sobald ein ausreichend großer Quantencomputer existiert; alles, was jahrelang vertraulich bleiben muss, liegt also bereits im Zeitfenster. Und dieses Fenster wird kleiner: 2025 sank die geschätzte Größe der Maschine, die den heutigen Schlüsselaustausch brechen kann, von rund zwanzig Millionen Qubits auf unter eine Million, und das NIST hat 2030 als Beginn und 2035 als Ende der Ablösung des heutigen Schlüsselaustauschs festgelegt. Browser und die größten Websites schützen ihren Datenverkehr bereits auf die neue Weise.',
+    calmFix:
+      '**Die Abhilfe ist klein.** Für die {exposedCount} Institute der Stufe {exposed} ist der nächste Schritt, TLS 1.3 zu aktivieren; für die {atRiskCount} der Stufe {at-risk}, den Post-Quanten-Schlüsselaustausch (X25519MLKEM768) einzuschalten, was auf aktuellen Servern und Content-Delivery-Netzwerken eine Konfigurationszeile oder ein Schalter ist. Die meisten sind nur eine Änderung von {protected} entfernt.',
+    barAria: (share: number) => `${share} Prozent geschützt oder bereit`,
+    share: (share: number) => `${share} % geschützt oder bereit`,
+    institutions: 'Alle Institute',
+    institutionsNotice: (total: number, date: string) =>
+      `Alphabetisch, alle ${total}. Jede Zeile verweist auf die vollständige Ergebnisseite und den PDF-Bericht, wie am ${date} erhoben; Erneut testen startet jetzt einen neuen Scan. Stufe und Punktzahl messen nur die Quantenbereitschaft, nicht die Sicherheit im Allgemeinen.`,
+    filter: 'Nach Stufe filtern',
+    all: (n: number) => `Alle ${n}`,
+    colInstitution: 'Institut',
+    colStage: 'Stufe',
+    colScore: 'Punkte',
+    colNext: 'Nächster Schritt',
+    colResult: 'Ergebnis',
+    report: 'Bericht',
+    pdf: 'PDF',
+    none: 'keine',
+    testAgain: 'Erneut testen',
+    method: 'Methode',
+    methodTested:
+      'Jede Domain wurde am {date} genau so getestet, wie es ein Browserbesuch tun würde: vierzehn TLS-Handshakes und eine gewöhnliche Verbindung, nicht mehr. Es wurde keine Seite geöffnet und keine Anmeldung versucht. Die Proben lesen im Klartext, ob der Server TLS 1.3 anbietet, welche Schlüsselaustauschgruppen er akzeptiert, darunter die hybride Post-Quanten-Gruppe X25519MLKEM768, die aktuelle Browser vorschlagen, ob er noch RSA-Schlüsseltransport akzeptiert, sowie die Zertifikatskette. Die {exposedCount} Ergebnisse der Stufe {exposedWord} wurden mit OpenSSL 3 und curl gegengeprüft, die ebenfalls mit keinem davon einen TLS-1.3-Handshake abschließen konnten.',
+    methodRubric:
+      'Das Bewertungsschema ist öffentlich: [Bewertung](https://github.com/manteiga-foundation/quantum-ready-labs/blob/main/docs/scoring.md). Der Scanner ist Open Source unter der MIT-Lizenz; jeder kann die Messung mit `bun run scan <host>` oder der [API](/api) wiederholen. Zitierte Standards: NIST IR 8547 (Übergang zur Post-Quanten-Kryptografie: quantenanfälligen Schlüsselaustausch bis 2030 als veraltet einstufen, bis 2035 untersagen), FIPS 203 (ML-KEM), CNSA 2.0.',
+    corrections:
+      'Eine falsche Domain oder eine Änderung seit der Erhebung: Schreiben Sie an hello@manteiga.org. Erneut testen zeigt sofort den heutigen Stand, und die Grundgesamtheit wird jedes Quartal neu gescannt; ein neues Ergebnis ersetzt die Zeile beim nächsten Lauf.',
+    press: 'In der Presse',
+    pressCoverage: 'hat darüber geschrieben',
+    pressRelease: 'die Pressemitteilung',
+    pressSyndication: 'hat die Pressemitteilung übernommen',
+  },
   dialog: {
     title: 'Bericht herunterladen',
     bodyPdf: 'Ein fünfseitiges, druckfertiges PDF: Deckblatt, Zusammenfassung, Stand des Hosts, technische Details, Methode und Standards.',

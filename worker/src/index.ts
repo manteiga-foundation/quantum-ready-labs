@@ -413,7 +413,7 @@ async function studyPage(slug: string, request: Request, env: Env): Promise<Resp
   const url = new URL(request.url);
   const origin = env.PUBLIC_ORIGIN || url.origin;
   const index = localizePage(await env.ASSETS.fetch(new Request(new URL('/', request.url), { headers: request.headers })), url.pathname, origin);
-  const preview = studyPreview(slug, origin);
+  const preview = studyPreview(slug, origin, splitPath(url.pathname).locale);
   if (!preview) return index;
   return withPreview(index, preview);
 }

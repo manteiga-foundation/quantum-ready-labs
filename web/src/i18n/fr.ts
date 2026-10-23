@@ -247,6 +247,51 @@ export const fr: Messages = {
     standards: 'Normes : NIST FIPS 203 (ML-KEM), IR 8547 (déprécié après 2030, interdit après 2035), NSA CNSA 2.0, IETF draft-ietf-tls-ecdhe-mlkem.',
     printFooter: 'Un projet de la Manteiga Foundation',
   },
+  study: {
+    indexTitle: 'Études',
+    indexIntro:
+      'Une étude porte sur une population nommée, analysée par le mainteneur en une seule journée et publiée sous forme de note sur l’état de préparation\u00a0: les chiffres, chaque institution avec son résultat, la méthode. Les études sont tenues à l’écart de l’usage courant de l’analyseur.',
+    observed: (date: string) => `Observé le ${date}.`,
+    notFoundTitle: 'Étude introuvable',
+    notFoundBody: 'Rien n’est publié sous ce nom. Les études existantes sont listées sur [/studies](/studies).',
+    byline: (subtitle: string, date: string) => `${subtitle}. Observé le ${date}. Par la Manteiga Foundation, avec l’analyseur libre Quantum Ready Labs.`,
+    findings: 'Résultats',
+    leadRest:
+      'Les {notYet} se répartissent en deux\u00a0: {exposedCount} sont au stade {exposed} (leurs sites utilisent encore une génération de protocole qui ne peut pas porter de protection post-quantique) et {atRiskCount} au stade {at-risk} (protocole moderne, protection post-quantique non activée). Les {protectedTotal} autres sont au stade {protected} ({protectedCount}) ou {ready} ({readyCount}). L’institution médiane obtient {median} sur 100.',
+    calmBroken:
+      '**Rien n’est cassé aujourd’hui.** Aucun compte, aucune connexion, aucune transaction de ces institutions n’est menacé par ce que décrit cette note\u00a0; chaque connexion testée est chiffrée avec des algorithmes qu’aucun ordinateur existant ne peut casser.',
+    calmTime:
+      '**Le risque, c’est le temps.** Le trafic chiffré peut être enregistré aujourd’hui et déchiffré lorsqu’un ordinateur quantique assez puissant existera\u00a0; tout ce qui doit rester confidentiel pendant des années est donc déjà dans la fenêtre. Et cette fenêtre se resserre\u00a0: en 2025, la taille estimée de la machine nécessaire pour casser l’échange de clés actuel est passée d’environ vingt millions de qubits à moins d’un million, et le NIST a fixé 2030 pour commencer à retirer l’échange de clés actuel et 2035 pour y mettre fin. Les navigateurs et les plus grands sites web protègent déjà leur trafic de la nouvelle manière.',
+    calmFix:
+      '**La correction est simple.** Pour les {exposedCount} institutions au stade {exposed}, la prochaine étape est d’activer TLS 1.3\u00a0; pour les {atRiskCount} au stade {at-risk}, d’activer l’échange de clés post-quantique (X25519MLKEM768), qui sur les serveurs et les réseaux de diffusion de contenu actuels tient en une ligne de configuration ou un interrupteur. La plupart sont à un seul changement du stade {protected}.',
+    barAria: (share: number) => `${share}\u00a0% protégées ou prêtes`,
+    share: (share: number) => `${share}\u00a0% protégées ou prêtes`,
+    institutions: 'Toutes les institutions',
+    institutionsNotice: (total: number, date: string) =>
+      `Par ordre alphabétique, les ${total}. Chaque ligne renvoie à la page complète du résultat et au rapport PDF tels qu’observés le ${date}\u00a0; Tester à nouveau lance une nouvelle analyse maintenant. Le stade et le score mesurent uniquement la préparation quantique, pas la sécurité en général.`,
+    filter: 'Filtrer par stade',
+    all: (n: number) => `Toutes ${n}`,
+    colInstitution: 'Institution',
+    colStage: 'Stade',
+    colScore: 'Score',
+    colNext: 'Prochaine étape',
+    colResult: 'Résultat',
+    report: 'Rapport',
+    pdf: 'PDF',
+    none: 'aucun',
+    testAgain: 'Tester à nouveau',
+    method: 'Méthode',
+    methodTested:
+      'Chaque domaine a été testé le {date} exactement comme le ferait une visite avec un navigateur\u00a0: quatorze négociations TLS et une connexion ordinaire, rien de plus. Aucune page n’a été ouverte et aucune connexion à un compte n’a été tentée. Les sondes lisent, en clair, si le serveur propose TLS 1.3, quels groupes d’échange de clés il accepte, dont le groupe hybride post-quantique X25519MLKEM768 que proposent les navigateurs actuels, s’il accepte encore le transport de clés RSA, et la chaîne de certificats. Les {exposedCount} résultats au stade {exposedWord} ont été recoupés avec OpenSSL 3 et curl, qui n’ont pas non plus pu mener à bien une négociation TLS 1.3 avec aucun d’entre eux.',
+    methodRubric:
+      'La grille de notation est publique\u00a0: [Notre notation](https://github.com/manteiga-foundation/quantum-ready-labs/blob/main/docs/scoring.md). L’analyseur est un logiciel libre sous licence MIT\u00a0; chacun peut répéter la mesure avec `bun run scan <host>` ou l’[API](/api). Normes citées\u00a0: NIST IR 8547 (transition vers la cryptographie post-quantique\u00a0: dépréciation de l’échange de clés vulnérable au quantique d’ici 2030, interdiction d’ici 2035), FIPS 203 (ML-KEM), CNSA 2.0.',
+    corrections:
+      'Un domaine erroné, ou un changement survenu depuis l’observation\u00a0: écrivez à hello@manteiga.org. Tester à nouveau montre immédiatement l’état actuel, et la population est réanalysée chaque trimestre\u00a0; un nouveau résultat remplace la ligne lors du passage suivant.',
+    press: 'Dans la presse',
+    pressCoverage: 'en a parlé',
+    pressRelease: 'le communiqué',
+    pressSyndication: 'a repris le communiqué',
+  },
   dialog: {
     title: 'Télécharger le rapport',
     bodyPdf: 'Un PDF de cinq pages prêt à imprimer : couverture, synthèse, situation de l’hôte, détails techniques, méthode et normes.',

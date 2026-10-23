@@ -247,6 +247,51 @@ export const pt: Messages = {
     standards: 'Normas: NIST FIPS 203 (ML-KEM), IR 8547 (obsoleto após 2030, proibido após 2035), NSA CNSA 2.0, IETF draft-ietf-tls-ecdhe-mlkem.',
     printFooter: 'Um projeto da Manteiga Foundation',
   },
+  study: {
+    indexTitle: 'Estudos',
+    indexIntro:
+      'Um estudo é uma população nomeada, analisada pelo mantenedor em um único dia e publicada como uma nota sobre o estado de preparação: os números, cada instituição com seu resultado e o método. Os estudos são mantidos separados do uso orgânico do scanner.',
+    observed: (date: string) => `Observado em ${date}.`,
+    notFoundTitle: 'Estudo não encontrado',
+    notFoundBody: 'Nada foi publicado com este nome. Os estudos existentes estão listados em [/studies](/studies).',
+    byline: (subtitle: string, date: string) => `${subtitle}. Observado em ${date}. Pela Manteiga Foundation, com o scanner de código aberto Quantum Ready Labs.`,
+    findings: 'Resultados',
+    leadRest:
+      'As {notYet} se dividem em duas: {exposedCount} estão na etapa {exposed} (seus sites ainda usam uma geração do protocolo que não comporta proteção pós-quântica) e {atRiskCount} na etapa {at-risk} (protocolo moderno, proteção pós-quântica não ativada). As {protectedTotal} restantes estão em {protected} ({protectedCount}) ou {ready} ({readyCount}). A instituição mediana marca {median} de 100.',
+    calmBroken:
+      '**Nada está quebrado hoje.** Nenhuma conta, login ou transação dessas instituições está em risco pelo que esta nota descreve; toda conexão testada é cifrada com algoritmos que nenhum computador existente consegue quebrar.',
+    calmTime:
+      '**O risco é o tempo.** O tráfego cifrado pode ser gravado agora e decifrado quando existir um computador quântico grande o bastante, então tudo o que precisa permanecer confidencial por anos já está dentro dessa janela. E a janela está se estreitando: em 2025, o tamanho estimado da máquina necessária para quebrar a troca de chaves atual caiu de cerca de vinte milhões de qubits para menos de um milhão, e o NIST definiu 2030 para começar a aposentar a troca de chaves atual e 2035 para encerrá-la. Os navegadores e os maiores sites da web já protegem seu tráfego da nova forma.',
+    calmFix:
+      '**A correção é pequena.** Para as {exposedCount} instituições na etapa {exposed}, o próximo passo é ativar o TLS 1.3; para as {atRiskCount} na etapa {at-risk}, ativar a troca de chaves pós-quântica (X25519MLKEM768), que nos servidores e redes de distribuição de conteúdo atuais é uma linha de configuração ou um botão. A maioria está a uma única mudança de {protected}.',
+    barAria: (share: number) => `${share} por cento protegidas ou prontas`,
+    share: (share: number) => `${share}% protegidas ou prontas`,
+    institutions: 'Todas as instituições',
+    institutionsNotice: (total: number, date: string) =>
+      `Em ordem alfabética, todas as ${total}. Cada linha leva à página completa do resultado e ao relatório em PDF conforme observados em ${date}; Testar novamente executa uma nova análise agora. Etapa e pontuação medem apenas a preparação quântica, não a segurança em geral.`,
+    filter: 'Filtrar por etapa',
+    all: (n: number) => `Todas ${n}`,
+    colInstitution: 'Instituição',
+    colStage: 'Etapa',
+    colScore: 'Pontos',
+    colNext: 'Próximo passo',
+    colResult: 'Resultado',
+    report: 'Relatório',
+    pdf: 'PDF',
+    none: 'nenhum',
+    testAgain: 'Testar novamente',
+    method: 'Método',
+    methodTested:
+      'Cada domínio foi testado em {date} exatamente como uma visita com um navegador: catorze handshakes TLS e uma conexão comum, nada mais. Nenhuma página foi aberta e nenhum login foi tentado. As sondas leem, em claro, se o servidor oferece TLS 1.3, quais grupos de troca de chaves aceita, entre eles o grupo híbrido pós-quântico X25519MLKEM768 que os navegadores atuais propõem, se ainda aceita o transporte de chaves RSA, e a cadeia de certificados. Os {exposedCount} resultados na etapa {exposedWord} foram conferidos com OpenSSL 3 e curl, que também não conseguiram concluir um handshake TLS 1.3 com nenhum deles.',
+    methodRubric:
+      'A rubrica é pública: [Como pontuamos](https://github.com/manteiga-foundation/quantum-ready-labs/blob/main/docs/scoring.md). O scanner é de código aberto sob a licença MIT; qualquer pessoa pode repetir a medição com `bun run scan <host>` ou a [API](/api). Normas citadas: NIST IR 8547 (transição para a criptografia pós-quântica: tornar obsoleta a troca de chaves vulnerável à computação quântica até 2030 e proibi-la até 2035), FIPS 203 (ML-KEM), CNSA 2.0.',
+    corrections:
+      'Um domínio errado ou uma mudança feita após a observação: escreva para hello@manteiga.org. Testar novamente mostra o estado de hoje na hora, e a população é analisada de novo a cada trimestre; um resultado novo substitui a linha na próxima rodada.',
+    press: 'Na imprensa',
+    pressCoverage: 'escreveu sobre o estudo',
+    pressRelease: 'o comunicado',
+    pressSyndication: 'publicou o comunicado',
+  },
   dialog: {
     title: 'Baixar o relatório',
     bodyPdf: 'Um PDF de cinco páginas pronto para impressão: capa, resumo executivo, situação do host, detalhes técnicos, método e normas.',

@@ -61,11 +61,24 @@ describe('the edge: each language as a search engine sees it', () => {
     expect(html).not.toContain('hreflang');
   });
 
-  test('the sitemap lists every home page with its alternates, and the studies', () => {
+  test('the study pages are translated too: each language is its own canonical, with alternates', async () => {
+    for (const rest of ['/studies', '/studies/florida-financial-2026q4']) {
+      const html = await rewrite(`/fr${rest}`);
+      expect(attr(html, /<link rel="canonical" href="([^"]+)"/)).toBe(`${ORIGIN}/fr${rest}`);
+      const alternates = [...html.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">/g)].map((m) => [m[1], m[2]]);
+      expect(alternates).toContainEqual(['ja', `${ORIGIN}/ja${rest}`]);
+      expect(alternates).toContainEqual(['x-default', `${ORIGIN}${rest}`]);
+      expect(alternates.length).toBe(7);
+    }
+  });
+
+  test('the sitemap lists every translated page with its alternates, then the API page', () => {
     const xml = sitemapXml(ORIGIN, ['florida-financial-2026q4']);
     for (const path of ['/', '/es/', '/pt/', '/fr/', '/de/', '/ja/']) expect(xml).toContain(`<loc>${ORIGIN}${path}</loc>`);
     expect(xml).toContain(`<xhtml:link rel="alternate" hreflang="pt-BR" href="${ORIGIN}/pt/"/>`);
     expect(xml).toContain(`<loc>${ORIGIN}/studies/florida-financial-2026q4</loc>`);
-    expect(xml.match(/<url>/g)?.length).toBe(6 + 2 + 1);
+    expect(xml).toContain(`<loc>${ORIGIN}/de/studies/florida-financial-2026q4</loc>`);
+    expect(xml).toContain(`<xhtml:link rel="alternate" hreflang="ja" href="${ORIGIN}/ja/studies"/>`);
+    expect(xml.match(/<url>/g)?.length).toBe(6 * 3 + 1);
   });
 });

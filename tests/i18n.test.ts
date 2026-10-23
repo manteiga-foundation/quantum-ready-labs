@@ -57,6 +57,14 @@ describe('messages: every language says everything', () => {
     expect(Object.keys(en.errors.scan).sort()).toEqual([...SCAN_ERROR_CODES].sort());
   });
 
+  test('every {placeholder} in English is in every translation, and no other', () => {
+    const slots = (s: string) => [...s.matchAll(/\{([a-zA-Z-]+)\}/g)].map((m) => m[1]).sort();
+    const english = new Map(leaves(en).map(([p, s]) => [p, slots(s)]));
+    for (const locale of LOCALES) {
+      for (const [path, text] of leaves(MESSAGES[locale])) expect({ locale, path, slots: slots(text) }).toEqual({ locale, path, slots: english.get(path) ?? [] });
+    }
+  });
+
   test('French typography: a no-break space before ? ! : ; never a plain one', () => {
     for (const [path, text] of leaves(MESSAGES.fr)) {
       const plain = text.replace(/https?:\/\/\S+|`[^`]*`|\]\([^)]*\)/g, '').match(/ [?!:;]/g);

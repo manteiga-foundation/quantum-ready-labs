@@ -462,6 +462,48 @@ describe('languages: detected, chosen, remembered', () => {
     await page.context().close();
   });
 
+  test('the study page reads in German: prose, live figures in colour, table, filter, method, press', async () => {
+    const { page, errors } = await open('/de/studies/florida-financial-2026q4');
+    await see(page.getByRole('heading', { level: 1 }), /^Banken und Kreditgenossenschaften in Florida/);
+    await see(page.getByTestId('study-lead'), /^Von 81 Banken/);
+    await see(page.getByTestId('study-lead'), /Der Median liegt bei 85 von 100/);
+    const inline = page.locator('[data-testid=study-lead] [data-stage=exposed]').first();
+    await see(inline, exact('Ungeschützt'));
+    expect(await inline.evaluate('el => getComputedStyle(el).color')).toBe(await page.getByTestId('count-exposed').evaluate('el => getComputedStyle(el).color'));
+    await see(page.getByTestId('study-calm'), /Heute ist nichts kaputt\./);
+    await see(page.getByTestId('count-exposed'), exact('10'));
+    await see(page.getByRole('columnheader', { name: 'Institut' }));
+    const first = page.getByTestId('institution-row').first();
+    await see(first.getByTestId('institution-stage'), exact('GEFÄHRDET'));
+    await see(first.getByTestId('institution-next'), /Aktivieren Sie hybriden Post-Quanten-Schlüsselaustausch/);
+    expect(await first.getByRole('link', { name: 'Bericht' }).getAttribute('href')).toMatch(/^https:\/\/quantumreadylabs\.com\/de\/r\/[A-Za-z0-9_-]{12}$/);
+    expect(await first.getByRole('link', { name: 'Erneut testen' }).getAttribute('href')).toBe('/de/scan?host=121fcu.org');
+    await page.getByRole('button', { name: /^Ungeschützt/ }).click();
+    expect(await page.getByTestId('institution-row').count()).toBe(10);
+    await see(page.getByTestId('study-method'), /18\. Oktober 2026/);
+    await see(page.getByTestId('study-press').getByRole('heading', { level: 2 }), exact('In der Presse'));
+    await see(page.getByTestId('study-press'), /hat darüber geschrieben/);
+    expect(await page.title()).toMatch(/^Banken und Kreditgenossenschaften in Florida/);
+    await page.goto(vite.url + '/ja/studies');
+    await see(page.getByRole('heading', { level: 1 }), exact('調査'));
+    expect(await page.getByRole('link', { name: /フロリダ/ }).getAttribute('href')).toBe('/ja/studies/florida-financial-2026q4');
+    expect(errors).toEqual([]);
+    await page.context().close();
+  });
+
+  test('on a phone, in every language, the study table still fits', async () => {
+    for (const prefix of ['/de', '/es', '/pt', '/fr', '/ja']) {
+      const { page } = await open(`${prefix}/studies/florida-financial-2026q4`, { width: 390, height: 844 });
+      await see(page.getByTestId('institution-row').first().getByTestId('institution-name'));
+      const fit = (await page.evaluate("(() => { const t = document.querySelector('.study-table'); return t.getBoundingClientRect().right - t.parentElement.getBoundingClientRect().right; })()")) as number;
+      // Measured against its own scrolling wrap: a table wider than the wrap scrolls sideways out of sight.
+      expect({ prefix, fits: fit <= 0.5 }).toEqual({ prefix, fits: true });
+      const overflow = await page.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth');
+      expect(overflow).toBeLessThanOrEqual(0);
+      await page.context().close();
+    }
+  });
+
   test('on a phone, in the longest words of every language, the selector stays and the ring word fits', async () => {
     const ringFit = (page: Page) =>
       page.evaluate(`(() => {

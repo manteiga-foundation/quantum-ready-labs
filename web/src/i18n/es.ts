@@ -247,6 +247,51 @@ export const es: Messages = {
     standards: 'Normas: NIST FIPS 203 (ML-KEM), IR 8547 (obsoleto después de 2030, prohibido después de 2035), NSA CNSA 2.0, IETF draft-ietf-tls-ecdhe-mlkem.',
     printFooter: 'Un proyecto de Manteiga Foundation',
   },
+  study: {
+    indexTitle: 'Estudios',
+    indexIntro:
+      'Un estudio es una población con nombre que el responsable del proyecto analiza en un solo día y publica como nota sobre el estado de preparación: las cifras, cada institución con su resultado y el método. Los estudios se mantienen separados del uso habitual del analizador.',
+    observed: (date: string) => `Observado el ${date}.`,
+    notFoundTitle: 'Estudio no encontrado',
+    notFoundBody: 'No hay nada publicado con este nombre. Los estudios existentes se enumeran en [/studies](/studies).',
+    byline: (subtitle: string, date: string) => `${subtitle}. Observado el ${date}. Por Manteiga Foundation, con el analizador de código abierto Quantum Ready Labs.`,
+    findings: 'Resultados',
+    leadRest:
+      'Las {notYet} se dividen en dos: {exposedCount} están en la etapa {exposed} (sus sitios todavía usan una generación del protocolo que no admite protección poscuántica) y {atRiskCount} en la etapa {at-risk} (protocolo moderno, protección poscuántica sin activar). Las {protectedTotal} restantes están en {protected} ({protectedCount}) o {ready} ({readyCount}). La institución mediana obtiene {median} de 100.',
+    calmBroken:
+      '**Hoy no hay nada roto.** Ninguna cuenta, inicio de sesión o transacción de estas instituciones está en riesgo por lo que describe esta nota; cada conexión probada está cifrada con algoritmos que ningún ordenador existente puede romper.',
+    calmTime:
+      '**El riesgo es el tiempo.** El tráfico cifrado puede grabarse ahora y descifrarse cuando exista un ordenador cuántico lo bastante grande, de modo que todo lo que deba seguir siendo confidencial durante años ya está dentro de ese margen. Y el margen se estrecha: en 2025, el tamaño estimado de la máquina necesaria para romper el intercambio de claves actual bajó de unos veinte millones de cúbits a menos de un millón, y el NIST ha fijado 2030 para empezar a retirar el intercambio de claves actual y 2035 para terminar. Los navegadores y los mayores sitios web ya protegen su tráfico de la nueva forma.',
+    calmFix:
+      '**La solución es pequeña.** Para las {exposedCount} instituciones en la etapa {exposed}, el siguiente paso es activar TLS 1.3; para las {atRiskCount} en la etapa {at-risk}, activar el intercambio de claves poscuántico (X25519MLKEM768), que en los servidores y las redes de distribución de contenidos actuales es una línea de configuración o un interruptor. La mayoría está a un solo cambio de {protected}.',
+    barAria: (share: number) => `${share} por ciento protegidas o listas`,
+    share: (share: number) => `${share} % protegidas o listas`,
+    institutions: 'Todas las instituciones',
+    institutionsNotice: (total: number, date: string) =>
+      `Por orden alfabético, las ${total}. Cada fila enlaza a la página completa del resultado y al informe en PDF tal como se observaron el ${date}; Volver a probar ejecuta ahora un análisis nuevo. La etapa y la puntuación miden solo la preparación cuántica, no la seguridad en general.`,
+    filter: 'Filtrar por etapa',
+    all: (n: number) => `Todas ${n}`,
+    colInstitution: 'Institución',
+    colStage: 'Etapa',
+    colScore: 'Puntos',
+    colNext: 'Siguiente paso',
+    colResult: 'Resultado',
+    report: 'Informe',
+    pdf: 'PDF',
+    none: 'ninguno',
+    testAgain: 'Volver a probar',
+    method: 'Método',
+    methodTested:
+      'Cada dominio se probó el {date} exactamente como lo haría una visita con un navegador: catorce negociaciones TLS y una conexión normal, nada más. No se abrió ninguna página ni se intentó iniciar sesión. Las sondas leen, en claro, si el servidor ofrece TLS 1.3, qué grupos de intercambio de claves acepta, entre ellos el grupo híbrido poscuántico X25519MLKEM768 que proponen los navegadores actuales, si todavía acepta el transporte de claves RSA, y la cadena de certificados. Los {exposedCount} resultados en la etapa {exposedWord} se contrastaron con OpenSSL 3 y curl, que tampoco pudieron completar una negociación TLS 1.3 con ninguno de ellos.',
+    methodRubric:
+      'La rúbrica es pública: [Cómo puntuamos](https://github.com/manteiga-foundation/quantum-ready-labs/blob/main/docs/scoring.md). El analizador es de código abierto bajo la licencia MIT; cualquiera puede repetir la medición con `bun run scan <host>` o con la [API](/api). Normas citadas: NIST IR 8547 (transición a la criptografía poscuántica: dejar obsoleto el intercambio de claves vulnerable a la computación cuántica para 2030 y prohibirlo para 2035), FIPS 203 (ML-KEM), CNSA 2.0.',
+    corrections:
+      'Si un dominio es incorrecto o hubo un cambio después de la observación, escriba a hello@manteiga.org. Volver a probar muestra al instante el estado de hoy, y la población se vuelve a analizar cada trimestre; un resultado nuevo sustituye la fila en la siguiente ejecución.',
+    press: 'En la prensa',
+    pressCoverage: 'escribió sobre el estudio',
+    pressRelease: 'el comunicado',
+    pressSyndication: 'publicó el comunicado',
+  },
   dialog: {
     title: 'Descargar el informe',
     bodyPdf: 'Un PDF de cinco páginas listo para imprimir: portada, resumen ejecutivo, situación del host, detalles técnicos, método y normas.',

@@ -58,15 +58,16 @@ serves shareable result pages with link previews and aggregates private metrics;
 
 ## Languages
 
-The landing page and the report speak English, Spanish, Brazilian Portuguese, French, German and
-Japanese. English lives at the root; every other language under its own prefix (`/es/`, `/pt/`,
+The landing page, the report and the study pages speak English, Spanish, Brazilian Portuguese,
+French, German and Japanese. English lives at the root; every other language under its own prefix (`/es/`, `/pt/`,
 `/fr/`, `/de/`, `/ja/`), so each one can be indexed and a shared link opens in the language it was
 shared in. A visitor arriving at an unprefixed address gets the language chosen earlier with the
 selector in the top bar, otherwise the browser's language, otherwise English. The edge writes each
 language's title, description, canonical address and `hreflang` alternates into the page before any
-script runs, and lists the home pages in `/sitemap.xml`. The words live in `web/src/i18n/`; the
-English report words are the engine's own, and a test fails when any language misses a key. The
-API, the terminal, the PDF and the study pages are in English.
+script runs, and lists every translated page in `/sitemap.xml`. The words live in `web/src/i18n/`
+(a study's own prose in its entry in `web/src/study-model.ts`); the English report words are the
+engine's own, and a test fails when any language misses a key. The API, the terminal and the PDF
+are in English.
 
 ## API
 
@@ -124,7 +125,7 @@ at once end with a worst-first summary.
 ```
 bunx playwright install chromium     # once: the browser the view tests and the PDF renderer use
 bun run check                        # TypeScript, all three projects
-bun run test                         # 174 tests: engine, edge policy, templates, languages, views in Chromium, renderer
+bun run test                         # 180 tests: engine, edge policy, templates, languages, views in Chromium, renderer
 bun run dev                          # the views on http://127.0.0.1:5180
 ```
 

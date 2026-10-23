@@ -233,6 +233,51 @@ export const en = {
     standards: 'Standards: NIST FIPS 203 (ML-KEM), IR 8547 (deprecated after 2030, disallowed after 2035), NSA CNSA 2.0, IETF draft-ietf-tls-ecdhe-mlkem.',
     printFooter: 'A Manteiga Foundation project',
   },
+  study: {
+    indexTitle: 'Studies',
+    indexIntro:
+      "A study is a named population scanned by the maintainer on one day, published as a state-of-readiness note: the figures, every institution with its result, the method. Studies are kept apart from the scanner's organic use.",
+    observed: (date: string) => `Observed ${date}.`,
+    notFoundTitle: 'No such study',
+    notFoundBody: 'Nothing is published under this name. The studies that exist are listed at [/studies](/studies).',
+    byline: (subtitle: string, date: string) => `${subtitle}. Observed ${date}. By Manteiga Foundation, with the open-source Quantum Ready Labs scanner.`,
+    findings: 'Findings',
+    leadRest:
+      'The {notYet} split in two: {exposedCount} are {exposed} (their sites still run a protocol generation that cannot carry post-quantum protection) and {atRiskCount} are {at-risk} (modern protocol, post-quantum protection not switched on). The {protectedTotal} are {protected} ({protectedCount}) or {ready} ({readyCount}). The median institution scores {median} of 100.',
+    calmBroken:
+      '**Nothing is broken today.** No account, login or transaction at any of these institutions is at risk from what this note describes; every connection tested is encrypted with algorithms no computer that exists can break.',
+    calmTime:
+      "**The risk is time.** Encrypted traffic can be recorded now and decrypted once a large enough quantum computer exists, so anything that must stay confidential for years is already inside the window. That window is narrowing: in 2025 the estimated size of the machine needed to break today's key exchange fell from about twenty million qubits to under one million, and NIST has set 2030 to begin retiring today's key exchange and 2035 to end it. Browsers and the largest web properties already protect their traffic the new way.",
+    calmFix:
+      '**The fix is small.** For the {exposedCount} {exposed} institutions, the next step is to enable TLS 1.3; for the {atRiskCount} {at-risk}, to switch on the post-quantum key exchange (X25519MLKEM768), which on current servers and content-delivery networks is a configuration line or a toggle. Most are one change away from {protected}.',
+    barAria: (share: number) => `${share} percent protected or ready`,
+    share: (share: number) => `${share}% protected or ready`,
+    institutions: 'Every institution',
+    institutionsNotice: (total: number, date: string) =>
+      `Alphabetical, all ${total}. Each row links to the full result page and the PDF report as observed on ${date}; Test again runs a fresh scan now. Stage and score measure quantum readiness only, not general security.`,
+    filter: 'Filter by stage',
+    all: (n: number) => `All ${n}`,
+    colInstitution: 'Institution',
+    colStage: 'Stage',
+    colScore: 'Score',
+    colNext: 'Next step',
+    colResult: 'Result',
+    report: 'Report',
+    pdf: 'PDF',
+    none: 'none',
+    testAgain: 'Test again',
+    method: 'Method',
+    methodTested:
+      'Each domain was tested on {date} exactly as a browser visit would be: fourteen TLS handshakes and one ordinary connection, nothing more. No page was opened and no login was attempted. The probes read, in clear, whether the server offers TLS 1.3, which key-exchange groups it accepts, among them the hybrid post-quantum group X25519MLKEM768 that current browsers propose, whether it still accepts RSA key transport, and the certificate chain. The {exposedCount} {exposedWord} results were cross-checked with OpenSSL 3 and curl, which could not complete a TLS 1.3 handshake with any of them either.',
+    methodRubric:
+      'The rubric is public: [How we score](https://github.com/manteiga-foundation/quantum-ready-labs/blob/main/docs/scoring.md). The scanner is open source under the MIT license; anyone can repeat the measurement with `bun run scan <host>` or the [API](/api). Standards cited: NIST IR 8547 (transition to post-quantum cryptography: deprecate quantum-vulnerable key exchange by 2030, disallow by 2035), FIPS 203 (ML-KEM), CNSA 2.0.',
+    corrections:
+      "A domain that is wrong, or a change made since the observation: write to hello@manteiga.org. Test again shows today's state at once, and the population is re-scanned each quarter; a fresh result replaces the row at the next run.",
+    press: 'In the press',
+    pressCoverage: 'wrote about it',
+    pressRelease: 'the release',
+    pressSyndication: 'carried the release',
+  },
   dialog: {
     title: 'Download the report',
     bodyPdf: 'A five-page PDF, print-ready: cover, executive summary, where the host stands, technical details, method and standards.',

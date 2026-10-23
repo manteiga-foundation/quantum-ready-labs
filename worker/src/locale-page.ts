@@ -14,15 +14,22 @@ interface RewriterElement {
   append(content: string, options?: { html?: boolean }): unknown;
 }
 
-/** The home page in every language, then the default for everyone else. */
-function alternates(origin: string): { hreflang: string; href: string }[] {
-  return [...LOCALES.map((l) => ({ hreflang: HTML_LANG[l], href: origin + localePath(l, '/') })), { hreflang: 'x-default', href: origin + '/' }];
+/** The pages that exist in every language: the home page and the studies. */
+function isTranslated(rest: string): boolean {
+  return rest === '/' || rest === '/studies' || /^\/studies\/[a-z0-9-]+$/.test(rest);
+}
+
+/** The same page in every language, then the default for everyone else. */
+function alternates(origin: string, rest = '/'): { hreflang: string; href: string }[] {
+  return [...LOCALES.map((l) => ({ hreflang: HTML_LANG[l], href: origin + localePath(l, rest) })), { hreflang: 'x-default', href: origin + rest }];
 }
 
 export function localizePage(index: Response, pathname: string, origin: string): Response {
   const { locale, rest } = splitPath(pathname);
   const t = MESSAGES[locale];
-  const home = origin + localePath(locale, '/');
+  const translated = isTranslated(rest);
+  // A translated page is its own canonical; any other page (a report) points at its language's home, as before.
+  const home = origin + localePath(locale, translated ? rest : '/');
   const set = (attr: string, value: string) => ({
     element(el: RewriterElement) {
       el.setAttribute(attr, value);
@@ -35,7 +42,7 @@ export function localizePage(index: Response, pathname: string, origin: string):
   });
   const headExtra = [
     `<meta property="og:locale" content="${OG_LOCALE[locale]}">`,
-    ...(rest === '/' ? alternates(origin).map((a) => `<link rel="alternate" hreflang="${escapeAttr(a.hreflang)}" href="${escapeAttr(a.href)}">`) : []),
+    ...(translated ? alternates(origin, rest).map((a) => `<link rel="alternate" hreflang="${escapeAttr(a.hreflang)}" href="${escapeAttr(a.href)}">`) : []),
   ].join('\n    ');
   return new HTMLRewriter()
     .on('html', set('lang', HTML_LANG[locale]))
@@ -57,18 +64,19 @@ export function localizePage(index: Response, pathname: string, origin: string):
     .transform(index);
 }
 
-/** Every home page with its alternates, then the English-only pages worth indexing. */
+/** Every translated page in every language with its alternates, then the English-only API page. */
 export function sitemapXml(origin: string, studySlugs: string[]): string {
-  const links = alternates(origin)
-    .map((a) => `    <xhtml:link rel="alternate" hreflang="${escapeAttr(a.hreflang)}" href="${escapeAttr(a.href)}"/>`)
-    .join('\n');
-  const homes = LOCALES.map((l) => `  <url>\n    <loc>${origin}${localePath(l, '/')}</loc>\n${links}\n  </url>`);
-  const others = ['/studies', ...studySlugs.map((s) => `/studies/${s}`), '/api'].map((p) => `  <url>\n    <loc>${origin}${p}</loc>\n  </url>`);
+  const pages = ['/', '/studies', ...studySlugs.map((s) => `/studies/${s}`)].flatMap((rest) => {
+    const links = alternates(origin, rest)
+      .map((a) => `    <xhtml:link rel="alternate" hreflang="${escapeAttr(a.hreflang)}" href="${escapeAttr(a.href)}"/>`)
+      .join('\n');
+    return LOCALES.map((l) => `  <url>\n    <loc>${origin}${localePath(l, rest)}</loc>\n${links}\n  </url>`);
+  });
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
-    ...homes,
-    ...others,
+    ...pages,
+    `  <url>\n    <loc>${origin}/api</loc>\n  </url>`,
     '</urlset>',
     '',
   ].join('\n');

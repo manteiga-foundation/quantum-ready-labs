@@ -1,7 +1,7 @@
 // The language in the views: a context carrying the locale and its messages, the inline-markup
 // renderer for long texts, and the one place an error becomes words.
 
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, Fragment, useContext, type ReactNode } from 'react';
 import type { ScanErrorCode, ScanErrorParams } from './en';
 import { DEFAULT_LOCALE, localePath, type Locale } from './locales';
 import { MESSAGES, type Messages } from './messages';
@@ -21,15 +21,20 @@ export function useI18n(): I18n {
   return useContext(I18nContext);
 }
 
-/** Renders [text](href) as a link and `code` as code; site paths are kept in the reader's language. */
-export function Rich({ text }: { text: string }) {
+/**
+ * Renders [text](href) as a link, `code` as code, **text** as strong, and {name} from `slots` (a
+ * figure, or a coloured stage word); site paths are kept in the reader's language.
+ */
+export function Rich({ text, slots = {} }: { text: string; slots?: Record<string, ReactNode> }) {
   const { locale } = useI18n();
   const parts: ReactNode[] = [];
-  const pattern = /\[([^\]]+)\]\(([^)]+)\)|`([^`]+)`/g;
+  const pattern = /\[([^\]]+)\]\(([^)]+)\)|`([^`]+)`|\*\*([^*]+)\*\*|\{([a-zA-Z-]+)\}/g;
   let last = 0;
   for (let m = pattern.exec(text); m; m = pattern.exec(text)) {
     if (m.index > last) parts.push(text.slice(last, m.index));
     if (m[3] !== undefined) parts.push(<code key={m.index}>{m[3]}</code>);
+    else if (m[4] !== undefined) parts.push(<strong key={m.index}>{m[4]}</strong>);
+    else if (m[5] !== undefined) parts.push(<Fragment key={m.index}>{m[5] in slots ? slots[m[5]] : m[0]}</Fragment>);
     else {
       const href = m[2].startsWith('/') ? localePath(locale, m[2]) : m[2];
       parts.push(

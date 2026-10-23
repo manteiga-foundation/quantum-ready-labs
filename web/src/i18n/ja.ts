@@ -247,6 +247,51 @@ export const ja: Messages = {
     standards: '準拠規格：NIST FIPS 203（ML-KEM）、IR 8547（2030 年以降は非推奨、2035 年以降は使用禁止）、NSA CNSA 2.0、IETF draft-ietf-tls-ecdhe-mlkem。',
     printFooter: 'Manteiga Foundation のプロジェクト',
   },
+  study: {
+    indexTitle: '調査',
+    indexIntro:
+      '調査とは、メンテナーが特定の1日に診断した名前付きの母集団を、対応状況レポートとして公開するものです。数値、各機関の結果、手法を掲載します。調査は、スキャナーの通常の利用とは区別して扱います。',
+    observed: (date: string) => `${date}に観測。`,
+    notFoundTitle: '該当する調査はありません',
+    notFoundBody: 'この名前で公開されているものはありません。既存の調査は [/studies](/studies) に一覧があります。',
+    byline: (subtitle: string, date: string) => `${subtitle}。${date}に観測。Manteiga Foundation が、オープンソースのスキャナー Quantum Ready Labs を用いて実施しました。`,
+    findings: '調査結果',
+    leadRest:
+      'まだ対応していない {notYet} 機関の内訳は、{exposedCount} 機関が「{exposed}」（サイトがポスト量子保護を載せられない世代のプロトコルをまだ使用）、{atRiskCount} 機関が「{at-risk}」（最新のプロトコルだが、ポスト量子保護が未設定）です。残る {protectedTotal} 機関は「{protected}」（{protectedCount}）または「{ready}」（{readyCount}）です。中央値は 100 点中 {median} 点です。',
+    calmBroken:
+      '**今日、壊れているものはありません。** これらの機関の口座、ログイン、取引のいずれも、このレポートが述べる事柄によって危険にさらされてはいません。診断したすべての接続は、現存するどのコンピューターにも破れないアルゴリズムで暗号化されています。',
+    calmTime:
+      '**リスクは時間です。** 暗号化された通信は今記録され、十分に大きな量子コンピューターが登場した時点で解読され得ます。何年も機密を保つ必要がある情報は、すでにその時間枠の中にあります。しかもその枠は狭まっています。2025 年には、現在の鍵交換を破るのに必要なマシンの推定規模が約 2,000 万量子ビットから 100 万量子ビット未満へと下がり、NIST は現在の鍵交換の廃止を 2030 年に始め 2035 年に終えると定めました。ブラウザと最大規模の Web サイトは、すでに新しい方式で通信を保護しています。',
+    calmFix:
+      '**対策は小さなものです。** 「{exposed}」の {exposedCount} 機関にとっての次の一手は TLS 1.3 の有効化、「{at-risk}」の {atRiskCount} 機関にとってはポスト量子鍵交換（X25519MLKEM768）の有効化です。現行のサーバーやコンテンツ配信ネットワークでは、設定1行かスイッチ1つで済みます。ほとんどの機関は、1つの変更で「{protected}」になります。',
+    barAria: (share: number) => `${share}% が保護済みまたは対応完了`,
+    share: (share: number) => `${share}% が保護済みまたは対応完了`,
+    institutions: '全機関',
+    institutionsNotice: (total: number, date: string) =>
+      `アルファベット順、全 ${total} 機関。各行から、${date}時点の結果ページと PDF レポートを開けます。「再診断」で今すぐ新たに診断します。段階とスコアが測るのは量子時代への対応状況のみで、セキュリティ全般ではありません。`,
+    filter: '段階で絞り込む',
+    all: (n: number) => `すべて ${n}`,
+    colInstitution: '機関',
+    colStage: '段階',
+    colScore: 'スコア',
+    colNext: '次の一手',
+    colResult: '結果',
+    report: 'レポート',
+    pdf: 'PDF',
+    none: 'なし',
+    testAgain: '再診断',
+    method: '手法',
+    methodTested:
+      '各ドメインは{date}に、ブラウザでの訪問とまったく同じ方法で診断しました。14 回の TLS ハンドシェイクと1回の通常の接続のみです。ページは開かず、ログインも試みていません。プローブは、サーバーが TLS 1.3 を提供しているか、どの鍵交換グループを受け入れるか（現行ブラウザが提示するハイブリッドのポスト量子グループ X25519MLKEM768 を含む）、RSA 鍵輸送をまだ受け入れるか、そして証明書チェーンを、平文のまま読み取ります。「{exposedWord}」の {exposedCount} 件の結果は OpenSSL 3 と curl でも確認し、いずれも TLS 1.3 のハンドシェイクを完了できませんでした。',
+    methodRubric:
+      '評価基準は公開しています：[評価方法](https://github.com/manteiga-foundation/quantum-ready-labs/blob/main/docs/scoring.md)。スキャナーは MIT ライセンスのオープンソースで、誰でも `bun run scan <host>` または [API](/api) で同じ測定を再現できます。準拠規格：NIST IR 8547（ポスト量子暗号への移行：量子コンピューターに脆弱な鍵交換を 2030 年までに非推奨、2035 年までに使用禁止）、FIPS 203（ML-KEM）、CNSA 2.0。',
+    corrections:
+      'ドメインの誤りや、観測後に行われた変更があれば、hello@manteiga.org までご連絡ください。「再診断」で今日の状態がすぐにわかります。母集団は四半期ごとに再診断し、次回の実行で新しい結果に置き換えます。',
+    press: '報道',
+    pressCoverage: '記事で取り上げた',
+    pressRelease: 'プレスリリース',
+    pressSyndication: 'プレスリリースを掲載',
+  },
   dialog: {
     title: 'レポートのダウンロード',
     bodyPdf: '印刷に適した5ページの PDF です：表紙、エグゼクティブサマリー、ホストの現状、技術的な詳細、手法と準拠規格。',

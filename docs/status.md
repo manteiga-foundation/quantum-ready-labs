@@ -87,13 +87,21 @@ slice that changes it; `AGENTS.md` stays the contract.
   previews under `/<lang>/r/<id>`, and answers refusals with `{error, code, params}` (English
   `error` unchanged for scripts). Long stage words shrink to fit the ring (sized from the label's
   width in container units); the German and Spanish labels were chosen as single words
-  (UNERREICHBAR, INDETERMINADO) so the ring word stays on one line. Not translated yet: study
-  pages, the API page, metrics, the PDF, letters and the terminal.
-- Tests: 174 (`bun run test`): 151 offline (unit, fixture TLS server, engine HTTP, edge policy,
+  (UNERREICHBAR, INDETERMINADO) so the ring word stays on one line. Study pages are translated too:
+  the frame's words in the catalogues (with `{placeholders}` rendered by `Rich`, so the coloured
+  stage words and the computed figures stay live), the study's own title, subtitle, population and
+  lead in `translations` on its meta (`studyText()`; a test checks every language's lead carries the
+  CSV's figures), next steps mapped from the CSV's English title to the catalogue, dates through
+  Intl; press article titles stay in their original language. `/studies` and each study page are
+  their own canonical per language, with hreflang, and are listed per language in the sitemap. On a
+  phone the study table's headers tighten their tracking and the stacked links may wrap, so the
+  German table fits (measured against its own wrap). Not translated yet: the API page, metrics,
+  the PDF, letters and the terminal.
+- Tests: 180 (`bun run test`): 155 offline (unit, fixture TLS server, engine HTTP, edge policy,
   report model, pacer, README shape, report and letter HTML, study model, the hosts list in
   `tests/host-list.test.ts`, the .xlsx export and the zip reader that parses it back, the
   languages in `tests/i18n.test.ts` and the edge's per-language page in
-  `tests/locale-page.test.ts`), 18 web tests in real Chromium, 5 renderer tests. CI (Linux) runs
+  `tests/locale-page.test.ts`), 20 web tests in real Chromium, 5 renderer tests. CI (Linux) runs
   check, the unit tests and the build.
 
 Measured on real hosts (2026-10-18): cloudflare.com, google.com, manteiga.org PROTECTED 85;

@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { parseStudyCsv, STUDY_META, studyPreview, summarize, type StudyRow } from '../web/src/study-model';
+import { parseStudyCsv, STUDY_META, studyPreview, studyText, summarize, type StudyRow } from '../web/src/study-model';
+import { LOCALES } from '../web/src/i18n/locales';
 
 // The state-of-readiness note reads a study's results.csv as written by scripts/study.ts. The
 // figures the note states (counts per stage, the median, the share protected) are computed here,
@@ -74,5 +75,24 @@ describe('the registry and its link preview', () => {
     expect(p!.image).toBe('https://quantumreadylabs.com/og/study-florida-financial-2026q4.png');
     expect(p!.url).toBe('https://quantumreadylabs.com/studies/florida-financial-2026q4');
     expect(studyPreview('nope', 'https://quantumreadylabs.com')).toBeNull();
+  });
+
+  test('every language states the same figures in its lead, so no translation drifts from the CSV', () => {
+    const s = summarize(parseStudyCsv(florida));
+    const meta = STUDY_META['florida-financial-2026q4'];
+    for (const locale of LOCALES) {
+      const text = studyText(meta, locale);
+      for (const n of [s.total, s.protectedCount, s.notYetCount]) expect({ locale, has: text.lead.includes(String(n)) }).toEqual({ locale, has: true });
+      for (const n of [s.total]) expect({ locale, has: text.subtitle.includes(String(n)) }).toEqual({ locale, has: true });
+      if (locale !== 'en') expect({ locale, translated: text.lead !== meta.lead && text.population !== meta.population }).toEqual({ locale, translated: true });
+    }
+    expect(studyText(meta, 'en')).toEqual({ title: meta.title, subtitle: meta.subtitle, population: meta.population, lead: meta.lead });
+  });
+
+  test('a study page in another language previews in that language, at its own address', () => {
+    const p = studyPreview('florida-financial-2026q4', 'https://quantumreadylabs.com', 'es');
+    expect(p!.title).toMatch(/^Bancos y cooperativas de crédito de Florida/);
+    expect(p!.description).toMatch(/^De 81 bancos/);
+    expect(p!.url).toBe('https://quantumreadylabs.com/es/studies/florida-financial-2026q4');
   });
 });

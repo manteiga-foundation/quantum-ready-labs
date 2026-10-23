@@ -7,7 +7,7 @@ import { Entry } from './views/Entry';
 import { Metrics } from './views/Metrics';
 import { Report } from './views/Report';
 import { Study, StudyIndex } from './views/Study';
-import { STUDY_META } from './study-model';
+import { STUDY_META, studyText } from './study-model';
 import { HTML_LANG, LOCALE_NAME, LOCALES, localePath, splitPath, STORAGE_KEY, type Locale } from './i18n/locales';
 import { MESSAGES } from './i18n/messages';
 import { I18nProvider, Rich } from './i18n/react';
@@ -122,7 +122,7 @@ export function App() {
     else if (route.view === 'metrics') document.title = t.titles.metrics + suffix;
     else if (route.view === 'api') document.title = t.titles.api + suffix;
     else if (route.view === 'studies') document.title = t.titles.studies + suffix;
-    else if (route.view === 'study') document.title = (STUDY_META[route.slug]?.title ?? t.titles.noStudy) + suffix;
+    else if (route.view === 'study') document.title = (STUDY_META[route.slug] ? studyText(STUDY_META[route.slug], locale).title : t.titles.noStudy) + suffix;
     else if (host && report.status === 'done') document.title = t.titles.done(host, t.stage.label[stage]) + suffix;
     else if (host) document.title = t.titles.testing(host) + suffix;
   }, [route, t, report.host, report.status, report.assessment.stage]);
