@@ -67,4 +67,12 @@ describe('report model: the live report built from the event stream', () => {
     expect(s.status).toBe('error');
     expect(s.error).toBe('refused');
   });
+
+  test('an error keeps its code and params, so the page can say it in the reader\'s language', () => {
+    const s = applyEvent(initialReport(), { type: 'error', error: 'Port 8443 ...', code: 'port-not-allowed', params: { port: 8443, allowed: [443] } });
+    expect(s.error).toBe('Port 8443 ...');
+    expect(s.errorCode).toBe('port-not-allowed');
+    expect(s.errorParams).toEqual({ port: 8443, allowed: [443] });
+    expect(applyEvent(initialReport(), { type: 'error', error: 'plain' })).toMatchObject({ errorCode: null, errorParams: {} });
+  });
 });

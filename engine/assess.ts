@@ -139,7 +139,10 @@ const SHORT_LIVED_DAYS = 100;
 
 const PQ_SIGNATURES = /^(ML-DSA|SLH-DSA)/;
 
-const STEPS: Record<string, NextStep> = {
+export type NextStepId = 'unreachable' | 'inconclusive' | 'enable-tls13' | 'enable-hybrid' | 'retire-rsa-transport' | 'shorten-certificates' | 'watch-pq-certificates';
+
+/** The next steps in English. The web says them in the reader's language by id; the API and the terminal use these words. */
+export const STEPS: Record<NextStepId, NextStep> = {
   unreachable: {
     id: 'unreachable',
     title: 'Check the address',
@@ -177,6 +180,27 @@ const STEPS: Record<string, NextStep> = {
   },
 };
 
+/** The verdict in one sentence, per stage (English; the web translates by stage). */
+export const VERDICT: Record<Stage, string> = {
+  unreachable: 'No TLS server answered at this address.',
+  inconclusive: 'The server answered in a way the probes could not read with confidence.',
+  exposed: 'Connections to this host can be recorded today and decrypted later. TLS 1.3 is not available.',
+  'at-risk': 'Connections to this host are safe today but can be recorded now and decrypted when a large quantum computer exists.',
+  protected: 'Connections to this host are protected against future quantum decryption.',
+  ready: 'Connections to this host are protected against future quantum decryption, and the foundations for the next step are in place.',
+};
+
+export const NOTE_IDS = ['kyber-draft-only', 'tls12-ecdhe-only', 'chain-not-trusted'] as const;
+export type NoteId = (typeof NOTE_IDS)[number];
+
+/** The notes in English; the trust error is the only variable part. */
+export const NOTE_TEXT: Record<NoteId, (trustError: string) => string> = {
+  'kyber-draft-only': () =>
+    'The server accepts only the pre-standard Kyber draft (X25519Kyber768Draft00). Browsers stopped offering it in 2024; the standard X25519MLKEM768 is what they send now.',
+  'tls12-ecdhe-only': () => 'TLS 1.2 is still offered, with ephemeral key exchange only. Acceptable for old clients.',
+  'chain-not-trusted': (trustError) => `The certificate chain did not validate against the trust store (${trustError}). Browsers would warn before connecting.`,
+};
+
 function daysBetween(a: string, b: string): number {
   return Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400_000);
 }
@@ -196,18 +220,10 @@ export function assess(f: Findings): Assessment {
   const pqChain = f.chain.length > 0 && f.chain.every((l) => PQ_SIGNATURES.test(l.signatureAlgorithm) || (l.selfSigned && PQ_SIGNATURES.test(l.keyAlgorithm)));
 
   const notes: Note[] = [];
-  if (hybridGroups.length === 0 && f.groups.X25519Kyber768Draft00 === 'yes') {
-    notes.push({
-      id: 'kyber-draft-only',
-      text: 'The server accepts only the pre-standard Kyber draft (X25519Kyber768Draft00). Browsers stopped offering it in 2024; the standard X25519MLKEM768 is what they send now.',
-    });
-  }
-  if (f.tls12 === true && f.rsaKeyTransport === false) {
-    notes.push({ id: 'tls12-ecdhe-only', text: 'TLS 1.2 is still offered, with ephemeral key exchange only. Acceptable for old clients.' });
-  }
-  if (f.trusted === false && leaf) {
-    notes.push({ id: 'chain-not-trusted', text: `The certificate chain did not validate against the trust store (${f.trustError ?? 'unknown reason'}). Browsers would warn before connecting.` });
-  }
+  const note = (id: NoteId, trustError = '') => notes.push({ id, text: NOTE_TEXT[id](trustError) });
+  if (hybridGroups.length === 0 && f.groups.X25519Kyber768Draft00 === 'yes') note('kyber-draft-only');
+  if (f.tls12 === true && f.rsaKeyTransport === false) note('tls12-ecdhe-only');
+  if (f.trusted === false && leaf) note('chain-not-trusted', f.trustError ?? 'unknown reason');
 
   let stage: Stage;
   if (!anyAnswer) stage = 'unreachable';
@@ -239,14 +255,7 @@ export function assess(f: Findings): Assessment {
   else if (leafDaysValid === null || leafDaysValid > SHORT_LIVED_DAYS) nextStep = STEPS['shorten-certificates'];
   else nextStep = STEPS['watch-pq-certificates'];
 
-  const verdict = {
-    unreachable: 'No TLS server answered at this address.',
-    inconclusive: 'The server answered in a way the probes could not read with confidence.',
-    exposed: 'Connections to this host can be recorded today and decrypted later. TLS 1.3 is not available.',
-    'at-risk': 'Connections to this host are safe today but can be recorded now and decrypted when a large quantum computer exists.',
-    protected: 'Connections to this host are protected against future quantum decryption.',
-    ready: 'Connections to this host are protected against future quantum decryption, and the foundations for the next step are in place.',
-  }[stage];
+  const verdict = VERDICT[stage];
 
   return {
     stage,

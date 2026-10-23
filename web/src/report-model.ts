@@ -4,8 +4,12 @@
 import { assess, emptyFindings, type Assessment, type Findings } from '../../engine/assess';
 import { GROUP, type GroupName } from '../../engine/hello';
 import type { ScanEvent, ScanResult } from '../../engine/events';
+import type { ScanErrorParams } from './i18n/en';
 
-export type StreamEvent = ScanEvent | { type: 'result'; result: ScanResult } | { type: 'saved'; id: string } | { type: 'error'; error: string };
+/** An error carries English words for scripts, and a code with params the page says in the reader's language. */
+export type ErrorEvent = { type: 'error'; error: string; code?: string; params?: ScanErrorParams };
+
+export type StreamEvent = ScanEvent | { type: 'result'; result: ScanResult } | { type: 'saved'; id: string } | ErrorEvent;
 
 export interface ProbeRow {
   id: string;
@@ -29,6 +33,8 @@ export interface ReportState {
   result: ScanResult | null;
   shareId: string | null;
   error: string | null;
+  errorCode: string | null;
+  errorParams: ScanErrorParams;
   ms: number | null;
 }
 
@@ -46,6 +52,8 @@ export function initialReport(): ReportState {
     result: null,
     shareId: null,
     error: null,
+    errorCode: null,
+    errorParams: {},
     ms: null,
   };
 }
@@ -112,7 +120,7 @@ export function applyEvent(state: ReportState, event: StreamEvent): ReportState 
     case 'done':
       return { ...state, status: state.status === 'error' ? 'error' : 'done', ms: state.ms ?? event.ms };
     case 'error':
-      return { ...state, status: 'error', error: event.error };
+      return { ...state, status: 'error', error: event.error, errorCode: event.code ?? null, errorParams: event.params ?? {} };
     default:
       return state;
   }

@@ -26,16 +26,17 @@ export async function resolveTarget(target: Target, options: ResolveOptions = {}
     } catch (e) {
       const code = e && typeof e === 'object' && 'code' in e ? String((e as { code: unknown }).code) : '';
       if (code === 'ENOTFOUND' || code === 'ENODATA' || code === 'ESERVFAIL') {
-        throw new TargetError(`${target.host} does not resolve to any address.`);
+        throw new TargetError('no-address', `${target.host} does not resolve to any address.`);
       }
-      throw new TargetError(`${target.host} could not be resolved (${code || 'resolver error'}).`);
+      throw new TargetError('unresolvable', `${target.host} could not be resolved (${code || 'resolver error'}).`);
     }
-    if (all.length === 0) throw new TargetError(`${target.host} does not resolve to any address.`);
+    if (all.length === 0) throw new TargetError('no-address', `${target.host} does not resolve to any address.`);
   }
   if (!options.allowPrivate) {
     const refused = all.filter((a) => !isPublicAddress(a.address));
     if (refused.length) {
       throw new TargetError(
+        'not-public',
         `${target.host} resolves to ${refused[0].address}, which is not a public Internet address. The public scanner tests only public hosts.`,
       );
     }

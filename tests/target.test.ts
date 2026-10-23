@@ -1,7 +1,25 @@
 import { describe, expect, test } from 'bun:test';
-import { parseTarget, isPublicAddress, TargetError } from '../engine/target';
+import { parseTarget, isPublicAddress, TARGET_ERRORS, TargetError } from '../engine/target';
 
 describe('parseTarget', () => {
+  test('every refusal carries a code, so each language can say it in its own words', () => {
+    const codeOf = (input: string) => {
+      try {
+        parseTarget(input);
+        return null;
+      } catch (e) {
+        return e instanceof TargetError ? [e.code, e.message === TARGET_ERRORS[e.code as keyof typeof TARGET_ERRORS]] : 'other';
+      }
+    };
+    expect(codeOf('')).toEqual(['empty', true]);
+    expect(codeOf('http://example.com')).toEqual(['https-only', true]);
+    expect(codeOf('0x7f.1')).toEqual(['ipv4-format', true]);
+    expect(codeOf('[zz::1]')).toEqual(['ipv6-invalid', true]);
+    expect(codeOf('example.com:0')).toEqual(['port', true]);
+    expect(codeOf(`${'a'.repeat(60)}.`.repeat(5) + 'com')).toEqual(['too-long', true]);
+    expect(codeOf('not a host')).toEqual(['invalid-host', true]);
+  });
+
   test('a bare host defaults to port 443', () => {
     expect(parseTarget('example.com')).toEqual({ host: 'example.com', port: 443 });
   });

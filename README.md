@@ -56,6 +56,18 @@ edge (a Cloudflare Worker with D1) that validates, rate-limits, caches results f
 serves shareable result pages with link previews and aggregates private metrics; and the views
 (Vite, React, Arwes frames).
 
+## Languages
+
+The landing page and the report speak English, Spanish, Brazilian Portuguese, French, German and
+Japanese. English lives at the root; every other language under its own prefix (`/es/`, `/pt/`,
+`/fr/`, `/de/`, `/ja/`), so each one can be indexed and a shared link opens in the language it was
+shared in. A visitor arriving at an unprefixed address gets the language chosen earlier with the
+selector in the top bar, otherwise the browser's language, otherwise English. The edge writes each
+language's title, description, canonical address and `hreflang` alternates into the page before any
+script runs, and lists the home pages in `/sitemap.xml`. The words live in `web/src/i18n/`; the
+English report words are the engine's own, and a test fails when any language misses a key. The
+API, the terminal, the PDF and the study pages are in English.
+
 ## API
 
 Open, no key, for scripts, services and agents: `curl 'https://quantumreadylabs.com/api/scan?host=example.com'`
@@ -112,7 +124,7 @@ at once end with a worst-first summary.
 ```
 bunx playwright install chromium     # once: the browser the view tests and the PDF renderer use
 bun run check                        # TypeScript, all three projects
-bun run test                         # 103 tests: engine, edge policy, templates, views in Chromium, renderer
+bun run test                         # 174 tests: engine, edge policy, templates, languages, views in Chromium, renderer
 bun run dev                          # the views on http://127.0.0.1:5180
 ```
 

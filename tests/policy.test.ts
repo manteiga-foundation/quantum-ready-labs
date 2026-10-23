@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { addressesFromDoh, decideRateLimit, isFresh, newShareId, previewFor, RATE_LIMITS, studyClient } from '../worker/src/policy';
+import { addressesFromDoh, decideRateLimit, isFresh, newShareId, previewFor, RATE_LIMITS, scanError, studyClient } from '../worker/src/policy';
 import protectedFixture from '../web/src/fixtures/protected.json';
 
 describe('edge policy', () => {
@@ -38,6 +38,26 @@ describe('edge policy', () => {
     expect(p.description).toContain('protected against future quantum decryption');
     expect(p.image).toBe('https://quantumreadylabs.com/og/protected.png');
     expect(p.url).toBe('https://quantumreadylabs.com/r/abc123XYZ_-1');
+  });
+
+  test('a shared link opened in another language previews in that language, at its own address', () => {
+    const p = previewFor(protectedFixture.result as never, 'abc123XYZ_-1', 'https://quantumreadylabs.com', 'es');
+    expect(p.title).toBe('protected.example está PROTEGIDO · Quantum Ready Labs');
+    expect(p.description).toContain('protegidas frente al descifrado cuántico futuro');
+    expect(p.description).toContain('Siguiente paso: Retire los conjuntos de cifrado');
+    expect(p.url).toBe('https://quantumreadylabs.com/es/r/abc123XYZ_-1');
+  });
+
+  test('a refusal carries English words for scripts and a code with params for the page', () => {
+    expect(scanError('port-not-allowed', { port: 8443, allowed: [443] })).toEqual({
+      error: 'The public scanner tests port 443 only. Port 8443 was asked for and noted.',
+      code: 'port-not-allowed',
+      params: { port: 8443, allowed: [443] },
+    });
+    expect(scanError('rate-caller')).toEqual({ error: 'Too many scans from your address. Please wait a few minutes.', code: 'rate-caller', params: {} });
+    expect(scanError('not-public', { host: 'a.example', address: '10.0.0.1' }).error).toBe(
+      'a.example resolves to 10.0.0.1, which is not a public Internet address. The public scanner tests only public hosts.',
+    );
   });
 
   test('study rows are tagged by a strict slug so they never mix with organic scans', () => {

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /metrics
+Disallow: /api/
+
+Sitemap: https://quantumreadylabs.com/sitemap.xml

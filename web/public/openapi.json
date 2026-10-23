@@ -121,7 +121,16 @@
           "notes": { "type": "array", "items": { "type": "object", "properties": { "text": { "type": "string" } } } }
         }
       },
-      "Error": { "type": "object", "required": ["error"], "properties": { "error": { "type": "string" }, "refused": { "type": "boolean" } } }
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": { "type": "string", "description": "What went wrong, in English." },
+          "code": { "type": "string", "description": "A stable code for the same refusal (for example port-not-allowed, rate-caller, rate-host, no-address, not-public, engine-busy, invalid-host), so a client can say it in its own language." },
+          "params": { "type": "object", "description": "The values the message names: host, port, allowed, address." },
+          "refused": { "type": "boolean" }
+        }
+      }
     }
   }
 }

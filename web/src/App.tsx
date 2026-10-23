@@ -8,6 +8,9 @@ import { Metrics } from './views/Metrics';
 import { Report } from './views/Report';
 import { Study, StudyIndex } from './views/Study';
 import { STUDY_META } from './study-model';
+import { HTML_LANG, LOCALE_NAME, LOCALES, localePath, splitPath, STORAGE_KEY, type Locale } from './i18n/locales';
+import { MESSAGES } from './i18n/messages';
+import { I18nProvider, Rich } from './i18n/react';
 
 type Route =
   | { view: 'entry' }
@@ -18,8 +21,10 @@ type Route =
   | { view: 'studies' }
   | { view: 'study'; slug: string };
 
+/** The view, read from the path without its language prefix. */
 function routeFromLocation(): Route {
-  const { pathname, search } = window.location;
+  const { search } = window.location;
+  const pathname = splitPath(window.location.pathname).rest;
   if (pathname === '/metrics') return { view: 'metrics' };
   if (pathname === '/api') return { view: 'api' };
   if (pathname === '/studies' || pathname === '/studies/') return { view: 'studies' };
@@ -30,6 +35,10 @@ function routeFromLocation(): Route {
   const host = new URLSearchParams(search).get('host');
   if (pathname === '/scan' && host) return { view: 'scan', host };
   return { view: 'entry' };
+}
+
+function localeFromLocation(): Locale {
+  return splitPath(window.location.pathname).locale;
 }
 
 function keepDemo(path: string): string {
@@ -46,11 +55,18 @@ function reducer(state: ReportState, event: StreamEvent | { type: 'reset' } | { 
 
 export function App() {
   const [route, setRoute] = useState<Route>(routeFromLocation);
+  const [locale, setLocale] = useState<Locale>(localeFromLocation);
   const [report, dispatch] = useReducer(reducer, undefined, initialReport);
   const handle = useRef<ScanHandle | null>(null);
+  const t = MESSAGES[locale];
+  // The scan restarts when the view changes, never when only the language does.
+  const routeKey = JSON.stringify(route);
 
   useEffect(() => {
-    const onPop = () => setRoute(routeFromLocation());
+    const onPop = () => {
+      setRoute(routeFromLocation());
+      setLocale(localeFromLocation());
+    };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
@@ -64,81 +80,110 @@ export function App() {
     } else if (route.view === 'shared') {
       dispatch({ type: 'reset' });
       loadResult(route.id).then((r) => {
-        if ('error' in r) dispatch({ type: 'error', error: r.error });
+        if ('error' in r) dispatch({ type: 'error', error: r.error, code: r.code, params: r.params });
         else dispatch({ type: 'load', state: reportFromResult(r.result, route.id) });
       });
     }
     return () => handle.current?.cancel();
-  }, [route]);
+  }, [routeKey]);
 
   useEffect(() => {
     if (import.meta.env.DEV) (window as unknown as { __qrl: () => ReportState }).__qrl = () => report;
   }, [report]);
 
+  useEffect(() => {
+    document.documentElement.lang = HTML_LANG[locale];
+  }, [locale]);
+
+  /** Navigates within the current language: the views pass unprefixed paths. */
   const go = (path: string) => {
-    window.history.pushState({}, '', keepDemo(path));
+    window.history.pushState({}, '', keepDemo(localePath(locale, path)));
     setRoute(routeFromLocation());
     window.scrollTo(0, 0);
+  };
+
+  /** The selector: the same page in another language, remembered for the next visit. */
+  const switchLocale = (next: Locale) => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // storage unavailable: the choice holds for this page only
+    }
+    const { pathname, search, hash } = window.location;
+    window.history.pushState({}, '', localePath(next, pathname + search) + hash);
+    setLocale(next);
   };
 
   useEffect(() => {
     const host = report.host;
     const stage = report.assessment.stage;
-    if (route.view === 'entry') document.title = 'Quantum Ready Labs: is your host ready for the quantum era?';
-    else if (route.view === 'metrics') document.title = 'Metrics · Quantum Ready Labs';
-    else if (route.view === 'api') document.title = 'API · Quantum Ready Labs';
-    else if (route.view === 'studies') document.title = 'Studies · Quantum Ready Labs';
-    else if (route.view === 'study') document.title = `${STUDY_META[route.slug]?.title ?? 'No such study'} · Quantum Ready Labs`;
-    else if (host && report.status === 'done') document.title = `${host}: ${stage.replace('-', ' ')} · Quantum Ready Labs`;
-    else if (host) document.title = `Testing ${host} · Quantum Ready Labs`;
-  }, [route, report.host, report.status, report.assessment.stage]);
+    const suffix = ' · Quantum Ready Labs';
+    if (route.view === 'entry') document.title = t.meta.title;
+    else if (route.view === 'metrics') document.title = t.titles.metrics + suffix;
+    else if (route.view === 'api') document.title = t.titles.api + suffix;
+    else if (route.view === 'studies') document.title = t.titles.studies + suffix;
+    else if (route.view === 'study') document.title = (STUDY_META[route.slug]?.title ?? t.titles.noStudy) + suffix;
+    else if (host && report.status === 'done') document.title = t.titles.done(host, t.stage.label[stage]) + suffix;
+    else if (host) document.title = t.titles.testing(host) + suffix;
+  }, [route, t, report.host, report.status, report.assessment.stage]);
 
   return (
-    <div className="shell">
-      <header className="topbar">
-        <div className="brand-block">
-          <a className="brand" href="/" onClick={(e) => { e.preventDefault(); go('/'); }}>
-            <span className="mark" aria-hidden="true" />
-            Quantum Ready Labs
-          </a>
-          <a className="byline" data-testid="byline" href="https://manteiga.org" rel="noopener">
-            By Manteiga Foundation
-          </a>
+    <I18nProvider locale={locale}>
+      <div className="shell">
+        <header className="topbar">
+          <div className="brand-block">
+            <a className="brand" href={localePath(locale, '/')} onClick={(e) => { e.preventDefault(); go('/'); }}>
+              <span className="mark" aria-hidden="true" />
+              Quantum Ready Labs
+            </a>
+            <a className="byline" data-testid="byline" href="https://manteiga.org" rel="noopener">
+              {t.shell.byline}
+            </a>
+          </div>
+          <div className="topbar-end">
+            <nav aria-label="Site">
+              <a href="https://github.com/manteiga-foundation/quantum-ready-labs" rel="noopener">
+                <FaGithub aria-hidden="true" />
+                {t.shell.source}
+              </a>
+              <a href="https://github.com/manteiga-foundation/quantum-ready-labs/blob/main/docs/scoring.md" rel="noopener">
+                <FaBalanceScale aria-hidden="true" />
+                {t.shell.howWeScore}
+              </a>
+              <a href={localePath(locale, '/studies')} onClick={(e) => { e.preventDefault(); go('/studies'); }}>
+                <FaChartBar aria-hidden="true" />
+                {t.shell.studies}
+              </a>
+              <a href={localePath(locale, '/api')} onClick={(e) => { e.preventDefault(); go('/api'); }}>
+                <FaPlug aria-hidden="true" />
+                {t.shell.api}
+              </a>
+            </nav>
+            <select className="lang-select" aria-label={t.shell.language} value={locale} onChange={(e) => switchLocale(e.target.value as Locale)}>
+              {LOCALES.map((l) => (
+                <option key={l} value={l} lang={HTML_LANG[l]}>
+                  {LOCALE_NAME[l]}
+                </option>
+              ))}
+            </select>
+          </div>
+        </header>
+        <div className="content">
+          {route.view === 'entry' && <Entry onScan={(host) => go(`/scan?host=${encodeURIComponent(host)}`)} />}
+          {route.view === 'scan' && <Report state={report} shared={false} onAnother={() => go('/')} />}
+          {route.view === 'shared' && <Report state={report} shared onAnother={() => go('/')} />}
+          {route.view === 'metrics' && <Metrics />}
+          {route.view === 'api' && <Api />}
+          {route.view === 'studies' && <StudyIndex go={go} />}
+          {route.view === 'study' && <Study key={route.slug} slug={route.slug} go={go} />}
         </div>
-        <nav aria-label="Site">
-          <a href="https://github.com/manteiga-foundation/quantum-ready-labs" rel="noopener">
-            <FaGithub aria-hidden="true" />
-            Source
-          </a>
-          <a href="https://github.com/manteiga-foundation/quantum-ready-labs/blob/main/docs/scoring.md" rel="noopener">
-            <FaBalanceScale aria-hidden="true" />
-            How we score
-          </a>
-          <a href="/studies" onClick={(e) => { e.preventDefault(); go('/studies'); }}>
-            <FaChartBar aria-hidden="true" />
-            Studies
-          </a>
-          <a href="/api" onClick={(e) => { e.preventDefault(); go('/api'); }}>
-            <FaPlug aria-hidden="true" />
-            API
-          </a>
-        </nav>
-      </header>
-      <div className="content">
-        {route.view === 'entry' && <Entry onScan={(host) => go(`/scan?host=${encodeURIComponent(host)}`)} />}
-        {route.view === 'scan' && <Report state={report} shared={false} onAnother={() => go('/')} />}
-        {route.view === 'shared' && <Report state={report} shared onAnother={() => go('/')} />}
-        {route.view === 'metrics' && <Metrics />}
-        {route.view === 'api' && <Api />}
-        {route.view === 'studies' && <StudyIndex go={go} />}
-        {route.view === 'study' && <Study key={route.slug} slug={route.slug} go={go} />}
+        <footer className="footer">
+          <p>{t.shell.footerScope}</p>
+          <p>
+            <Rich text={t.shell.footerLicense} />
+          </p>
+        </footer>
       </div>
-      <footer className="footer">
-        <p>Quantum Ready Labs tests the key exchange, protocol versions and certificate chain a host negotiates, and explains where it stands on the post-quantum transition. It is not a general TLS audit.</p>
-        <p>
-          Open source under the MIT license. A <a href="https://manteiga.org" rel="noopener">Manteiga Foundation</a> project. <a href="/api">API</a> for scripts, services and agents. Abuse or questions: hello@manteiga.org
-        </p>
-      </footer>
-    </div>
+    </I18nProvider>
   );
 }

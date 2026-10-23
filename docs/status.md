@@ -72,10 +72,29 @@ slice that changes it; `AGENTS.md` stays the contract.
   the standards, a corrections address. The edge rewrites the page's title, description, canonical
   and Open Graph image (`og/study-<slug>.png`, drawn by `scripts/og-images.ts` from the same
   figures); study pages are indexable, unlike shared results.
-- Tests: 149 (`bun run test`): 131 offline (unit, fixture TLS server, engine HTTP, edge policy,
+- Languages: the landing page (with the FAQ), the live report, the download dialog and every
+  refusal speak English, Spanish, Brazilian Portuguese, French, German and Japanese
+  (`web/src/i18n/`: `locales.ts` pure path and detection rules, one catalogue per language typed
+  against `en.ts`). English stays at the root; the others live under `/es/ /pt/ /fr/ /de/ /ja/`.
+  Detection: a prefixed path wins, then the selector's stored choice (`localStorage qrl-lang`),
+  then `navigator.languages`, then English; crawlers send no language and stay on English. The
+  selector in the top bar re-words the open report in place without scanning again. The English
+  verdicts, next steps, notes, stage words and target refusals are exported by the engine
+  (`VERDICT`, `STEPS`, `NOTE_TEXT`, `STAGE_LABEL`, `TARGET_ERRORS`) and reused, so the page, the
+  API and the terminal agree. The edge rewrites `lang`, title, description, canonical, Open
+  Graph locale and the prerendered heading per language (`worker/src/locale-page.ts`), adds
+  `hreflang` alternates on the home pages, serves `/sitemap.xml`, localizes shared-result
+  previews under `/<lang>/r/<id>`, and answers refusals with `{error, code, params}` (English
+  `error` unchanged for scripts). Long stage words shrink to fit the ring (sized from the label's
+  width in container units); the German and Spanish labels were chosen as single words
+  (UNERREICHBAR, INDETERMINADO) so the ring word stays on one line. Not translated yet: study
+  pages, the API page, metrics, the PDF, letters and the terminal.
+- Tests: 174 (`bun run test`): 151 offline (unit, fixture TLS server, engine HTTP, edge policy,
   report model, pacer, README shape, report and letter HTML, study model, the hosts list in
-  `tests/host-list.test.ts`, the .xlsx export and the zip reader that parses it back), 13 web
-  tests in real Chromium, 5 renderer tests. CI (Linux) runs check, the unit tests and the build.
+  `tests/host-list.test.ts`, the .xlsx export and the zip reader that parses it back, the
+  languages in `tests/i18n.test.ts` and the edge's per-language page in
+  `tests/locale-page.test.ts`), 18 web tests in real Chromium, 5 renderer tests. CI (Linux) runs
+  check, the unit tests and the build.
 
 Measured on real hosts (2026-10-18): cloudflare.com, google.com, manteiga.org PROTECTED 85;
 github.com AT RISK 49; tls-v1-2.badssl.com:1012 EXPOSED 27. 20-530 ms per scan from the Mac,

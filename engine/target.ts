@@ -1,10 +1,30 @@
 // What the user typed -> a host and a port, or a TargetError. Nothing typed ever reaches
 // anything but a socket: this module is the only parser of operator input in the engine.
 
+/** Every refusal, by code. The web says each in the reader's language; these are the English words. */
+export const TARGET_ERRORS = {
+  empty: 'Enter a host name or an IP address.',
+  'https-only': 'Only https:// addresses can be tested.',
+  unreadable: 'That address could not be read.',
+  'ipv4-format': 'Write IPv4 addresses as four decimal numbers.',
+  'ipv6-invalid': 'That is not a valid IPv6 address.',
+  port: 'The port must be a number between 1 and 65535.',
+  'too-long': 'That host name is too long.',
+  'invalid-host': 'That is not a valid host name.',
+} as const;
+
+export type TargetErrorCode = keyof typeof TARGET_ERRORS;
+/** The engine's own resolver refuses with these; their words carry the host, so the message is passed in. */
+export type ResolveErrorCode = 'no-address' | 'unresolvable' | 'not-public';
+
 export class TargetError extends Error {
-  constructor(message: string) {
-    super(message);
+  readonly code: TargetErrorCode | ResolveErrorCode;
+  constructor(code: TargetErrorCode);
+  constructor(code: ResolveErrorCode, message: string);
+  constructor(code: TargetErrorCode | ResolveErrorCode, message?: string) {
+    super(message ?? TARGET_ERRORS[code as TargetErrorCode]);
     this.name = 'TargetError';
+    this.code = code;
   }
 }
 
@@ -19,21 +39,21 @@ const IPV4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
 
 export function parseTarget(input: string): Target {
   let s = input.trim();
-  if (!s) throw new TargetError('Enter a host name or an IP address.');
+  if (!s) throw new TargetError('empty');
 
   let port = 443;
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(s)) {
-    if (!/^https:\/\//i.test(s)) throw new TargetError('Only https:// addresses can be tested.');
+    if (!/^https:\/\//i.test(s)) throw new TargetError('https-only');
     let url: URL;
     try {
       url = new URL(s);
     } catch {
-      throw new TargetError('That address could not be read.');
+      throw new TargetError('unreadable');
     }
     s = url.hostname.startsWith('[') ? url.hostname.slice(1, -1) : url.hostname;
     if (url.port) port = parsePort(url.port);
     if (!isIpv6Literal(s) && looksLikeIpv4Attempt(s) && !isCanonicalIpv4(s)) {
-      throw new TargetError('Write IPv4 addresses as four decimal numbers.');
+      throw new TargetError('ipv4-format');
     }
     return { host: finishHost(s), port };
   }
@@ -41,7 +61,7 @@ export function parseTarget(input: string): Target {
   const bracket = s.match(/^\[([^\]]+)\](?::(.+))?$/);
   if (bracket) {
     const host = bracket[1];
-    if (!isIpv6Literal(host)) throw new TargetError('That is not a valid IPv6 address.');
+    if (!isIpv6Literal(host)) throw new TargetError('ipv6-invalid');
     if (bracket[2] !== undefined) port = parsePort(bracket[2]);
     return { host: host.toLowerCase(), port };
   }
@@ -57,9 +77,9 @@ export function parseTarget(input: string): Target {
 }
 
 function parsePort(text: string): number {
-  if (!/^\d{1,5}$/.test(text)) throw new TargetError('The port must be a number between 1 and 65535.');
+  if (!/^\d{1,5}$/.test(text)) throw new TargetError('port');
   const port = Number(text);
-  if (port < 1 || port > 65535) throw new TargetError('The port must be a number between 1 and 65535.');
+  if (port < 1 || port > 65535) throw new TargetError('port');
   return port;
 }
 
@@ -69,13 +89,13 @@ function finishHost(raw: string): string {
   if (looksLikeIpv4Attempt(host)) {
     // An IPv4 literal in some notation: only the canonical dotted-decimal form passes, because
     // resolvers read octal, hex and short forms differently from what the reader sees.
-    if (!isCanonicalIpv4(host)) throw new TargetError('Write IPv4 addresses as four decimal numbers.');
+    if (!isCanonicalIpv4(host)) throw new TargetError('ipv4-format');
     return host;
   }
-  if (host.length > 253) throw new TargetError('That host name is too long.');
+  if (host.length > 253) throw new TargetError('too-long');
   const labels = host.split('.');
   if (labels.length < 2 || !labels.every((l) => LABEL.test(l))) {
-    throw new TargetError('That is not a valid host name.');
+    throw new TargetError('invalid-host');
   }
   return host;
 }

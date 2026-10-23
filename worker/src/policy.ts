@@ -1,7 +1,10 @@
 // Edge decisions as pure functions, so bun test can exercise them without the Workers runtime.
 
-import { STAGE_LABEL } from '../../engine/assess';
+import type { NextStepId } from '../../engine/assess';
 import type { ScanResult } from '../../engine/events';
+import { en, type ScanErrorCode, type ScanErrorParams } from '../../web/src/i18n/en';
+import { localePath, type Locale } from '../../web/src/i18n/locales';
+import { MESSAGES } from '../../web/src/i18n/messages';
 
 export const RATE_LIMITS = {
   /** Per caller (client IP): a generous burst, then a wait. */
@@ -54,15 +57,25 @@ export interface Preview {
   url: string;
 }
 
-export function previewFor(result: ScanResult, id: string, origin: string): Preview {
+export function previewFor(result: ScanResult, id: string, origin: string, locale: Locale = 'en'): Preview {
+  const t = MESSAGES[locale];
   const host = result.target.port === 443 ? result.target.host : `${result.target.host}:${result.target.port}`;
   const stage = result.assessment.stage;
+  const step = t.report.steps[result.assessment.nextStep.id as NextStepId] ?? result.assessment.nextStep;
   return {
-    title: `${host} is ${STAGE_LABEL[stage]} · Quantum Ready Labs`,
-    description: `${result.assessment.verdict} Next step: ${result.assessment.nextStep.title}.`,
+    title: `${t.meta.shareTitle(host, t.stage.label[stage])} · Quantum Ready Labs`,
+    description: t.meta.shareDescription(t.report.verdict[stage], step.title),
     image: `${origin}/og/${stage}.png`,
-    url: `${origin}/r/${id}`,
+    url: `${origin}${localePath(locale, `/r/${id}`)}`,
   };
+}
+
+/**
+ * A refusal as the edge answers it: English words in `error` (scripts and agents read those, as
+ * before), and a code with params so the page can say it in the reader's language.
+ */
+export function scanError(code: ScanErrorCode, params: ScanErrorParams = {}): { error: string; code: ScanErrorCode; params: ScanErrorParams } {
+  return { error: en.errors.scan[code](params), code, params };
 }
 
 export function escapeAttr(s: string): string {

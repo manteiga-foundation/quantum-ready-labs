@@ -8,8 +8,8 @@ import { startVite, type ViteServer } from './vite';
 let vite: ViteServer;
 let browser: Browser;
 
-async function open(path: string, viewport = { width: 1440, height: 900 }): Promise<{ page: Page; errors: string[] }> {
-  const context = await browser.newContext({ viewport });
+async function open(path: string, viewport = { width: 1440, height: 900 }, locale = 'en-US'): Promise<{ page: Page; errors: string[] }> {
+  const context = await browser.newContext({ viewport, locale });
   const page = await context.newPage();
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -385,6 +385,108 @@ describe('view 5: a study, the state-of-readiness note', () => {
     await page.goto(vite.url + '/studies');
     await see(page.getByRole('heading', { level: 1 }), exact('Studies'));
     expect(await page.getByRole('link', { name: /Florida/ }).getAttribute('href')).toBe('/studies/florida-financial-2026q4');
+    expect(errors).toEqual([]);
+    await page.context().close();
+  });
+});
+
+describe('languages: detected, chosen, remembered', () => {
+  const pathOf = (page: Page) => new URL(page.url()).pathname + new URL(page.url()).search;
+
+  test('a Spanish browser lands on /es/ in Spanish; links, refusals and the selector follow', async () => {
+    const { page, errors } = await open('/', undefined, 'es-MX');
+    await see(page.getByRole('heading', { level: 1 }), exact('¿Está listo para la era cuántica?'));
+    expect(pathOf(page)).toBe('/es/');
+    expect(await page.evaluate('document.documentElement.lang')).toBe('es');
+    const selector = page.getByRole('combobox', { name: 'Idioma' });
+    expect(await selector.inputValue()).toBe('es');
+    expect(await selector.locator('option').allTextContents()).toEqual(['English', 'Español', 'Português', 'Français', 'Deutsch', '日本語']);
+    const nav = page.getByRole('navigation', { name: 'Site' });
+    expect(await nav.getByRole('link', { name: 'Estudios' }).getAttribute('href')).toBe('/es/studies');
+    await see(page.getByRole('heading', { name: 'Preguntas' }));
+    await page.getByRole('textbox', { name: 'Host' }).fill('not a host');
+    await page.getByRole('button', { name: 'Probar' }).click();
+    await see(page.getByRole('alert'), exact('No es un nombre de host válido.'));
+    expect(errors).toEqual([]);
+    await page.context().close();
+  });
+
+  test('the selector translates the report in place, without scanning again, and the choice is remembered', async () => {
+    const { page, errors } = await open('/scan?host=protected.example&demo=protected');
+    await see(page.getByTestId('next-step'), /Retire RSA key transport/, 15000);
+    await page.getByRole('combobox', { name: 'Language' }).selectOption('fr');
+    expect(pathOf(page)).toBe('/fr/scan?host=protected.example&demo=protected');
+    // The finished report is re-worded at once; a new scan would hide the next step for seconds.
+    await see(page.getByTestId('next-step'), /Retirez les suites de chiffrement/, 400);
+    await see(page.getByTestId('stage-word'), exact('PROTÉGÉ'));
+    await see(page.getByRole('heading', { level: 1 }), exact('Prêt pour l’ère quantique'));
+    await see(page.getByTestId('verdict'), /protégées contre un futur déchiffrement quantique/);
+    // Label and value are joined the French way, with a no-break space before the colon.
+    await see(page.getByTestId('key-exchange-card'), /Groupes hybrides\u00a0: X25519MLKEM768/);
+    expect(await page.title()).toBe('protected.example\u00a0: protégé · Quantum Ready Labs');
+    expect(await page.evaluate('document.documentElement.lang')).toBe('fr');
+    // An unprefixed address now opens in French: the choice beats the browser's English.
+    await page.goto(vite.url + '/');
+    await see(page.getByRole('heading', { level: 1 }), exact('Êtes-vous prêt pour l’ère quantique\u00a0?'));
+    expect(pathOf(page)).toBe('/fr/');
+    // And choosing English sticks too, even after a reload of the root.
+    await page.getByRole('combobox', { name: 'Langue' }).selectOption('en');
+    expect(pathOf(page)).toBe('/');
+    await page.reload();
+    await see(page.getByRole('heading', { level: 1 }), exact('Are you quantum ready?'));
+    expect(pathOf(page)).toBe('/');
+    expect(errors).toEqual([]);
+    await page.context().close();
+  });
+
+  test('a shared link keeps its language whatever the browser speaks', async () => {
+    const { page, errors } = await open('/es/r/demo-at-risk', undefined, 'de-DE');
+    await see(page.getByTestId('stage-word'), exact('EN RIESGO'));
+    expect(pathOf(page)).toBe('/es/r/demo-at-risk');
+    await see(page.getByTestId('next-step'), /Active el intercambio de claves híbrido/);
+    await see(page.getByTestId('certificate-card'), /Clásico, como toda la web pública/);
+    await see(page.getByRole('link', { name: 'Pruebe su propio host' }));
+    expect(await page.getByRole('link', { name: 'Pruebe su propio host' }).getAttribute('href')).toBe('/es/');
+    expect(errors).toEqual([]);
+    await page.context().close();
+  });
+
+  test('a refusal from the edge is said in the reader\'s language, from its code', async () => {
+    const { page } = await open('/ja/scan?host=example.com');
+    await page.route('**/api/scan', (route) =>
+      route.fulfill({ status: 429, contentType: 'application/json', body: JSON.stringify({ error: 'Too many scans from your address. Please wait a few minutes.', code: 'rate-caller' }) }),
+    );
+    await page.reload();
+    await see(page.getByRole('heading', { level: 1 }), exact('診断は実行されませんでした'));
+    await see(page.getByTestId('verdict'), exact('お使いのアドレスからの診断が多すぎます。数分お待ちください。'));
+    await page.context().close();
+  });
+
+  test('on a phone, in the longest words of every language, the selector stays and the ring word fits', async () => {
+    const ringFit = (page: Page) =>
+      page.evaluate(`(() => {
+        const ring = document.querySelector('[data-testid="ring"] svg').getBoundingClientRect();
+        const word = document.querySelector('[data-testid="stage-word"]').getBoundingClientRect();
+        const r = ring.width / 2, cx = ring.left + r, cy = ring.top + r;
+        // Every corner of the word's box sits inside the track circle (radius 110 of 130), with a margin.
+        const inner = r * (104 / 130);
+        const corners = [[word.left, word.top], [word.right, word.top], [word.left, word.bottom], [word.right, word.bottom]];
+        return { inside: corners.every(([x, y]) => Math.hypot(x - cx, y - cy) <= inner) };
+      })()`);
+    const { page, errors } = await open('/de/scan?host=exposed.example:1012&demo=exposed', { width: 390, height: 844 });
+    await see(page.getByTestId('stage-word'), exact('UNGESCHÜTZT'), 15000);
+    await see(page.getByTestId('next-step'), /Aktivieren Sie TLS 1.3/, 15000);
+    await see(page.getByRole('combobox', { name: 'Sprache' }));
+    expect(await ringFit(page)).toEqual({ inside: true });
+    const overflow = await page.evaluate('document.documentElement.scrollWidth - document.documentElement.clientWidth');
+    expect(overflow).toBeLessThanOrEqual(0);
+    // A refused scan shows the longest labels of all (the unreachable stage) in the ring.
+    await page.route('**/api/scan', (route) => route.fulfill({ status: 429, contentType: 'application/json', body: JSON.stringify({ error: 'busy', code: 'engine-busy' }) }));
+    for (const [prefix, word] of [['/de', 'UNERREICHBAR'], ['/es', 'INACCESIBLE'], ['', 'UNREACHABLE'], ['/fr', 'INJOIGNABLE'], ['/pt', 'INACESSÍVEL']] as const) {
+      await page.goto(`${vite.url}${prefix}/scan?host=example.com`);
+      await see(page.getByTestId('stage-word'), exact(word));
+      expect({ word, ...((await ringFit(page)) as { inside: boolean }) }).toEqual({ word, inside: true });
+    }
     expect(errors).toEqual([]);
     await page.context().close();
   });

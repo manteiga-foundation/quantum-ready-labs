@@ -5,8 +5,10 @@
 import type { ScanResult } from '../../engine/events';
 import { isCanonicalIpv4, isPublicAddress, parseTarget, TargetError } from '../../engine/target';
 import { SCAN_FIXTURES } from '../../web/src/fixtures';
-import { studyPreview } from '../../web/src/study-model';
-import { addressesFromDoh, decideRateLimit, escapeAttr, isFresh, newShareId, previewFor, studyClient, type RateKind } from './policy';
+import { splitPath } from '../../web/src/i18n/locales';
+import { STUDY_META, studyPreview } from '../../web/src/study-model';
+import { localizePage, sitemapXml } from './locale-page';
+import { addressesFromDoh, decideRateLimit, escapeAttr, isFresh, newShareId, previewFor, scanError, studyClient, type RateKind } from './policy';
 
 export interface Env {
   DB: D1Database;
@@ -43,20 +45,30 @@ export default {
     }
 
 
-    const shared = pathname.match(/^\/r\/([A-Za-z0-9_-]{12})$/);
+    if (pathname === '/sitemap.xml') {
+      const origin = env.PUBLIC_ORIGIN || url.origin;
+      return new Response(sitemapXml(origin, Object.keys(STUDY_META)), { headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+    }
+
+    // Pages: the same views under every language prefix (/es/, /pt/ ...); English has none.
+    const { rest } = splitPath(pathname);
+    const shared = rest.match(/^\/r\/([A-Za-z0-9_-]{12})$/);
     if (shared && request.method === 'GET') {
       warmRenderer(env, ctx);
       return sharedPage(shared[1], request, env);
     }
 
-    const study = pathname.match(/^\/studies\/([a-z0-9-]+)$/);
+    const study = rest.match(/^\/studies\/([a-z0-9-]+)$/);
     if (study && request.method === 'GET') return studyPage(study[1], request, env);
 
-    if (pathname === '/metrics') {
+    if (rest === '/metrics') {
       // Cloudflare Access fronts this path; this is the belt to its braces.
       if (!request.headers.get('cf-access-jwt-assertion') && !isLocal(request)) return new Response('Forbidden', { status: 403 });
     }
-    return env.ASSETS.fetch(request);
+    const asset = await env.ASSETS.fetch(request);
+    // Every HTML page is the one index; give it the words of the path's language.
+    if (asset.headers.get('content-type')?.includes('text/html')) return localizePage(asset, pathname, env.PUBLIC_ORIGIN || url.origin);
+    return asset;
   },
 };
 
@@ -112,19 +124,19 @@ async function scanRoute(request: Request, env: Env, ctx: ExecutionContext): Pro
   } catch (e) {
     if (e instanceof TargetError) {
       ctx.waitUntil(recordFailure(env, 'Invalid target', e.message, null));
-      return json({ error: e.message }, 400);
+      return json({ error: e.message, code: e.code }, 400);
     }
     throw e;
   }
   const allowedPorts = (env.ALLOWED_PORTS ?? '443').split(',').map((p) => Number(p.trim()));
   if (!allowedPorts.includes(target.port)) {
     ctx.waitUntil(recordFailure(env, 'Port not allowed', String(target.port), target.port));
-    return json({ error: `The public scanner tests port${allowedPorts.length > 1 ? 's' : ''} ${allowedPorts.join(', ')} only. Port ${target.port} was asked for and noted.` }, 400);
+    return json(scanError('port-not-allowed', { port: target.port, allowed: allowedPorts }), 400);
   }
 
   const ip = clientIp(request);
   const callerLimit = await rateCheck(env, 'caller', ip);
-  if (!callerLimit.allowed) return json({ error: 'Too many scans from your address. Please wait a few minutes.' }, 429, { 'retry-after': String(callerLimit.retryAfterS) });
+  if (!callerLimit.allowed) return json(scanError('rate-caller'), 429, { 'retry-after': String(callerLimit.retryAfterS) });
 
   const hostKey = `${target.host}:${target.port}`;
   const encoder = new TextEncoder();
@@ -146,18 +158,18 @@ async function scanRoute(request: Request, env: Env, ctx: ExecutionContext): Pro
   }
 
   const hostLimit = await rateCheck(env, 'host', hostKey);
-  if (!hostLimit.allowed) return json({ error: 'This host was tested several times in the last minutes. The last result is shown when it is fresh; please try again shortly.' }, 429, { 'retry-after': String(hostLimit.retryAfterS) });
+  if (!hostLimit.allowed) return json(scanError('rate-host'), 429, { 'retry-after': String(hostLimit.retryAfterS) });
 
   // Resolve here and judge every address; the engine judges again. Belt and braces.
   const addresses = await resolvePublic(target.host);
   if (addresses.length === 0) {
     ctx.waitUntil(recordFailure(env, 'Host does not resolve', target.host, target.port));
-    return json({ error: `${target.host} does not resolve to any address.` }, 400);
+    return json(scanError('no-address', { host: target.host }), 400);
   }
   const refused = addresses.find((a) => !isPublicAddress(a));
   if (refused) {
     ctx.waitUntil(recordFailure(env, 'Refused: not a public address', null, target.port));
-    return json({ error: `${target.host} resolves to ${refused}, which is not a public Internet address. The public scanner tests only public hosts.` }, 400);
+    return json(scanError('not-public', { host: target.host, address: refused }), 400);
   }
 
   const upstream = await fetch(`${env.ENGINE_URL}/scan`, {
@@ -170,7 +182,7 @@ async function scanRoute(request: Request, env: Env, ctx: ExecutionContext): Pro
     const busy = upstream.status === 429;
     ctx.waitUntil(recordFailure(env, busy ? 'Engine busy' : 'Engine refused', detail.error ?? String(upstream.status), target.port));
     // The engine says "busy" in one word; the reader gets the sentence and a 429 with Retry-After.
-    return json({ error: busy ? 'The scanner is busy. Please try again in a moment.' : detail.error ?? 'The scanner could not run. Please try again in a moment.' }, busy ? 429 : 502, busy ? { 'retry-after': '3' } : {});
+    return json(busy ? scanError('engine-busy') : detail.error ? { error: detail.error } : scanError('engine-failed'), busy ? 429 : 502, busy ? { 'retry-after': '3' } : {});
   }
 
   // Pass the stream through, keep the result, append the share id when it arrives.
@@ -388,17 +400,19 @@ async function reportPdfRoute(id: string, request: Request, env: Env, ctx: Execu
 
 async function sharedPage(id: string, request: Request, env: Env): Promise<Response> {
   const row = await env.DB.prepare('SELECT result FROM scans WHERE id = ?').bind(id).first<{ result: string }>();
-  const index = await env.ASSETS.fetch(new Request(new URL('/', request.url), { headers: request.headers }));
+  const url = new URL(request.url);
+  const origin = env.PUBLIC_ORIGIN || url.origin;
+  const index = localizePage(await env.ASSETS.fetch(new Request(new URL('/', request.url), { headers: request.headers })), url.pathname, origin);
   if (!row) return index;
-  const origin = env.PUBLIC_ORIGIN || new URL(request.url).origin;
-  const preview = previewFor(JSON.parse(row.result) as ScanResult, id, origin);
+  const preview = previewFor(JSON.parse(row.result) as ScanResult, id, origin, splitPath(url.pathname).locale);
   return withPreview(index, preview, `<meta name="robots" content="noindex" data-shared="${escapeAttr(id)}">`);
 }
 
 /** A study's page: the index with the note's title, description and image, indexable. */
 async function studyPage(slug: string, request: Request, env: Env): Promise<Response> {
-  const index = await env.ASSETS.fetch(new Request(new URL('/', request.url), { headers: request.headers }));
-  const origin = env.PUBLIC_ORIGIN || new URL(request.url).origin;
+  const url = new URL(request.url);
+  const origin = env.PUBLIC_ORIGIN || url.origin;
+  const index = localizePage(await env.ASSETS.fetch(new Request(new URL('/', request.url), { headers: request.headers })), url.pathname, origin);
   const preview = studyPreview(slug, origin);
   if (!preview) return index;
   return withPreview(index, preview);

@@ -3,6 +3,7 @@
 
 import type { ScanResult } from '../../engine/events';
 import { demoMetrics, SCAN_FIXTURES, type MetricsData } from './fixtures';
+import type { ScanErrorCode, ScanErrorParams } from './i18n/en';
 import { pacer } from './pace';
 import type { StreamEvent } from './report-model';
 
@@ -34,8 +35,9 @@ export function startScan(host: string, onEvent: (e: StreamEvent) => void, onEnd
         signal: controller.signal,
       });
       if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string };
-        paced.push({ type: 'error', error: body.error ?? (res.status === 429 ? 'Too many scans right now. Try again in a moment.' : `The scan could not start (${res.status}).`) });
+        const body = (await res.json().catch(() => ({}))) as { error?: string; code?: string; params?: ScanErrorParams };
+        const fallback = res.status === 429 ? { code: 'rate', error: 'Too many scans right now. Try again in a moment.' } : { code: 'start-failed', error: `The scan could not start (${res.status}).` };
+        paced.push({ type: 'error', error: body.error ?? fallback.error, code: body.code ?? (body.error ? undefined : fallback.code), params: { status: res.status, ...body.params } });
         return;
       }
       const reader = res.body!.getReader();
@@ -53,7 +55,7 @@ export function startScan(host: string, onEvent: (e: StreamEvent) => void, onEnd
         }
       }
     } catch {
-      if (!controller.signal.aborted) paced.push({ type: 'error', error: 'The connection to the scanner was lost.' });
+      if (!controller.signal.aborted) paced.push({ type: 'error', error: 'The connection to the scanner was lost.', code: 'connection-lost' });
     } finally {
       paced.end();
     }
@@ -119,13 +121,19 @@ function replayFixture(name: string, host: string, onEvent: (e: StreamEvent) => 
   };
 }
 
-export async function loadResult(id: string): Promise<{ result: ScanResult } | { error: string }> {
+export type LoadError = { error: string; code: ScanErrorCode; params: ScanErrorParams };
+
+export async function loadResult(id: string): Promise<{ result: ScanResult } | LoadError> {
   if (id.startsWith('demo-')) {
     const fixture = SCAN_FIXTURES[id.slice(5)];
-    return fixture ? { result: fixture.result } : { error: 'There is no such demo result.' };
+    return fixture ? { result: fixture.result } : { error: 'There is no such demo result.', code: 'no-demo', params: {} };
   }
   const res = await fetch(`/api/result/${encodeURIComponent(id)}`);
-  if (!res.ok) return { error: res.status === 404 ? 'This result has expired or never existed. Results are kept for 30 days.' : `The result could not be loaded (${res.status}).` };
+  if (!res.ok) {
+    return res.status === 404
+      ? { error: 'This result has expired or never existed. Results are kept for 30 days.', code: 'expired', params: {} }
+      : { error: `The result could not be loaded (${res.status}).`, code: 'load-failed', params: { status: res.status } };
+  }
   return { result: (await res.json()) as ScanResult };
 }
 
